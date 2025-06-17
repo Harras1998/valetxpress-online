@@ -218,7 +218,8 @@ export default function Buchen() {
                     borderRadius: 8,
                     padding: "10px 10px 0 10px"
                   }}>
-                    Fahrzeugübernahme bei Abflug am Flughafenterminal<br />
+                    Fahrzeugübernahme bei Abflug am Flughafenterminal
+                    <br /><br />
                     Fahrzeugübergabe bei Rückflug am Flughafenterminal
                   </div>
                   <div style={{
