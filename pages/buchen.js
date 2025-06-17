@@ -3,6 +3,13 @@ import { useRouter } from "next/router";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
+// Hilfsfunktion für deutsches Datumsformat
+function toDE(dateStr) {
+  if (!dateStr) return "";
+  const [y, m, d] = dateStr.split("-");
+  return `${d}.${m}.${y}`;
+}
+
 const valetPrices = [95,97,99,110,116,117,119,120,126,128,131,136,139,143,148,149,150,154,157,161,166];
 const extra = { außen:19, innen:95 };
 
@@ -38,15 +45,22 @@ export default function Buchen() {
   const [form, setForm] = useState({
     vorname: "",
     nachname: "",
+    strasse: "",
+    plz: "",
+    ort: "",
     email: "",
     telefon: "",
     auto: "",
     kennzeichen: "",
     abflug: "",
     abflugUhrzeit: "",
+    ankunftUhrzeit: "",
     rueckflug: "",
     rueckflugUhrzeit: "",
+    reiseziel: "",
     fluggesellschaft: "",
+    flugnummerHin: "",
+    flugnummerRueck: "",
     terminal: "",
     handgepaeck: false,
     bemerkung: "",
@@ -217,8 +231,8 @@ export default function Buchen() {
               >
                 <div style={{ fontSize: 17, minWidth: 180, flex: 1 }}>
                   <strong>Park-Modell:</strong> {type === "valet" ? "Valet-Parking" : "All-Inclusive‑Parking"}<br />
-                  <strong>Anreise:</strong> {start}<br />
-                  <strong>Abreise:</strong> {end}<br />
+                  <strong>Anreise:</strong> {toDE(start)}<br />
+                  <strong>Abreise:</strong> {toDE(end)}<br />
                   <strong>Aufenthaltsdauer:</strong> {days} Tage<br />
                   {type === "valet" && (addOut || addIn) && (
                     <>
@@ -264,6 +278,23 @@ export default function Buchen() {
                 </div>
               </div><br />
 
+              <label>Straße / Hausnr.*:<br />
+                <input name="strasse" value={form.strasse} onChange={handleForm} required style={{width:"100%"}} />
+              </label><br /><br />
+
+              <div style={{display:"flex",gap:8}}>
+                <div style={{flex:1}}>
+                  <label>PLZ*:<br />
+                    <input name="plz" value={form.plz} onChange={handleForm} required style={{width:"100%"}} />
+                  </label>
+                </div>
+                <div style={{flex:2}}>
+                  <label>Ort*:<br />
+                    <input name="ort" value={form.ort} onChange={handleForm} required style={{width:"100%"}} />
+                  </label>
+                </div>
+              </div><br />
+
               <label>E-Mail-Adresse*: <br />
                 <input name="email" type="email" value={form.email} onChange={handleForm} required style={{width:"100%"}} />
               </label><br /><br />
@@ -278,6 +309,10 @@ export default function Buchen() {
 
               <label>Kennzeichen*: <br />
                 <input name="kennzeichen" value={form.kennzeichen} onChange={handleForm} required style={{width:"100%"}} />
+              </label><br /><br />
+
+              <label>Ankunft Uhrzeit am Flughafen*:<br />
+                <input name="ankunftUhrzeit" type="time" value={form.ankunftUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
               </label><br /><br />
 
               <label>Abflugdatum*: <br />
@@ -312,8 +347,20 @@ export default function Buchen() {
                 <input name="rueckflugUhrzeit" type="time" value={form.rueckflugUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
               </label><br /><br />
 
+              <label>Reiseziel*:<br />
+                <input name="reiseziel" value={form.reiseziel} onChange={handleForm} required style={{width:"100%"}} />
+              </label><br /><br />
+
               <label>Fluggesellschaft*: <br />
                 <input name="fluggesellschaft" value={form.fluggesellschaft} onChange={handleForm} required style={{width:"100%"}} />
+              </label><br /><br />
+
+              <label>Flugnummer Hinflug*:<br />
+                <input name="flugnummerHin" value={form.flugnummerHin} onChange={handleForm} required style={{width:"100%"}} />
+              </label><br /><br />
+
+              <label>Flugnummer Rückflug*:<br />
+                <input name="flugnummerRueck" value={form.flugnummerRueck} onChange={handleForm} required style={{width:"100%"}} />
               </label><br /><br />
 
               <label>Terminal* (z.B. T1, T2): <br />
