@@ -92,35 +92,6 @@ export default function Buchen() {
     }
   }, [type]);
 
-  function getTableRows() {
-    const rows = [];
-    for (let i = 0; i < 21; i++) {
-      if (type === "valet") {
-        rows.push({
-          days: i + 1,
-          base: valetPrices[i]
-        });
-      } else {
-        rows.push({
-          days: i + 1,
-          allin: valetPrices[i] + extra.außen + extra.innen
-        });
-      }
-    }
-    if (type === "valet") {
-      rows.push({
-        days: "22+",
-        base: `${valetPrices[20]} € + 7 €/Tag`
-      });
-    } else {
-      rows.push({
-        days: "22+",
-        allin: `${valetPrices[20] + extra.außen + extra.innen} € + 7 €/Tag`
-      });
-    }
-    return rows;
-  }
-
   function handleForm(e) {
     const { name, value, type, checked } = e.target;
     setForm({ ...form, [name]: type === "checkbox" ? checked : value });
@@ -192,23 +163,6 @@ export default function Buchen() {
                 </div>
               }
 
-              <h3 style={{marginBottom: 0}}>Preisübersicht</h3>
-              <table style={{ width: "100%", marginTop: 8 }}>
-                <tbody>
-                  {getTableRows().map((row, i) => (
-                    <tr key={i}>
-                      <td style={{ padding: "4px" }}>
-                        {typeof row.days === "number" ? row.days + " Tag" : row.days + " Tage"}
-                      </td>
-                      {type === "valet" ? (
-                        <td style={{ padding: "4px" }}>{row.base}</td>
-                      ) : (
-                        <td style={{ padding: "4px", fontStyle: "italic", color: "#666" }}>{row.allin}</td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
               <div style={{
                 marginTop: 12,
                 background: "#e1fbe9",
