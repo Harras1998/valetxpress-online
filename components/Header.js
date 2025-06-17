@@ -8,7 +8,6 @@ export default function Header() {
 
   const isAllIn = router.pathname.includes("all-inclusive");
   const isValet = router.pathname.includes("valet");
-
   let buchenUrl = "/buchen";
   if (isAllIn) buchenUrl = "/buchen?type=allinclusive";
   else if (isValet) buchenUrl = "/buchen?type=valet";
@@ -18,33 +17,31 @@ export default function Header() {
       background: "#1db954",
       color: "#fff",
       boxShadow: "0 2px 8px #0002",
-      padding: "0",
       width: "100vw",
       minWidth: "100%",
       zIndex: 999
     }}>
       <nav style={{
-        maxWidth: "1600px",
+        maxWidth: "1300px",
         margin: "0 auto",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "0 3vw",
-        height: "110px" // deutlich höher
+        padding: "0 2vw",
+        height: "75px" // etwas kompakter
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 36 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <Link href="/" style={{
             color: "#fff",
-            fontSize: "2.8rem",
-            fontWeight: "900",
+            fontSize: "2rem",
+            fontWeight: "800",
             textDecoration: "none",
-            letterSpacing: "1px",
-            lineHeight: 1,
-            textShadow: "0 2px 8px #088c1a33"
+            letterSpacing: ".5px",
+            lineHeight: 1
           }}>ValetXpress</Link>
         </div>
         <div className="desktop-menu" style={{
-          display: "flex", gap: 38, alignItems: "center"
+          display: "flex", gap: 26, alignItems: "center"
         }}>
           <Link href="/" style={navStyle(router.pathname === "/")}>Start</Link>
           <Link href="/valet-parking" style={navStyle(isValet)}>Valet Parking</Link>
@@ -53,12 +50,12 @@ export default function Header() {
             ...navStyle(router.pathname === "/buchen"),
             background: "#fff",
             color: "#1db954",
-            borderRadius: 9,
+            borderRadius: 7,
             fontWeight: "bold",
-            padding: "14px 32px",
-            fontSize: "1.13rem",
-            marginLeft: 12,
-            boxShadow: "0 3px 16px #088c1a18"
+            padding: "9px 22px",
+            fontSize: "1.07rem",
+            marginLeft: 6,
+            boxShadow: "0 2px 8px #088c1a15"
           }}>Buchen</Link>
           <Link href="/kontakt" style={navStyle(router.pathname === "/kontakt")}>Kontakt</Link>
         </div>
@@ -71,7 +68,7 @@ export default function Header() {
             background: "transparent",
             border: "none",
             color: "#fff",
-            fontSize: "3rem",
+            fontSize: "2rem",
             cursor: "pointer"
           }}>
           ☰
@@ -81,8 +78,8 @@ export default function Header() {
       <div className="mobile-menu" style={{
         display: open ? "block" : "none",
         background: "#1db954",
-        padding: "1.4rem 7vw",
-        fontSize: "1.3rem"
+        padding: "1rem 6vw",
+        fontSize: "1.13rem"
       }}>
         <Link href="/" style={navStyle(router.pathname === "/")}>Start</Link><br />
         <Link href="/valet-parking" style={navStyle(isValet)}>Valet Parking</Link><br />
@@ -91,12 +88,12 @@ export default function Header() {
           ...navStyle(router.pathname === "/buchen"),
           background: "#fff",
           color: "#1db954",
-          borderRadius: 9,
+          borderRadius: 7,
           fontWeight: "bold",
-          padding: "12px 28px",
+          padding: "9px 22px",
           display: "inline-block",
-          fontSize: "1.14rem",
-          margin: "12px 0"
+          fontSize: "1.1rem",
+          margin: "8px 0"
         }}>Buchen</Link><br />
         <Link href="/kontakt" style={navStyle(router.pathname === "/kontakt")}>Kontakt</Link>
       </div>
@@ -105,7 +102,7 @@ export default function Header() {
         @media (max-width: 900px) {
           .desktop-menu { display: none !important; }
           .mobile-menu-btn { display: block !important; }
-          nav { height: 72px !important; }
+          nav { height: 60px !important; }
         }
         @media (min-width: 901px) {
           .mobile-menu { display: none !important; }
@@ -120,9 +117,9 @@ function navStyle(active) {
     color: active ? "#fff" : "#e9ffe9",
     textDecoration: "none",
     fontWeight: active ? "bold" : "normal",
-    fontSize: "1.25rem",
-    padding: "10px 12px",
-    borderBottom: active ? "2.5px solid #fff" : "none",
+    fontSize: "1.12rem",
+    padding: "8px 10px",
+    borderBottom: active ? "2px solid #fff" : "none",
     transition: "color 0.15s",
     letterSpacing: ".5px"
   };
