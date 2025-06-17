@@ -20,12 +20,12 @@ export default function Home() {
         </div>
         <div style={{display: "flex", gap: 24, flexWrap: "wrap", justifyContent: "center"}}>
           <div style={{flex: "1 1 320px", minWidth: 280, background: "#f4f6fa", borderRadius: "1.5rem", boxShadow: "0 1px 8px #0001", padding: 24}}>
-            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=700&q=80" alt="Valet Parking" style={{borderRadius: "1rem", width: "100%", maxHeight: 160, objectFit: "cover"}} />
+            <img src="/images/schlüssel.png" alt="Valet Parking" style={{borderRadius: "1rem", width: "100%", maxHeight: 160, objectFit: "cover"}} />
             <h2 style={{marginTop: 18, fontSize: "1.3rem", fontWeight: "bold"}}>Valet Parking</h2>
             <p>Wir holen Ihr Fahrzeug direkt am Terminal ab und parken es sicher für Sie.</p>
           </div>
           <div style={{flex: "1 1 320px", minWidth: 280, background: "#f4f6fa", borderRadius: "1.5rem", boxShadow: "0 1px 8px #0001", padding: 24}}>
-            <img src="https://images.unsplash.com/photo-1511918984145-48de785d4c4e?auto=format&fit=crop&w=700&q=80" alt="All-Inclusive Parking" style={{borderRadius: "1rem", width: "100%", maxHeight: 160, objectFit: "cover"}} />
+            <img src="/images/flugzeug.jpg" alt="All-Inclusive Parking" style={{borderRadius: "1rem", width: "100%", maxHeight: 160, objectFit: "cover"}} />
             <h2 style={{marginTop: 18, fontSize: "1.3rem", fontWeight: "bold"}}>All-Inclusive Parking</h2>
             <p>Mit Rundum-Service und Top-Sicherheitsstandards – All-Inclusive für Ihre Reise.</p>
           </div>

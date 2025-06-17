@@ -1,97 +1,129 @@
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 export default function Header() {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
+
+  const isAllIn = router.pathname.includes("all-inclusive");
+  const isValet = router.pathname.includes("valet");
+
+  let buchenUrl = "/buchen";
+  if (isAllIn) buchenUrl = "/buchen?type=allinclusive";
+  else if (isValet) buchenUrl = "/buchen?type=valet";
 
   return (
     <header style={{
       background: "#1db954",
       color: "#fff",
-      boxShadow: "0 2px 8px #0002"
+      boxShadow: "0 2px 8px #0002",
+      padding: "0",
+      width: "100vw",
+      minWidth: "100%",
+      zIndex: 999
     }}>
-      <nav className="container" style={{
-        maxWidth: 1100,
+      <nav style={{
+        maxWidth: "1600px",
         margin: "0 auto",
         display: "flex",
-        justifyContent: "space-between",
         alignItems: "center",
-        padding: "1rem"
+        justifyContent: "space-between",
+        padding: "0 3vw",
+        height: "110px" // deutlich höher
       }}>
-        <Link href="/" style={{
-          fontWeight: "bold",
-          fontSize: "2rem",
-          color: "#fff",
-          textDecoration: "none",
+        <div style={{ display: "flex", alignItems: "center", gap: 36 }}>
+          <Link href="/" style={{
+            color: "#fff",
+            fontSize: "2.8rem",
+            fontWeight: "900",
+            textDecoration: "none",
+            letterSpacing: "1px",
+            lineHeight: 1,
+            textShadow: "0 2px 8px #088c1a33"
+          }}>ValetXpress</Link>
+        </div>
+        <div className="desktop-menu" style={{
+          display: "flex", gap: 38, alignItems: "center"
         }}>
-          ValetXpress
-        </Link>
-
-        {/* Burger-Icon für mobile */}
+          <Link href="/" style={navStyle(router.pathname === "/")}>Start</Link>
+          <Link href="/valet-parking" style={navStyle(isValet)}>Valet Parking</Link>
+          <Link href="/all-inclusive-parking" style={navStyle(isAllIn)}>All-Inclusive Parking</Link>
+          <Link href={buchenUrl} style={{
+            ...navStyle(router.pathname === "/buchen"),
+            background: "#fff",
+            color: "#1db954",
+            borderRadius: 9,
+            fontWeight: "bold",
+            padding: "14px 32px",
+            fontSize: "1.13rem",
+            marginLeft: 12,
+            boxShadow: "0 3px 16px #088c1a18"
+          }}>Buchen</Link>
+          <Link href="/kontakt" style={navStyle(router.pathname === "/kontakt")}>Kontakt</Link>
+        </div>
         <button
-          onClick={() => setMenuOpen(!menuOpen)}
+          className="mobile-menu-btn"
+          aria-label="Menü öffnen"
+          onClick={() => setOpen(o => !o)}
           style={{
-            background: "none",
-            border: "none",
             display: "none",
-            flexDirection: "column",
+            background: "transparent",
+            border: "none",
+            color: "#fff",
+            fontSize: "3rem",
             cursor: "pointer"
-          }}
-          className="burger"
-        >
-          <span style={{
-            display: "block", width: 28, height: 3, background: "#fff", margin: "5px 0"
-          }} />
-          <span style={{
-            display: "block", width: 28, height: 3, background: "#fff", margin: "5px 0"
-          }} />
-          <span style={{
-            display: "block", width: 28, height: 3, background: "#fff", margin: "5px 0"
-          }} />
+          }}>
+          ☰
         </button>
-
-        <ul
-          className={menuOpen ? "nav-open" : ""}
-          style={{
-            display: "flex",
-            gap: "2rem",
-            listStyle: "none",
-            margin: 0,
-            padding: 0,
-            alignItems: "center"
-          }}
-        >
-          <li><Link href="/" style={{ color: "#fff", textDecoration: "none", fontSize: "1.1rem" }}>Start</Link></li>
-          <li><Link href="/valet-parking" style={{ color: "#fff", textDecoration: "none", fontSize: "1.1rem" }}>Valet Parking</Link></li>
-          <li><Link href="/all-inclusive-parking" style={{ color: "#fff", textDecoration: "none", fontSize: "1.1rem" }}>All-Inclusive Parking</Link></li>
-          <li><Link href="/buchen" style={{ color: "#fff", textDecoration: "none", fontSize: "1.1rem" }}>Buchen</Link></li>
-          <li><Link href="/kontakt" style={{ color: "#fff", textDecoration: "none", fontSize: "1.1rem" }}>Kontakt</Link></li>
-        </ul>
       </nav>
-
-      {/* Simple CSS für Responsivität */}
+      {/* Mobile Menu */}
+      <div className="mobile-menu" style={{
+        display: open ? "block" : "none",
+        background: "#1db954",
+        padding: "1.4rem 7vw",
+        fontSize: "1.3rem"
+      }}>
+        <Link href="/" style={navStyle(router.pathname === "/")}>Start</Link><br />
+        <Link href="/valet-parking" style={navStyle(isValet)}>Valet Parking</Link><br />
+        <Link href="/all-inclusive-parking" style={navStyle(isAllIn)}>All-Inclusive Parking</Link><br />
+        <Link href={buchenUrl} style={{
+          ...navStyle(router.pathname === "/buchen"),
+          background: "#fff",
+          color: "#1db954",
+          borderRadius: 9,
+          fontWeight: "bold",
+          padding: "12px 28px",
+          display: "inline-block",
+          fontSize: "1.14rem",
+          margin: "12px 0"
+        }}>Buchen</Link><br />
+        <Link href="/kontakt" style={navStyle(router.pathname === "/kontakt")}>Kontakt</Link>
+      </div>
+      {/* Responsive CSS */}
       <style jsx>{`
-        @media (max-width: 800px) {
-          nav.container {
-            flex-direction: column;
-            align-items: flex-start;
-          }
-          .burger {
-            display: flex !important;
-            margin-left: auto;
-          }
-          ul {
-            display: ${menuOpen ? "flex" : "none"};
-            flex-direction: column;
-            gap: 1rem;
-            width: 100%;
-            background: #1db954;
-            padding: 1rem 0;
-            margin-top: 1rem;
-            border-radius: 0 0 1rem 1rem;
-          }
+        @media (max-width: 900px) {
+          .desktop-menu { display: none !important; }
+          .mobile-menu-btn { display: block !important; }
+          nav { height: 72px !important; }
+        }
+        @media (min-width: 901px) {
+          .mobile-menu { display: none !important; }
         }
       `}</style>
     </header>
   );
+}
+
+function navStyle(active) {
+  return {
+    color: active ? "#fff" : "#e9ffe9",
+    textDecoration: "none",
+    fontWeight: active ? "bold" : "normal",
+    fontSize: "1.25rem",
+    padding: "10px 12px",
+    borderBottom: active ? "2.5px solid #fff" : "none",
+    transition: "color 0.15s",
+    letterSpacing: ".5px"
+  };
 }

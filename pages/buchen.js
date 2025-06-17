@@ -1,13 +1,442 @@
+import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import BookingForm from "../components/BookingForm";
+
+const valetPrices = [95,97,99,110,116,117,119,120,126,128,131,136,139,143,148,149,150,154,157,161,166];
+const extra = { außen:19, innen:95 };
+
+function getValet(priceList, days) {
+  if (days <= priceList.length) return priceList[days - 1];
+  return priceList[priceList.length - 1] + (days - priceList.length) * 7;
+}
+
+function todayStr() {
+  const t = new Date();
+  return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
+}
 
 export default function Buchen() {
+  const router = useRouter();
+  const [type, setType] = useState("valet");
+  const [start, setStart] = useState(todayStr());
+  const [end, setEnd] = useState("");
+  const [days, setDays] = useState(0);
+  const [price, setPrice] = useState(0);
+  const [addOut, setAddOut] = useState(false);
+  const [addIn, setAddIn] = useState(false);
+  const [step, setStep] = useState(1);
+
+  // Vorauswahl nach Query-Parameter beim ersten Laden
+  useEffect(() => {
+    if (!router.isReady) return;
+    const qType = router.query.type;
+    if (qType === "allinclusive" || qType === "valet") setType(qType);
+  }, [router.isReady, router.query]);
+
+  // Persönliche Daten
+  const [form, setForm] = useState({
+    vorname: "",
+    nachname: "",
+    email: "",
+    telefon: "",
+    auto: "",
+    kennzeichen: "",
+    abflug: "",
+    abflugUhrzeit: "",
+    rueckflug: "",
+    rueckflugUhrzeit: "",
+    fluggesellschaft: "",
+    terminal: "",
+    handgepaeck: false,
+    bemerkung: "",
+    agb: false,
+    datenschutz: false,
+  });
+
+  useEffect(() => {
+    if (!end || new Date(end) <= new Date(start)) {
+      const next = new Date(start);
+      next.setDate(next.getDate() + 1);
+      setEnd(next.toISOString().split("T")[0]);
+    }
+  }, [start]);
+
+  useEffect(() => {
+    if (!start || !end || new Date(end) <= new Date(start)) {
+      setDays(0); setPrice(0); return;
+    }
+    const d = Math.ceil((new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24));
+    setDays(d);
+  }, [start, end]);
+
+  useEffect(() => {
+    if (!days) return setPrice(0);
+    let base = getValet(valetPrices, days);
+    if (type === "allinclusive") {
+      base += extra.außen + extra.innen;
+      setAddOut(true); setAddIn(true);
+    } else {
+      base += (addOut ? extra.außen : 0) + (addIn ? extra.innen : 0);
+    }
+    setPrice(base);
+  }, [days, type, addOut, addIn]);
+
+  useEffect(() => {
+    if (type === "allinclusive") {
+      setAddOut(true);
+      setAddIn(true);
+    } else {
+      setAddOut(false);
+      setAddIn(false);
+    }
+  }, [type]);
+
+  function getTableRows() {
+    const rows = [];
+    for (let i = 0; i < 21; i++) {
+      if (type === "valet") {
+        rows.push({
+          days: i + 1,
+          base: valetPrices[i]
+        });
+      } else {
+        rows.push({
+          days: i + 1,
+          allin: valetPrices[i] + extra.außen + extra.innen
+        });
+      }
+    }
+    if (type === "valet") {
+      rows.push({
+        days: "22+",
+        base: `${valetPrices[20]} € + 7 €/Tag`
+      });
+    } else {
+      rows.push({
+        days: "22+",
+        allin: `${valetPrices[20] + extra.außen + extra.innen} € + 7 €/Tag`
+      });
+    }
+    return rows;
+  }
+
+  function handleForm(e) {
+    const { name, value, type, checked } = e.target;
+    setForm({ ...form, [name]: type === "checkbox" ? checked : value });
+  }
+
+  function handleBookingSubmit(e) {
+    e.preventDefault();
+    alert("Buchung abgesendet! (E-Mail-Integration kann hier ergänzt werden)");
+  }
+
+  // Hilfsfunktion für min-Attribut: immer heute oder später
+  const minDate = todayStr();
+
   return (
     <>
       <Header />
-      <main>
-        <BookingForm />
+
+      <main style={{ minHeight: "80vh", background: "#e5e7eb", padding: "2rem 0" }}>
+        <div style={{ maxWidth: 520, margin: "2rem auto", padding: 20, background: "#f4f4f4", borderRadius: 16 }}>
+          {step === 1 && (
+            <>
+              <h2 style={{ textAlign: "center", color: "#1db954" }}>Parkplatz buchen</h2>
+
+              <label>Park-Modell:<br />
+                <select value={type} onChange={e => setType(e.target.value)}>
+                  <option value="valet">Valet-Parking</option>
+                  <option value="allinclusive">All-Inclusive‑Parking</option>
+                </select>
+              </label><br /><br />
+
+              <label>Anreise:<br />
+                <input
+                  type="date"
+                  min={minDate}
+                  value={start}
+                  onChange={e => setStart(e.target.value)}
+                />
+              </label><br /><br />
+
+              <label>Abreise:<br />
+                <input
+                  type="date"
+                  min={start ? (() => {
+                    const next = new Date(start);
+                    next.setDate(next.getDate() + 1);
+                    return next.toISOString().split("T")[0];
+                  })() : minDate}
+                  value={end}
+                  onChange={e => setEnd(e.target.value)}
+                />
+              </label><br /><br />
+
+              {type === "valet" && days > 0 &&
+                <div style={{ marginBottom: 16 }}>
+                  <label>
+                    <input type="checkbox" checked={addOut} onChange={e => setAddOut(e.target.checked)} />
+                    Außenreinigung (+{extra.außen} €)
+                  </label><br />
+                  <label>
+                    <input type="checkbox" checked={addIn} onChange={e => setAddIn(e.target.checked)} />
+                    Innenreinigung (+{extra.innen} €)
+                  </label>
+                </div>
+              }
+
+              {days > 0 &&
+                <div style={{ background: "#1db954", color: "#fff", padding: 16, borderRadius: 8, fontWeight: "bold" }}>
+                  Aufenthalt: {days} Tag(e) • Gesamtpreis: {price} €
+                </div>
+              }
+
+              <h3 style={{marginBottom: 0}}>Preisübersicht</h3>
+              <table style={{ width: "100%", marginTop: 8 }}>
+                <tbody>
+                  {getTableRows().map((row, i) => (
+                    <tr key={i}>
+                      <td style={{ padding: "4px" }}>
+                        {typeof row.days === "number" ? row.days + " Tag" : row.days + " Tage"}
+                      </td>
+                      {type === "valet" ? (
+                        <td style={{ padding: "4px" }}>{row.base}</td>
+                      ) : (
+                        <td style={{ padding: "4px", fontStyle: "italic", color: "#666" }}>{row.allin}</td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div style={{
+                marginTop: 12,
+                background: "#e1fbe9",
+                border: "1px solid #1db95444",
+                color: "#1db954",
+                borderRadius: 8,
+                padding: 10,
+                fontWeight: "bold",
+                fontSize: "1.08rem"
+              }}>
+                Buchungen können kostenfrei geändert oder storniert werden.
+              </div>
+              <br />
+
+              <button
+                disabled={days < 1}
+                style={{
+                  width: "100%",
+                  padding: 12,
+                  background: "#1db954",
+                  color: "#fff",
+                  fontWeight: "bold",
+                  border: "none",
+                  borderRadius: 8,
+                  cursor: days < 1 ? "not-allowed" : "pointer",
+                  opacity: days < 1 ? 0.6 : 1
+                }}
+                onClick={() => setStep(2)}
+              >
+                Jetzt buchen
+              </button>
+            </>
+          )}
+
+          {step === 2 && (
+            <form onSubmit={handleBookingSubmit} autoComplete="off">
+              <h2 style={{ textAlign: "center", color: "#1db954" }}>Persönliche Daten & Fluginformation</h2>
+              
+              {/* Zusammenfassung mit Preis rechts und groß */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  background: "#e1fbe9",
+                  border: "1px solid #1db95444",
+                  borderRadius: 8,
+                  padding: 12,
+                  marginBottom: 16,
+                  flexWrap: "wrap"
+                }}
+              >
+                <div style={{ fontSize: 17, minWidth: 180, flex: 1 }}>
+                  <strong>Park-Modell:</strong> {type === "valet" ? "Valet-Parking" : "All-Inclusive‑Parking"}<br />
+                  <strong>Anreise:</strong> {start}<br />
+                  <strong>Abreise:</strong> {end}<br />
+                  <strong>Aufenthaltsdauer:</strong> {days} Tage<br />
+                  {type === "valet" && (addOut || addIn) && (
+                    <>
+                      <strong>Reinigung:</strong> {addOut ? "Außen" : ""}{addIn ? (addOut ? " & " : "") + "Innen" : ""}<br />
+                    </>
+                  )}
+                </div>
+                <div style={{
+                  minWidth: 120,
+                  textAlign: "right",
+                  fontSize: 28,
+                  color: "#1db954",
+                  fontWeight: "bold",
+                  flex: 0.7
+                }}>
+                  {price} €
+                </div>
+              </div>
+
+              <div style={{
+                marginBottom: 16,
+                background: "#e1fbe9",
+                border: "1px solid #1db95444",
+                color: "#1db954",
+                borderRadius: 8,
+                padding: 10,
+                fontWeight: "bold",
+                fontSize: "1.08rem"
+              }}>
+                Buchungen können kostenfrei geändert oder storniert werden.
+              </div>
+
+              <div style={{display:"flex",gap:8}}>
+                <div style={{flex:1}}>
+                  <label>Vorname*: <br />
+                    <input name="vorname" value={form.vorname} onChange={handleForm} required style={{width:"100%"}} />
+                  </label>
+                </div>
+                <div style={{flex:2}}>
+                  <label>Nachname*: <br />
+                    <input name="nachname" value={form.nachname} onChange={handleForm} required style={{width:"100%"}} />
+                  </label>
+                </div>
+              </div><br />
+
+              <label>E-Mail-Adresse*: <br />
+                <input name="email" type="email" value={form.email} onChange={handleForm} required style={{width:"100%"}} />
+              </label><br /><br />
+
+              <label>Mobilnummer*: <br />
+                <input name="telefon" type="tel" value={form.telefon} onChange={handleForm} required style={{width:"100%"}} />
+              </label><br /><br />
+
+              <label>Fahrzeugtyp/Modell*: <br />
+                <input name="auto" value={form.auto} onChange={handleForm} required style={{width:"100%"}} />
+              </label><br /><br />
+
+              <label>Kennzeichen*: <br />
+                <input name="kennzeichen" value={form.kennzeichen} onChange={handleForm} required style={{width:"100%"}} />
+              </label><br /><br />
+
+              <label>Abflugdatum*: <br />
+                <input
+                  name="abflug"
+                  type="date"
+                  min={minDate}
+                  value={form.abflug}
+                  onChange={handleForm}
+                  required
+                  style={{width:"100%"}}
+                />
+              </label><br /><br />
+
+              <label>Abflug-Uhrzeit*: <br />
+                <input name="abflugUhrzeit" type="time" value={form.abflugUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
+              </label><br /><br />
+
+              <label>Rückflugdatum*: <br />
+                <input
+                  name="rueckflug"
+                  type="date"
+                  min={minDate}
+                  value={form.rueckflug}
+                  onChange={handleForm}
+                  required
+                  style={{width:"100%"}}
+                />
+              </label><br /><br />
+
+              <label>Rückflug-Uhrzeit*: <br />
+                <input name="rueckflugUhrzeit" type="time" value={form.rueckflugUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
+              </label><br /><br />
+
+              <label>Fluggesellschaft*: <br />
+                <input name="fluggesellschaft" value={form.fluggesellschaft} onChange={handleForm} required style={{width:"100%"}} />
+              </label><br /><br />
+
+              <label>Terminal* (z.B. T1, T2): <br />
+                <input name="terminal" value={form.terminal} onChange={handleForm} required style={{width:"100%"}} />
+              </label><br /><br />
+
+              <label>
+                <input
+                  type="checkbox"
+                  name="handgepaeck"
+                  checked={form.handgepaeck}
+                  onChange={handleForm}
+                  style={{marginRight:4}}
+                />
+                Ich habe Handgepäck
+              </label><br /><br />
+
+              <label>Bemerkung (optional):<br />
+                <textarea name="bemerkung" value={form.bemerkung} onChange={handleForm} rows={2} style={{width:"100%"}} />
+              </label><br /><br />
+
+              <label>
+                <input
+                  type="checkbox"
+                  name="agb"
+                  checked={form.agb}
+                  onChange={handleForm}
+                  required
+                  style={{marginRight:4}}
+                />
+                Ich akzeptiere die <a href="/agb" target="_blank">AGB</a>*
+              </label><br />
+              <label>
+                <input
+                  type="checkbox"
+                  name="datenschutz"
+                  checked={form.datenschutz}
+                  onChange={handleForm}
+                  required
+                  style={{marginRight:4}}
+                />
+                Ich akzeptiere die <a href="/datenschutz" target="_blank">Datenschutzbestimmungen</a>*
+              </label><br /><br />
+
+              <button
+                type="submit"
+                style={{
+                  width: "100%",
+                  padding: 12,
+                  background: "#1db954",
+                  color: "#fff",
+                  fontWeight: "bold",
+                  border: "none",
+                  borderRadius: 8,
+                  cursor: "pointer"
+                }}>
+                Buchung absenden
+              </button>
+              <br /><br />
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                style={{
+                  width: "100%",
+                  padding: 8,
+                  background: "#ccc",
+                  color: "#222",
+                  fontWeight: "bold",
+                  border: "none",
+                  borderRadius: 8,
+                  cursor: "pointer"
+                }}>
+                &larr; Zurück zur Auswahl
+              </button>
+            </form>
+          )}
+        </div>
       </main>
       <Footer />
     </>
