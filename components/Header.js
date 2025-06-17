@@ -28,7 +28,7 @@ export default function Header() {
         alignItems: "center",
         justifyContent: "space-between",
         padding: "0 2vw",
-        height: "75px" // etwas kompakter
+        height: "75px" // kompakt
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <Link href="/" style={{
@@ -81,11 +81,11 @@ export default function Header() {
         padding: "1rem 6vw",
         fontSize: "1.13rem"
       }}>
-        <Link href="/" style={navStyle(router.pathname === "/")}>Start</Link><br />
-        <Link href="/valet-parking" style={navStyle(isValet)}>Valet Parking</Link><br />
-        <Link href="/all-inclusive-parking" style={navStyle(isAllIn)}>All-Inclusive Parking</Link><br />
+        <Link href="/" style={mobileNavStyle(router.pathname === "/")}>Start</Link><br />
+        <Link href="/valet-parking" style={mobileNavStyle(isValet)}>Valet Parking</Link><br />
+        <Link href="/all-inclusive-parking" style={mobileNavStyle(isAllIn)}>All-Inclusive Parking</Link><br />
         <Link href={buchenUrl} style={{
-          ...navStyle(router.pathname === "/buchen"),
+          ...mobileNavStyle(router.pathname === "/buchen"),
           background: "#fff",
           color: "#1db954",
           borderRadius: 7,
@@ -95,7 +95,7 @@ export default function Header() {
           fontSize: "1.1rem",
           margin: "8px 0"
         }}>Buchen</Link><br />
-        <Link href="/kontakt" style={navStyle(router.pathname === "/kontakt")}>Kontakt</Link>
+        <Link href="/kontakt" style={mobileNavStyle(router.pathname === "/kontakt")}>Kontakt</Link>
       </div>
       {/* Responsive CSS */}
       <style jsx>{`
@@ -120,6 +120,20 @@ function navStyle(active) {
     fontSize: "1.12rem",
     padding: "8px 10px",
     borderBottom: active ? "2px solid #fff" : "none",
+    transition: "color 0.15s",
+    letterSpacing: ".5px"
+  };
+}
+
+// Mobiles Menü: KEIN Unterstrich (borderBottom)!
+function mobileNavStyle(active) {
+  return {
+    color: active ? "#fff" : "#e9ffe9",
+    textDecoration: "none",
+    fontWeight: active ? "bold" : "normal",
+    fontSize: "1.12rem",
+    padding: "8px 10px",
+    // KEIN borderBottom!
     transition: "color 0.15s",
     letterSpacing: ".5px"
   };
