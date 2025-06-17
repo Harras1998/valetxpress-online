@@ -11,7 +11,7 @@ function toDE(dateStr) {
 }
 
 const valetPrices = [95,97,99,110,116,117,119,120,126,128,131,136,139,143,148,149,150,154,157,161,166];
-const extra = { außen:19, innen:95 };
+const extra = { außen:19, innen:95, tank:15, lade:19 };
 
 function getValet(priceList, days) {
   if (days <= priceList.length) return priceList[days - 1];
@@ -32,6 +32,8 @@ export default function Buchen() {
   const [price, setPrice] = useState(0);
   const [addOut, setAddOut] = useState(false);
   const [addIn, setAddIn] = useState(false);
+  const [addTank, setAddTank] = useState(false);
+  const [addLade, setAddLade] = useState(false);
   const [step, setStep] = useState(1);
 
   // Vorauswahl nach Query-Parameter beim ersten Laden
@@ -87,14 +89,17 @@ export default function Buchen() {
   useEffect(() => {
     if (!days) return setPrice(0);
     let base = getValet(valetPrices, days);
+    // All-Inclusive enthält immer Innen + Außen
     if (type === "allinclusive") {
       base += extra.außen + extra.innen;
       setAddOut(true); setAddIn(true);
     } else {
       base += (addOut ? extra.außen : 0) + (addIn ? extra.innen : 0);
     }
+    // Zusatzleistungen
+    base += (addTank ? extra.tank : 0) + (addLade ? extra.lade : 0);
     setPrice(base);
-  }, [days, type, addOut, addIn]);
+  }, [days, type, addOut, addIn, addTank, addLade]);
 
   useEffect(() => {
     if (type === "allinclusive") {
@@ -116,19 +121,16 @@ export default function Buchen() {
     alert("Buchung abgesendet! (E-Mail-Integration kann hier ergänzt werden)");
   }
 
-  // Hilfsfunktion für min-Attribut: immer heute oder später
   const minDate = todayStr();
 
   return (
     <>
       <Header />
-
       <main style={{ minHeight: "80vh", background: "#e5e7eb", padding: "2rem 0" }}>
         <div style={{ maxWidth: 520, margin: "2rem auto", padding: 20, background: "#f4f4f4", borderRadius: 16 }}>
           {step === 1 && (
             <>
               <h2 style={{ textAlign: "center", color: "#1db954" }}>Parkplatz buchen</h2>
-
               <label>Park-Modell:<br />
                 <select value={type} onChange={e => setType(e.target.value)}>
                   <option value="valet">Valet-Parking</option>
@@ -158,7 +160,7 @@ export default function Buchen() {
                 />
               </label><br /><br />
 
-              {type === "valet" && days > 0 &&
+              {(type === "valet" && days > 0) &&
                 <div style={{ marginBottom: 16 }}>
                   <label>
                     <input type="checkbox" checked={addOut} onChange={e => setAddOut(e.target.checked)} />
@@ -167,6 +169,34 @@ export default function Buchen() {
                   <label>
                     <input type="checkbox" checked={addIn} onChange={e => setAddIn(e.target.checked)} />
                     Innenreinigung (+{extra.innen} €)
+                  </label><br />
+                  <label>
+                    <input type="checkbox" checked={addTank} onChange={e => setAddTank(e.target.checked)} />
+                    Tankservice (+{extra.tank} €)
+                  </label><br />
+                  <label>
+                    <input type="checkbox" checked={addLade} onChange={e => setAddLade(e.target.checked)} />
+                    Ladeservice für Elektrofahrzeuge exkl. Stromkosten (+{extra.lade} €)
+                  </label>
+                </div>
+              }
+              {(type === "allinclusive" && days > 0) &&
+                <div style={{ marginBottom: 16 }}>
+                  <label>
+                    <input type="checkbox" checked={true} disabled />
+                    Außenreinigung (inkl.)
+                  </label><br />
+                  <label>
+                    <input type="checkbox" checked={true} disabled />
+                    Innenreinigung (inkl.)
+                  </label><br />
+                  <label>
+                    <input type="checkbox" checked={addTank} onChange={e => setAddTank(e.target.checked)} />
+                    Tankservice (+{extra.tank} €)
+                  </label><br />
+                  <label>
+                    <input type="checkbox" checked={addLade} onChange={e => setAddLade(e.target.checked)} />
+                    Ladeservice für Elektrofahrzeuge exkl. Stromkosten (+{extra.lade} €)
                   </label>
                 </div>
               }
@@ -215,7 +245,6 @@ export default function Buchen() {
             <form onSubmit={handleBookingSubmit} autoComplete="off">
               <h2 style={{ textAlign: "center", color: "#1db954" }}>Persönliche Daten & Fluginformation</h2>
               
-              {/* Zusammenfassung mit Preis rechts und groß */}
               <div
                 style={{
                   display: "flex",
@@ -234,9 +263,19 @@ export default function Buchen() {
                   <strong>Anreise:</strong> {toDE(start)}<br />
                   <strong>Abreise:</strong> {toDE(end)}<br />
                   <strong>Aufenthaltsdauer:</strong> {days} Tage<br />
-                  {type === "valet" && (addOut || addIn) && (
+                  {(type === "valet" && (addOut || addIn || addTank || addLade)) && (
                     <>
-                      <strong>Reinigung:</strong> {addOut ? "Außen" : ""}{addIn ? (addOut ? " & " : "") + "Innen" : ""}<br />
+                      <strong>Reinigung:</strong> 
+                      {[addOut ? "Außen" : null, addIn ? "Innen" : null].filter(Boolean).join(" & ") || "-"}<br />
+                      {addTank && <span>Tankservice<br /></span>}
+                      {addLade && <span>Ladeservice<br /></span>}
+                    </>
+                  )}
+                  {(type === "allinclusive" && (addTank || addLade)) && (
+                    <>
+                      <strong>Zusatzleistungen:</strong><br />
+                      {addTank && <span>Tankservice<br /></span>}
+                      {addLade && <span>Ladeservice<br /></span>}
                     </>
                   )}
                 </div>
@@ -265,6 +304,8 @@ export default function Buchen() {
                 Buchungen können kostenfrei geändert oder storniert werden.
               </div>
 
+              {/* ... (Persönliche Daten Felder wie im vorherigen Code) ... */}
+              {/* Gleicher Block wie vorher für die Felder, nur reinkopieren */}
               <div style={{display:"flex",gap:8}}>
                 <div style={{flex:1}}>
                   <label>Vorname*: <br />
