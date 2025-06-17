@@ -211,6 +211,7 @@ export default function Buchen() {
                 <>
                   <div style={{
                     marginTop: 12,
+                    marginBottom: 14,
                     fontWeight: "bold",
                     color: "#222",
                     background: "#e1fbe9",
