@@ -207,20 +207,35 @@ export default function Buchen() {
                 </div>
               }
 
-              <div style={{
-                marginTop: 12,
-                background: "#e1fbe9",
-                border: "1px solid #1db95444",
-                color: "#1db954",
-                borderRadius: 8,
-                padding: 10,
-                fontWeight: "bold",
-                fontSize: "1.08rem"
-              }}>
-                Buchungen können kostenfrei geändert oder storniert werden.
-              </div>
-              <br />
+              {(type === "valet" || type === "allinclusive") && days > 0 && (
+                <>
+                  <div style={{
+                    marginTop: 12,
+                    fontWeight: "bold",
+                    color: "#222",
+                    background: "#e1fbe9",
+                    border: "1px solid #1db95444",
+                    borderRadius: 8,
+                    padding: "10px 10px 0 10px"
+                  }}>
+                    Fahrzeugübernahme bei Abflug am Flughafenterminal<br />
+                    Fahrzeugübergabe bei Rückflug am Flughafenterminal
+                  </div>
+                  <div style={{
+                    background: "#e1fbe9",
+                    border: "1px solid #1db95444",
+                    color: "#1db954",
+                    borderRadius: 8,
+                    padding: 10,
+                    fontWeight: "bold",
+                    fontSize: "1.08rem"
+                  }}>
+                    Buchungen können kostenfrei geändert oder storniert werden.
+                  </div>
+                </>
+              )}
 
+              <br />
               <button
                 disabled={days < 1}
                 style={{
@@ -304,8 +319,6 @@ export default function Buchen() {
                 Buchungen können kostenfrei geändert oder storniert werden.
               </div>
 
-              {/* ... (Persönliche Daten Felder wie im vorherigen Code) ... */}
-              {/* Gleicher Block wie vorher für die Felder, nur reinkopieren */}
               <div style={{display:"flex",gap:8}}>
                 <div style={{flex:1}}>
                   <label>Vorname*: <br />
