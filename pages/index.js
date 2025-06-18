@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Image from "next/image";
+import HeroSection from "../components/HeroSection";
 
 // Hilfsfunktion für Scroll-FadeIn Animation
 function FadeIn({ children, delay = 0 }) {
@@ -22,61 +23,21 @@ export default function Home() {
   return (
     <>
       <Header />
+
       <main style={{
         background: "#f5f7fa",
         minHeight: "85vh",
         padding: 0,
       }}>
+        <HeroSection />
+
         <div style={{
           maxWidth: 900,
           margin: "0 auto",
           padding: "2.5rem 1rem",
         }}>
-          {/* Hero/Intro */}
-          <FadeIn>
-            <section style={{
-              textAlign: "center",
-              padding: "2.5rem 1rem 2rem",
-            }}>
-              <h1 style={{
-                fontSize: "2.8rem",
-                fontWeight: 700,
-                color: "#1db954",
-                marginBottom: 10,
-                lineHeight: 1.1,
-              }}>
-                Sicher & komfortabel<br />am Flughafen München parken
-              </h1>
-              <p style={{
-                fontSize: "1.25rem",
-                color: "#1a2d3a",
-                marginBottom: 22,
-                maxWidth: 520,
-                margin: "0 auto",
-              }}>
-                ValetXpress bietet Ihnen erstklassigen Service für sorgenfreies Parken – Fahrzeugübergabe direkt am Terminal, sichere Abstellung und Wunschreinigung.
-              </p>
-              <a href="/buchen">
-                <button style={{
-                  background: "#1db954",
-                  color: "#fff",
-                  padding: "18px 36px",
-                  borderRadius: 8,
-                  fontSize: "1.15rem",
-                  fontWeight: 700,
-                  border: "none",
-                  boxShadow: "0 2px 12px #1db95444",
-                  cursor: "pointer",
-                  marginTop: 10,
-                }}>
-                  Parkplatz buchen
-                </button>
-              </a>
-            </section>
-          </FadeIn>
-
           {/* Vorteil 1 */}
-          <FadeIn delay={0.15}>
+          <FadeIn>
             <section style={{
               display: "flex",
               flexWrap: "wrap",
@@ -119,7 +80,7 @@ export default function Home() {
           </FadeIn>
 
           {/* Vorteil 2 */}
-          <FadeIn delay={0.3}>
+          <FadeIn delay={0.18}>
             <section style={{
               display: "flex",
               flexWrap: "wrap-reverse",
@@ -160,7 +121,7 @@ export default function Home() {
           </FadeIn>
 
           {/* Vorteil 3 */}
-          <FadeIn delay={0.45}>
+          <FadeIn delay={0.34}>
             <section style={{
               display: "flex",
               flexWrap: "wrap",
@@ -201,7 +162,7 @@ export default function Home() {
           </FadeIn>
 
           {/* FAQ */}
-          <FadeIn delay={0.6}>
+          <FadeIn delay={0.45}>
             <section style={{
               background: "#fff",
               borderRadius: 24,
@@ -248,7 +209,7 @@ export default function Home() {
           </FadeIn>
 
           {/* Abschluss */}
-          <FadeIn delay={0.75}>
+          <FadeIn delay={0.6}>
             <section style={{ textAlign: "center", marginTop: 36 }}>
               <a href="/buchen">
                 <button style={{
