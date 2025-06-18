@@ -89,14 +89,12 @@ export default function Buchen() {
   useEffect(() => {
     if (!days) return setPrice(0);
     let base = getValet(valetPrices, days);
-    // All-Inclusive enthält immer Innen + Außen
     if (type === "allinclusive") {
       base += extra.außen + extra.innen;
       setAddOut(true); setAddIn(true);
     } else {
       base += (addOut ? extra.außen : 0) + (addIn ? extra.innen : 0);
     }
-    // Zusatzleistungen
     base += (addTank ? extra.tank : 0) + (addLade ? extra.lade : 0);
     setPrice(base);
   }, [days, type, addOut, addIn, addTank, addLade]);
@@ -127,129 +125,176 @@ export default function Buchen() {
     <>
       <Header />
       <main style={{ minHeight: "80vh", background: "#e5e7eb", padding: "2rem 0" }}>
-        <div style={{ maxWidth: 520, margin: "2rem auto", padding: 20, background: "#f4f4f4", borderRadius: 16 }}>
+        <div style={{
+          maxWidth: 700,
+          margin: "2rem auto",
+          padding: 24,
+          background: "#fff",
+          borderRadius: 24,
+          boxShadow: "0 2px 12px #0002",
+          fontFamily: "system-ui, Arial, sans-serif"
+        }}>
           {step === 1 && (
             <>
-              <h2 style={{ textAlign: "center", color: "#1db954" }}>Parkplatz buchen</h2>
-              <label>Park-Modell:<br />
-                <select value={type} onChange={e => setType(e.target.value)}>
-                  <option value="valet">Valet-Parking</option>
-                  <option value="allinclusive">All-Inclusive‑Parking</option>
-                </select>
-              </label><br /><br />
+              <h2 style={{
+                textAlign: "center",
+                color: "#1db954",
+                fontWeight: "bold",
+                marginBottom: 28,
+                fontSize: "2.1rem"
+              }}>Parkplatz buchen</h2>
 
-              <label>Anreise:<br />
-                <input
-                  type="date"
-                  min={minDate}
-                  value={start}
-                  onChange={e => setStart(e.target.value)}
-                />
-              </label><br /><br />
-
-              <label>Abreise:<br />
-                <input
-                  type="date"
-                  min={start ? (() => {
-                    const next = new Date(start);
-                    next.setDate(next.getDate() + 1);
-                    return next.toISOString().split("T")[0];
-                  })() : minDate}
-                  value={end}
-                  onChange={e => setEnd(e.target.value)}
-                />
-              </label><br /><br />
+              <div style={{maxWidth: 350, margin: "0 auto 18px", fontSize: "1.18rem"}}>
+                <div style={{marginBottom: 8}}>
+                  <label style={{fontWeight: 500}}>Park-Modell:<br />
+                    <select value={type} onChange={e => setType(e.target.value)} style={{
+                      fontSize: "1rem",
+                      borderRadius: 4,
+                      padding: "2px 7px"
+                    }}>
+                      <option value="valet">Valet-Parking</option>
+                      <option value="allinclusive">All-Inclusive‑Parking</option>
+                    </select>
+                  </label>
+                </div>
+                <div style={{marginBottom: 8}}>
+                  <label>Anreise:<br />
+                    <input
+                      type="date"
+                      min={minDate}
+                      value={start}
+                      onChange={e => setStart(e.target.value)}
+                      style={{
+                        fontSize: "1rem",
+                        borderRadius: 4,
+                        border: "1px solid #bbb",
+                        padding: "2px 7px"
+                      }}
+                    />
+                  </label>
+                </div>
+                <div>
+                  <label>Abreise:<br />
+                    <input
+                      type="date"
+                      min={start ? (() => {
+                        const next = new Date(start);
+                        next.setDate(next.getDate() + 1);
+                        return next.toISOString().split("T")[0];
+                      })() : minDate}
+                      value={end}
+                      onChange={e => setEnd(e.target.value)}
+                      style={{
+                        fontSize: "1rem",
+                        borderRadius: 4,
+                        border: "1px solid #bbb",
+                        padding: "2px 7px"
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
 
               {(type === "valet" && days > 0) &&
-                <div style={{ marginBottom: 16 }}>
+                <div style={{ margin: "0 auto 16px", maxWidth: 430 }}>
                   <label>
                     <input type="checkbox" checked={addOut} onChange={e => setAddOut(e.target.checked)} />
-                    Außenreinigung (+{extra.außen} €)
+                    {" "}Außenreinigung (+1 €)
                   </label><br />
                   <label>
                     <input type="checkbox" checked={addIn} onChange={e => setAddIn(e.target.checked)} />
-                    Innenreinigung (+{extra.innen} €)
+                    {" "}Innenreinigung (+95 €)
                   </label><br />
                   <label>
                     <input type="checkbox" checked={addTank} onChange={e => setAddTank(e.target.checked)} />
-                    Tankservice (+{extra.tank} €)
+                    {" "}Tankservice (+15 €)
                   </label><br />
                   <label>
                     <input type="checkbox" checked={addLade} onChange={e => setAddLade(e.target.checked)} />
-                    Ladeservice für Elektrofahrzeuge exkl. Stromkosten (+{extra.lade} €)
+                    {" "}Ladeservice für Elektrofahrzeuge exkl. Stromkosten (+19 €)
                   </label>
                 </div>
               }
               {(type === "allinclusive" && days > 0) &&
-                <div style={{ marginBottom: 16 }}>
+                <div style={{ margin: "0 auto 16px", maxWidth: 430 }}>
                   <label>
                     <input type="checkbox" checked={true} disabled />
-                    Außenreinigung (inkl.)
+                    {" "}Außenreinigung (inkl.)
                   </label><br />
                   <label>
                     <input type="checkbox" checked={true} disabled />
-                    Innenreinigung (inkl.)
+                    {" "}Innenreinigung (inkl.)
                   </label><br />
                   <label>
                     <input type="checkbox" checked={addTank} onChange={e => setAddTank(e.target.checked)} />
-                    Tankservice (+{extra.tank} €)
+                    {" "}Tankservice (+15 €)
                   </label><br />
                   <label>
                     <input type="checkbox" checked={addLade} onChange={e => setAddLade(e.target.checked)} />
-                    Ladeservice für Elektrofahrzeuge exkl. Stromkosten (+{extra.lade} €)
+                    {" "}Ladeservice für Elektrofahrzeuge exkl. Stromkosten (+19 €)
                   </label>
                 </div>
               }
 
               {days > 0 &&
-                <div style={{ background: "#1db954", color: "#fff", padding: 16, borderRadius: 8, fontWeight: "bold" }}>
-                  Aufenthalt: {days} Tag(e) • Gesamtpreis: {price} €
+                <div style={{
+                  background: "#1db954",
+                  color: "#fff",
+                  padding: "16px 20px",
+                  borderRadius: 12,
+                  fontWeight: "bold",
+                  fontSize: "1.18rem",
+                  margin: "0 0 18px 0"
+                }}>
+                  Aufenthalt: {days} Tag(e) • Gesamtpreis: {price} €
                 </div>
               }
 
               {(type === "valet" || type === "allinclusive") && days > 0 && (
                 <>
-                  <div style={{
-                    marginTop: 12,
-                    marginBottom: 14,
-                    fontWeight: "bold",
-                    color: "#222",
-                    background: "#e1fbe9",
-                    border: "1px solid #1db95444",
-                    borderRadius: 8,
-                    padding: "10px 10px 0 10px"
-                  }}>
-                    Fahrzeugübernahme bei Abflug am Flughafenterminal
-                    <br /><br />
-                    Fahrzeugübergabe bei Rückflug am Flughafenterminal
-                  </div>
+                  <div
+                style={{
+                  background: "#e1fbe9",
+                  border: "1px solid #1db95444",
+                  borderRadius: 12,
+                  padding: "18px 18px 10px 18px",
+                  marginBottom: 20,
+                  fontWeight: "bold",
+                  fontSize: "1.25rem"
+                }}>
+                Fahrzeugübernahme bei Abflug am Flughafenterminal <br /><br />
+                Fahrzeugübergabe bei Rückflug am Flughafenterminal
+              </div>
+
                   <div style={{
                     background: "#e1fbe9",
                     border: "1px solid #1db95444",
                     color: "#1db954",
-                    borderRadius: 8,
-                    padding: 10,
+                    borderRadius: 12,
+                    padding: 14,
                     fontWeight: "bold",
-                    fontSize: "1.08rem"
+                    fontSize: "1.18rem",
+                    marginBottom: 20
                   }}>
                     Buchungen können kostenfrei geändert oder storniert werden.
                   </div>
                 </>
               )}
 
-              <br />
               <button
                 disabled={days < 1}
                 style={{
                   width: "100%",
-                  padding: 12,
+                  padding: "15px 0",
                   background: "#1db954",
                   color: "#fff",
                   fontWeight: "bold",
+                  fontSize: "1.13rem",
                   border: "none",
-                  borderRadius: 8,
+                  borderRadius: 12,
                   cursor: days < 1 ? "not-allowed" : "pointer",
-                  opacity: days < 1 ? 0.6 : 1
+                  opacity: days < 1 ? 0.6 : 1,
+                  marginTop: 0
                 }}
                 onClick={() => setStep(2)}
               >
@@ -258,10 +303,20 @@ export default function Buchen() {
             </>
           )}
 
+          {/* Schritt 2: Persönliche Daten & Fluginformation */}
           {step === 2 && (
-            <form onSubmit={handleBookingSubmit} autoComplete="off">
-              <h2 style={{ textAlign: "center", color: "#1db954" }}>Persönliche Daten & Fluginformation</h2>
-              
+            <>
+              <h2 style={{
+                textAlign: "center",
+                color: "#1db954",
+                fontWeight: "bold",
+                marginBottom: 28,
+                fontSize: "2.3rem"
+              }}>
+                Persönliche Daten & Fluginformation
+              </h2>
+
+              {/* Box 1: Zusammenfassung */}
               <div
                 style={{
                   display: "flex",
@@ -269,37 +324,22 @@ export default function Buchen() {
                   justifyContent: "space-between",
                   background: "#e1fbe9",
                   border: "1px solid #1db95444",
-                  borderRadius: 8,
-                  padding: 12,
-                  marginBottom: 16,
+                  borderRadius: 12,
+                  padding: 18,
+                  marginBottom: 20,
                   flexWrap: "wrap"
                 }}
               >
-                <div style={{ fontSize: 17, minWidth: 180, flex: 1 }}>
+                <div style={{ fontSize: 20, minWidth: 180, flex: 1 }}>
                   <strong>Park-Modell:</strong> {type === "valet" ? "Valet-Parking" : "All-Inclusive‑Parking"}<br />
                   <strong>Anreise:</strong> {toDE(start)}<br />
                   <strong>Abreise:</strong> {toDE(end)}<br />
-                  <strong>Aufenthaltsdauer:</strong> {days} Tage<br />
-                  {(type === "valet" && (addOut || addIn || addTank || addLade)) && (
-                    <>
-                      <strong>Reinigung:</strong> 
-                      {[addOut ? "Außen" : null, addIn ? "Innen" : null].filter(Boolean).join(" & ") || "-"}<br />
-                      {addTank && <span>Tankservice<br /></span>}
-                      {addLade && <span>Ladeservice<br /></span>}
-                    </>
-                  )}
-                  {(type === "allinclusive" && (addTank || addLade)) && (
-                    <>
-                      <strong>Zusatzleistungen:</strong><br />
-                      {addTank && <span>Tankservice<br /></span>}
-                      {addLade && <span>Ladeservice<br /></span>}
-                    </>
-                  )}
+                  <strong>Aufenthaltsdauer:</strong> {days} {days === 1 ? "Tag" : "Tage"}<br />
                 </div>
                 <div style={{
                   minWidth: 120,
                   textAlign: "right",
-                  fontSize: 28,
+                  fontSize: 38,
                   color: "#1db954",
                   fontWeight: "bold",
                   flex: 0.7
@@ -308,190 +348,210 @@ export default function Buchen() {
                 </div>
               </div>
 
-              <div style={{
-                marginBottom: 16,
-                background: "#e1fbe9",
-                border: "1px solid #1db95444",
-                color: "#1db954",
-                borderRadius: 8,
-                padding: 10,
-                fontWeight: "bold",
-                fontSize: "1.08rem"
-              }}>
+              {/* Box 2: Terminal Hinweise */}
+              <div
+                style={{
+                  background: "#e1fbe9",
+                  border: "1px solid #1db95444",
+                  borderRadius: 12,
+                  padding: "18px 18px 10px 18px",
+                  marginBottom: 20,
+                  fontWeight: "bold",
+                  fontSize: "1.25rem"
+                }}>
+                Fahrzeugübernahme bei Abflug am Flughafenterminal <br /><br />
+                Fahrzeugübergabe bei Rückflug am Flughafenterminal
+              </div>
+
+              {/* Box 3: Stornierung */}
+              <div
+                style={{
+                  background: "#e1fbe9",
+                  border: "1px solid #1db95444",
+                  borderRadius: 12,
+                  padding: 18,
+                  fontWeight: "bold",
+                  color: "#1db954",
+                  fontSize: "1.4rem",
+                  marginBottom: 30
+                }}>
                 Buchungen können kostenfrei geändert oder storniert werden.
               </div>
 
-              <div style={{display:"flex",gap:8}}>
-                <div style={{flex:1}}>
-                  <label>Vorname*: <br />
-                    <input name="vorname" value={form.vorname} onChange={handleForm} required style={{width:"100%"}} />
-                  </label>
-                </div>
-                <div style={{flex:2}}>
-                  <label>Nachname*: <br />
-                    <input name="nachname" value={form.nachname} onChange={handleForm} required style={{width:"100%"}} />
-                  </label>
-                </div>
-              </div><br />
+              {/* Formular */}
+              <form onSubmit={handleBookingSubmit} autoComplete="off">
+                <div style={{display:"flex",gap:8}}>
+                  <div style={{flex:1}}>
+                    <label>Vorname*: <br />
+                      <input name="vorname" value={form.vorname} onChange={handleForm} required style={{width:"100%"}} />
+                    </label>
+                  </div>
+                  <div style={{flex:2}}>
+                    <label>Nachname*: <br />
+                      <input name="nachname" value={form.nachname} onChange={handleForm} required style={{width:"100%"}} />
+                    </label>
+                  </div>
+                </div><br />
 
-              <label>Straße / Hausnr.*:<br />
-                <input name="strasse" value={form.strasse} onChange={handleForm} required style={{width:"100%"}} />
-              </label><br /><br />
+                <label>Straße / Hausnr.*:<br />
+                  <input name="strasse" value={form.strasse} onChange={handleForm} required style={{width:"100%"}} />
+                </label><br /><br />
 
-              <div style={{display:"flex",gap:8}}>
-                <div style={{flex:1}}>
-                  <label>PLZ*:<br />
-                    <input name="plz" value={form.plz} onChange={handleForm} required style={{width:"100%"}} />
-                  </label>
-                </div>
-                <div style={{flex:2}}>
-                  <label>Ort*:<br />
-                    <input name="ort" value={form.ort} onChange={handleForm} required style={{width:"100%"}} />
-                  </label>
-                </div>
-              </div><br />
+                <div style={{display:"flex",gap:8}}>
+                  <div style={{flex:1}}>
+                    <label>PLZ*:<br />
+                      <input name="plz" value={form.plz} onChange={handleForm} required style={{width:"100%"}} />
+                    </label>
+                  </div>
+                  <div style={{flex:2}}>
+                    <label>Ort*:<br />
+                      <input name="ort" value={form.ort} onChange={handleForm} required style={{width:"100%"}} />
+                    </label>
+                  </div>
+                </div><br />
 
-              <label>E-Mail-Adresse*: <br />
-                <input name="email" type="email" value={form.email} onChange={handleForm} required style={{width:"100%"}} />
-              </label><br /><br />
+                <label>E-Mail-Adresse*: <br />
+                  <input name="email" type="email" value={form.email} onChange={handleForm} required style={{width:"100%"}} />
+                </label><br /><br />
 
-              <label>Mobilnummer*: <br />
-                <input name="telefon" type="tel" value={form.telefon} onChange={handleForm} required style={{width:"100%"}} />
-              </label><br /><br />
+                <label>Mobilnummer*: <br />
+                  <input name="telefon" type="tel" value={form.telefon} onChange={handleForm} required style={{width:"100%"}} />
+                </label><br /><br />
 
-              <label>Fahrzeugtyp/Modell*: <br />
-                <input name="auto" value={form.auto} onChange={handleForm} required style={{width:"100%"}} />
-              </label><br /><br />
+                <label>Fahrzeugtyp/Modell*: <br />
+                  <input name="auto" value={form.auto} onChange={handleForm} required style={{width:"100%"}} />
+                </label><br /><br />
 
-              <label>Kennzeichen*: <br />
-                <input name="kennzeichen" value={form.kennzeichen} onChange={handleForm} required style={{width:"100%"}} />
-              </label><br /><br />
+                <label>Kennzeichen*: <br />
+                  <input name="kennzeichen" value={form.kennzeichen} onChange={handleForm} required style={{width:"100%"}} />
+                </label><br /><br />
 
-              <label>Ankunft Uhrzeit am Flughafen*:<br />
-                <input name="ankunftUhrzeit" type="time" value={form.ankunftUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
-              </label><br /><br />
+                <label>Ankunft Uhrzeit am Flughafen*:<br />
+                  <input name="ankunftUhrzeit" type="time" value={form.ankunftUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
+                </label><br /><br />
 
-              <label>Abflugdatum*: <br />
-                <input
-                  name="abflug"
-                  type="date"
-                  min={minDate}
-                  value={form.abflug}
-                  onChange={handleForm}
-                  required
-                  style={{width:"100%"}}
-                />
-              </label><br /><br />
+                <label>Abflugdatum*: <br />
+                  <input
+                    name="abflug"
+                    type="date"
+                    min={minDate}
+                    value={form.abflug}
+                    onChange={handleForm}
+                    required
+                    style={{width:"100%"}}
+                  />
+                </label><br /><br />
 
-              <label>Abflug-Uhrzeit*: <br />
-                <input name="abflugUhrzeit" type="time" value={form.abflugUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
-              </label><br /><br />
+                <label>Abflug-Uhrzeit*: <br />
+                  <input name="abflugUhrzeit" type="time" value={form.abflugUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
+                </label><br /><br />
 
-              <label>Rückflugdatum*: <br />
-                <input
-                  name="rueckflug"
-                  type="date"
-                  min={minDate}
-                  value={form.rueckflug}
-                  onChange={handleForm}
-                  required
-                  style={{width:"100%"}}
-                />
-              </label><br /><br />
+                <label>Rückflugdatum*: <br />
+                  <input
+                    name="rueckflug"
+                    type="date"
+                    min={minDate}
+                    value={form.rueckflug}
+                    onChange={handleForm}
+                    required
+                    style={{width:"100%"}}
+                  />
+                </label><br /><br />
 
-              <label>Rückflug-Uhrzeit*: <br />
-                <input name="rueckflugUhrzeit" type="time" value={form.rueckflugUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
-              </label><br /><br />
+                <label>Rückflug-Uhrzeit*: <br />
+                  <input name="rueckflugUhrzeit" type="time" value={form.rueckflugUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
+                </label><br /><br />
 
-              <label>Reiseziel*:<br />
-                <input name="reiseziel" value={form.reiseziel} onChange={handleForm} required style={{width:"100%"}} />
-              </label><br /><br />
+                <label>Reiseziel*:<br />
+                  <input name="reiseziel" value={form.reiseziel} onChange={handleForm} required style={{width:"100%"}} />
+                </label><br /><br />
 
-              <label>Fluggesellschaft*: <br />
-                <input name="fluggesellschaft" value={form.fluggesellschaft} onChange={handleForm} required style={{width:"100%"}} />
-              </label><br /><br />
+                <label>Fluggesellschaft*: <br />
+                  <input name="fluggesellschaft" value={form.fluggesellschaft} onChange={handleForm} required style={{width:"100%"}} />
+                </label><br /><br />
 
-              <label>Flugnummer Hinflug*:<br />
-                <input name="flugnummerHin" value={form.flugnummerHin} onChange={handleForm} required style={{width:"100%"}} />
-              </label><br /><br />
+                <label>Flugnummer Hinflug*:<br />
+                  <input name="flugnummerHin" value={form.flugnummerHin} onChange={handleForm} required style={{width:"100%"}} />
+                </label><br /><br />
 
-              <label>Flugnummer Rückflug*:<br />
-                <input name="flugnummerRueck" value={form.flugnummerRueck} onChange={handleForm} required style={{width:"100%"}} />
-              </label><br /><br />
+                <label>Flugnummer Rückflug*:<br />
+                  <input name="flugnummerRueck" value={form.flugnummerRueck} onChange={handleForm} required style={{width:"100%"}} />
+                </label><br /><br />
 
-              <label>Terminal* (z.B. T1, T2): <br />
-                <input name="terminal" value={form.terminal} onChange={handleForm} required style={{width:"100%"}} />
-              </label><br /><br />
+                <label>Terminal* (z.B. T1, T2): <br />
+                  <input name="terminal" value={form.terminal} onChange={handleForm} required style={{width:"100%"}} />
+                </label><br /><br />
 
-              <label>
-                <input
-                  type="checkbox"
-                  name="handgepaeck"
-                  checked={form.handgepaeck}
-                  onChange={handleForm}
-                  style={{marginRight:4}}
-                />
-                Ich habe Handgepäck
-              </label><br /><br />
+                <label>
+                  <input
+                    type="checkbox"
+                    name="handgepaeck"
+                    checked={form.handgepaeck}
+                    onChange={handleForm}
+                    style={{marginRight:4}}
+                  />
+                  Ich habe Handgepäck
+                </label><br /><br />
 
-              <label>Bemerkung (optional):<br />
-                <textarea name="bemerkung" value={form.bemerkung} onChange={handleForm} rows={2} style={{width:"100%"}} />
-              </label><br /><br />
+                <label>Bemerkung (optional):<br />
+                  <textarea name="bemerkung" value={form.bemerkung} onChange={handleForm} rows={2} style={{width:"100%"}} />
+                </label><br /><br />
 
-              <label>
-                <input
-                  type="checkbox"
-                  name="agb"
-                  checked={form.agb}
-                  onChange={handleForm}
-                  required
-                  style={{marginRight:4}}
-                />
-                Ich akzeptiere die <a href="/agb" target="_blank">AGB</a>*
-              </label><br />
-              <label>
-                <input
-                  type="checkbox"
-                  name="datenschutz"
-                  checked={form.datenschutz}
-                  onChange={handleForm}
-                  required
-                  style={{marginRight:4}}
-                />
-                Ich akzeptiere die <a href="/datenschutz" target="_blank">Datenschutzbestimmungen</a>*
-              </label><br /><br />
+                <label>
+                  <input
+                    type="checkbox"
+                    name="agb"
+                    checked={form.agb}
+                    onChange={handleForm}
+                    required
+                    style={{marginRight:4}}
+                  />
+                  Ich akzeptiere die <a href="/agb" target="_blank">AGB</a>*
+                </label><br />
+                <label>
+                  <input
+                    type="checkbox"
+                    name="datenschutz"
+                    checked={form.datenschutz}
+                    onChange={handleForm}
+                    required
+                    style={{marginRight:4}}
+                  />
+                  Ich akzeptiere die <a href="/datenschutz" target="_blank">Datenschutzbestimmungen</a>*
+                </label><br /><br />
 
-              <button
-                type="submit"
-                style={{
-                  width: "100%",
-                  padding: 12,
-                  background: "#1db954",
-                  color: "#fff",
-                  fontWeight: "bold",
-                  border: "none",
-                  borderRadius: 8,
-                  cursor: "pointer"
-                }}>
-                Buchung absenden
-              </button>
-              <br /><br />
-              <button
-                type="button"
-                onClick={() => setStep(1)}
-                style={{
-                  width: "100%",
-                  padding: 8,
-                  background: "#ccc",
-                  color: "#222",
-                  fontWeight: "bold",
-                  border: "none",
-                  borderRadius: 8,
-                  cursor: "pointer"
-                }}>
-                &larr; Zurück zur Auswahl
-              </button>
-            </form>
+                <button
+                  type="submit"
+                  style={{
+                    width: "100%",
+                    padding: 12,
+                    background: "#1db954",
+                    color: "#fff",
+                    fontWeight: "bold",
+                    border: "none",
+                    borderRadius: 8,
+                    cursor: "pointer"
+                  }}>
+                  Buchung absenden
+                </button>
+                <br /><br />
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  style={{
+                    width: "100%",
+                    padding: 8,
+                    background: "#ccc",
+                    color: "#222",
+                    fontWeight: "bold",
+                    border: "none",
+                    borderRadius: 8,
+                    cursor: "pointer"
+                  }}>
+                  &larr; Zurück zur Auswahl
+                </button>
+              </form>
+            </>
           )}
         </div>
       </main>
