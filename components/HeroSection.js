@@ -35,7 +35,6 @@ export default function HeroSection() {
           justify-content: center;
           overflow: hidden;
           background: #000;
-          /* Verhindert horizontales Scrollen! */
           box-sizing: border-box;
         }
         .hero-bg {
@@ -101,14 +100,14 @@ export default function HeroSection() {
             min-height: 300px;
           }
           .hero-content h1 {
-            font-size: 2rem;
+            font-size: 2.4rem; /* jetzt größer */
           }
           .hero-content p {
-            font-size: 1.05rem;
+            font-size: 1.15rem; /* jetzt größer */
           }
           .hero-btn {
-            font-size: 1.05rem;
-            padding: 14px 28px;
+            font-size: 1.23rem; /* jetzt größer */
+            padding: 16px 30px;
           }
         }
         @media (max-width: 540px) {
@@ -117,16 +116,16 @@ export default function HeroSection() {
             min-height: 160px;
           }
           .hero-content h1 {
-            font-size: 1.25rem;
+            font-size: 1.45rem;  /* größer als vorher! */
             margin-bottom: 15px;
           }
           .hero-content p {
-            font-size: 0.97rem;
+            font-size: 1.06rem;  /* größer als vorher! */
             margin-bottom: 20px;
           }
           .hero-btn {
-            font-size: 0.98rem;
-            padding: 10px 16px;
+            font-size: 1.11rem;  /* größer als vorher! */
+            padding: 12px 16px;
             border-radius: 7px;
           }
         }
