@@ -135,7 +135,7 @@ export default function Home() {
             }}>
               <div style={{ flex: 1, minWidth: 220 }}>
                 <Image
-                  src="/images/flughafen.jpg"
+                  src="/images/Check.png"
                   alt="Sicher parken"
                   width={320}
                   height={210}
