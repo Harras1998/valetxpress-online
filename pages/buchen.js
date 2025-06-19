@@ -199,7 +199,7 @@ export default function Buchen() {
                 <div style={{ margin: "0 auto 16px", maxWidth: 430 }}>
                   <label>
                     <input type="checkbox" checked={addOut} onChange={e => setAddOut(e.target.checked)} />
-                    {" "}Außenreinigung (+1 €)
+                    {" "}Außenreinigung (+19 €)
                   </label><br />
                   <label>
                     <input type="checkbox" checked={addIn} onChange={e => setAddIn(e.target.checked)} />
