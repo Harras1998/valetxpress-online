@@ -6,7 +6,7 @@ export default function HeroSection() {
       {/* Hintergrundbild + Overlay */}
       <div className="hero-bg">
         <Image
-          src="/images/Flugzeug.jpg"
+          src="/images/Flugzeug2.png"
           alt="Flughafen München"
           fill
           style={{ objectFit: "cover" }}
