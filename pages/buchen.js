@@ -317,36 +317,48 @@ export default function Buchen() {
               </h2>
 
               {/* Box 1: Zusammenfassung */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  background: "#e1fbe9",
-                  border: "1px solid #1db95444",
-                  borderRadius: 12,
-                  padding: 18,
-                  marginBottom: 20,
-                  flexWrap: "wrap"
-                }}
-              >
-                <div style={{ fontSize: 20, minWidth: 180, flex: 1 }}>
-                  <strong>Park-Modell:</strong> {type === "valet" ? "Valet-Parking" : "All-Inclusive‑Parking"}<br />
-                  <strong>Anreise:</strong> {toDE(start)}<br />
-                  <strong>Abreise:</strong> {toDE(end)}<br />
-                  <strong>Aufenthaltsdauer:</strong> {days} {days === 1 ? "Tag" : "Tage"}<br />
-                </div>
-                <div style={{
-                  minWidth: 120,
-                  textAlign: "right",
-                  fontSize: 38,
-                  color: "#1db954",
-                  fontWeight: "bold",
-                  flex: 0.7
-                }}>
-                  {price} €
-                </div>
-              </div>
+            <div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    background: "#e1fbe9",
+    border: "1px solid #1db95444",
+    borderRadius: 12,
+    padding: 18,
+    marginBottom: 20,
+    flexWrap: "wrap"
+  }}
+>
+  <div style={{ fontSize: 20, minWidth: 180, flex: 1 }}>
+    <strong>Park-Modell:</strong> {type === "valet" ? "Valet-Parking" : "All-Inclusive‑Parking"}<br />
+    <strong>Anreise:</strong> {toDE(start)}<br />
+    <strong>Abreise:</strong> {toDE(end)}<br />
+    <strong>Aufenthaltsdauer:</strong> {days} {days === 1 ? "Tag" : "Tage"}<br />
+    {/* Zusatzleistungen */}
+    {(type === "valet" || type === "allinclusive") && (addOut || addIn || addTank || addLade) && (
+      <>
+        <strong>Gebuchte Zusatzleistungen:</strong>
+        <ul style={{ margin: "6px 0 0 18px", fontSize: 18, listStyle: "disc" }}>
+          {addOut && <li>Außenreinigung</li>}
+          {addIn && <li>Innenreinigung</li>}
+          {addTank && <li>Tankservice</li>}
+          {addLade && <li>Ladeservice für Elektrofahrzeuge exkl. Stromkosten</li>}
+        </ul>
+      </>
+    )}
+  </div>
+  <div style={{
+    minWidth: 120,
+    textAlign: "right",
+    fontSize: 38,
+    color: "#1db954",
+    fontWeight: "bold",
+    flex: 0.7
+  }}>
+    {price} €
+  </div>
+</div>
 
               {/* Box 2: Terminal Hinweise */}
               <div
