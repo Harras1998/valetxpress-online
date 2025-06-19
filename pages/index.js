@@ -105,7 +105,7 @@ export default function Home() {
               </div>
               <div style={{ flex: 1, minWidth: 220 }}>
                 <Image
-                  src="/images/Flugzeug.jpg"
+                  src="/images/Auto.png"
                   alt="Autopflege"
                   width={320}
                   height={210}
