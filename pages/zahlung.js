@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+// Falls noch nicht installiert: npm install @paypal/react-paypal-js
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 // Hilfsfunktion für deutsches Datumsformat
 function toDE(dateStr) {
@@ -12,15 +14,9 @@ function toDE(dateStr) {
 const paymentOptions = [
   {
     key: "paypal",
-    label: "PayPal",
-    desc: "Schnelle und sichere Zahlung über PayPal.",
+    label: "PayPal, Kreditkarte oder Lastschrift",
+    desc: "Zahlen Sie einfach per PayPal-Konto, Kreditkarte oder SEPA-Lastschrift.",
     icon: "/images/paypal.svg",
-  },
-  {
-    key: "creditcard",
-    label: "Kreditkarte",
-    desc: "Zahlen Sie bequem mit Ihrer Kreditkarte.",
-    icon: "/images/creditcard.svg",
   },
   {
     key: "sofort",
@@ -46,6 +42,7 @@ export default function Zahlung() {
   const [booking, setBooking] = useState(null);
   const [payment, setPayment] = useState("paypal");
   const [done, setDone] = useState(false);
+  const [showPayPal, setShowPayPal] = useState(false);
 
   // Lade Buchungsdaten beim Start aus localStorage
   useEffect(() => {
@@ -60,7 +57,7 @@ export default function Zahlung() {
       <>
         <Header />
         <main style={{ minHeight: "70vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{background: "#fff", borderRadius: 12, padding: 40, boxShadow: "0 2px 16px #0002"}}>
+          <div style={{ background: "#fff", borderRadius: 12, padding: 40, boxShadow: "0 2px 16px #0002" }}>
             <h2>Buchung nicht gefunden.</h2>
             <a href="/buchen" style={{ color: "#1db954", fontWeight: "bold" }}>Zurück zur Buchung</a>
           </div>
@@ -74,12 +71,22 @@ export default function Zahlung() {
     form, type, start, end, days, price, addOut, addIn, addTank, addLade
   } = booking;
 
-  // Hier erfolgt in echt die Einbindung der Zahlungsanbieter (Platzhalter!)
+  // Handle Bezahlung
   function handlePay(e) {
     e.preventDefault();
+    // Bei PayPal: Zeige PayPal-Widget
+    if (payment === "paypal") {
+      setShowPayPal(true);
+      return;
+    }
+    // Bei Sofort, Bank, Cash: einfach als "fertig" markieren
     setDone(true);
-    // Hier könntest du für echte Zahlungen die Integration machen!
-    // Beispiel: window.location.href = "/danke";
+  }
+
+  // PayPal Erfolg
+  function handlePayPalSuccess() {
+    setDone(true);
+    setShowPayPal(false);
   }
 
   return (
@@ -111,14 +118,13 @@ export default function Zahlung() {
             fontSize: "1.15rem"
           }}>
             <b>Buchungsübersicht</b>
-            <div style={{margin: "8px 0"}}>
+            <div style={{ margin: "8px 0" }}>
               <b>Park-Modell:</b> {type === "valet" ? "Valet-Parking" : "All-Inclusive‑Parking"}<br />
               <b>Name:</b> {form.vorname} {form.nachname}<br />
               <b>Anreise:</b> {toDE(start)}, <b>Abreise:</b> {toDE(end)}<br />
               <b>Aufenthaltsdauer:</b> {days} {days === 1 ? "Tag" : "Tage"}<br />
               {form.auto && (<><b>Fahrzeug:</b> {form.auto}, Kennzeichen: {form.kennzeichen}<br /></>)}
-              <b>Gesamtpreis:</b> <span style={{color: "#1db954", fontWeight: "bold", fontSize: 22}}>{price} €</span><br />
-              {/* Zusatzleistungen auflisten */}
+              <b>Gesamtpreis:</b> <span style={{ color: "#1db954", fontWeight: "bold", fontSize: 22 }}>{price} €</span><br />
               {(addOut || addIn || addTank || addLade) && (
                 <>
                   <b>Gebuchte Zusatzleistungen:</b>
@@ -131,16 +137,17 @@ export default function Zahlung() {
                 </>
               )}
             </div>
-            <div style={{marginTop:10, color:"#1db954", fontWeight:"bold"}}>
+            <div style={{ marginTop: 10, color: "#1db954", fontWeight: "bold" }}>
               Buchungen können kostenfrei geändert oder storniert werden.
             </div>
           </div>
 
-          {!done ? (
+          {/* NICHT abgeschlossen (Button & Zahlungsarten) */}
+          {!done && !showPayPal && (
             <>
-              <form onSubmit={handlePay} style={{marginBottom: 8}}>
-                <div style={{marginBottom: 18}}>
-                  <b style={{fontSize: "1.08rem"}}>Zahlungsart wählen:</b>
+              <form onSubmit={handlePay} style={{ marginBottom: 8 }}>
+                <div style={{ marginBottom: 18 }}>
+                  <b style={{ fontSize: "1.08rem" }}>Zahlungsart wählen:</b>
                   <div style={{
                     display: "flex",
                     flexWrap: "wrap",
@@ -161,15 +168,15 @@ export default function Zahlung() {
                           value={opt.key}
                           checked={payment === opt.key}
                           onChange={() => setPayment(opt.key)}
-                          style={{marginRight: 7, accentColor: "#1db954"}}
+                          style={{ marginRight: 7, accentColor: "#1db954" }}
                         />
-                        {/* Optionale Icons */}
+                        {/* Icon */}
                         {opt.icon && (
-                          <img src={opt.icon} alt="" width={32} height={32} style={{borderRadius: 6}} />
+                          <img src={opt.icon} alt="" width={32} height={32} style={{ borderRadius: 6 }} />
                         )}
                         <div>
-                          <span style={{fontWeight: "bold"}}>{opt.label}</span><br />
-                          <span style={{fontSize: ".96rem", color: "#273"}}>{opt.desc}</span>
+                          <span style={{ fontWeight: "bold" }}>{opt.label}</span><br />
+                          <span style={{ fontSize: ".96rem", color: "#273" }}>{opt.desc}</span>
                         </div>
                       </label>
                     ))}
@@ -192,11 +199,45 @@ export default function Zahlung() {
                   Zahlung abschließen
                 </button>
               </form>
-              <div style={{textAlign: "center", margin: "14px 0"}}>
-                <a href="/buchen" style={{color:"#1db954"}}>&larr; Zurück zur Buchung</a>
+              <div style={{ textAlign: "center", margin: "14px 0" }}>
+                <a href="/buchen" style={{ color: "#1db954" }}>&larr; Zurück zur Buchung</a>
               </div>
             </>
-          ) : (
+          )}
+
+          {/* --- PAYPAL --- */}
+          {showPayPal && !done && (
+            <div style={{ margin: "28px 0 0 0", textAlign: "center" }}>
+              <PayPalScriptProvider options={{ "client-id": "AUchvowm3yesxcTsIASz8B1SObtXXskWRKpX-iRkjDpwO1C2Mur1Q4MCXdabm_KJYq8YoQZQ0vZOfgb0", currency: "EUR" }}>
+                <PayPalButtons
+                  style={{ layout: "vertical", color: "blue", shape: "pill" }}
+                  createOrder={(data, actions) =>
+                    actions.order.create({
+                      purchase_units: [{ amount: { value: price.toString() } }]
+                    })
+                  }
+                  onApprove={(data, actions) =>
+                    actions.order.capture().then(() => handlePayPalSuccess())
+                  }
+                  onCancel={() => setShowPayPal(false)}
+                />
+              </PayPalScriptProvider>
+              <div style={{ fontSize: 16, marginTop: 16, color: "#444" }}>
+                Sie können per PayPal, Kreditkarte oder Lastschrift zahlen – auch ohne PayPal-Konto.
+              </div>
+              <button onClick={() => setShowPayPal(false)} style={{
+                marginTop: 26,
+                background: "#ccc",
+                border: "none",
+                borderRadius: 8,
+                padding: "10px 26px",
+                cursor: "pointer"
+              }}>Zurück zur Auswahl</button>
+            </div>
+          )}
+
+          {/* --- FERTIG --- */}
+          {done && (
             <div style={{
               background: "#e1fbe9",
               border: "1px solid #1db95444",
@@ -204,10 +245,10 @@ export default function Zahlung() {
               padding: 28,
               textAlign: "center"
             }}>
-              <img src="/images/green-check.png" alt="" width={54} height={54} style={{marginBottom:18}} />
-              <h3 style={{color: "#1db954"}}>Vielen Dank für Ihre Buchung!</h3>
-              <div style={{marginTop:10, fontSize:18}}>Sie erhalten in Kürze eine Buchungsbestätigung per E-Mail.</div>
-              <div style={{marginTop:18}}><a href="/" style={{color:"#1db954", fontWeight:600}}>Zurück zur Startseite</a></div>
+              <img src="/images/green-check.png" alt="" width={54} height={54} style={{ marginBottom: 18 }} />
+              <h3 style={{ color: "#1db954" }}>Vielen Dank für Ihre Buchung!</h3>
+              <div style={{ marginTop: 10, fontSize: 18 }}>Sie erhalten in Kürze eine Buchungsbestätigung per E-Mail.</div>
+              <div style={{ marginTop: 18 }}><a href="/" style={{ color: "#1db954", fontWeight: 600 }}>Zurück zur Startseite</a></div>
             </div>
           )}
         </div>

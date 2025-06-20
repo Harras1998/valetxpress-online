@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+// 1. PayPal Integration importieren
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 // Hilfsfunktion für deutsches Datumsformat
 function toDE(dateStr) {
@@ -46,6 +48,7 @@ export default function Zahlung() {
   const [booking, setBooking] = useState(null);
   const [payment, setPayment] = useState("paypal");
   const [done, setDone] = useState(false);
+  const [showPayPal, setShowPayPal] = useState(false);
 
   // Lade Buchungsdaten beim Start aus localStorage
   useEffect(() => {
@@ -74,12 +77,26 @@ export default function Zahlung() {
     form, type, start, end, days, price, addOut, addIn, addTank, addLade
   } = booking;
 
-  // Hier erfolgt in echt die Einbindung der Zahlungsanbieter (Platzhalter!)
+  // Hier erfolgt die Zahlungsabwicklung
   function handlePay(e) {
     e.preventDefault();
+
+    if (payment === "paypal") {
+      setShowPayPal(true); // PayPal-Button anzeigen
+    } else if (payment === "creditcard") {
+      alert("Hier würde die Kreditkartenzahlung (z.B. Stripe) erfolgen.");
+      setDone(true);
+    } else if (payment === "sofort" || payment === "bank") {
+      setDone("bank");
+    } else if (payment === "cash") {
+      setDone("cash");
+    }
+  }
+
+  // Nach PayPal-Zahlung: Buchung fertig
+  function handlePayPalSuccess() {
+    setShowPayPal(false);
     setDone(true);
-    // Hier könntest du für echte Zahlungen die Integration machen!
-    // Beispiel: window.location.href = "/danke";
   }
 
   return (
@@ -136,7 +153,7 @@ export default function Zahlung() {
             </div>
           </div>
 
-          {!done ? (
+          {!done && (
             <>
               <form onSubmit={handlePay} style={{marginBottom: 8}}>
                 <div style={{marginBottom: 18}}>
@@ -165,7 +182,7 @@ export default function Zahlung() {
                         />
                         {/* Optionale Icons */}
                         {opt.icon && (
-                          <img src={opt.icon} alt="" width={32} height={32} style={{borderRadius: 6}} />
+                          <img src={opt.icon} alt="" width={38} height={38} style={{borderRadius: 6}} />
                         )}
                         <div>
                           <span style={{fontWeight: "bold"}}>{opt.label}</span><br />
@@ -195,8 +212,60 @@ export default function Zahlung() {
               <div style={{textAlign: "center", margin: "14px 0"}}>
                 <a href="/buchen" style={{color:"#1db954"}}>&larr; Zurück zur Buchung</a>
               </div>
+
+              {/* --- Zahlungs-Integration nach Auswahl --- */}
+              {showPayPal && (
+                <div style={{ margin: "28px 0 0 0" }}>
+                  <PayPalScriptProvider options={{ "client-id": "AUchvowm3yesxcTsIASz8B1SObtXXskWRKpX-iRkjDpwO1C2Mur1Q4MCXdabm_KJYq8YoQZQ0vZOfgb0", currency: "EUR" }}>
+                    <PayPalButtons
+                      style={{ layout: "vertical", color: "blue", shape: "pill" }}
+                      createOrder={(data, actions) =>
+                        actions.order.create({
+                          purchase_units: [{ amount: { value: price.toString() } }]
+                        })
+                      }
+                      onApprove={(data, actions) =>
+                        actions.order.capture().then(() => handlePayPalSuccess())
+                      }
+                      onCancel={() => setShowPayPal(false)}
+                    />
+                  </PayPalScriptProvider>
+                </div>
+              )}
+
+              {payment === "creditcard" && !showPayPal && (
+                <div style={{ marginTop: 28, background: "#e1fbe9", borderRadius: 10, padding: 20 }}>
+                  <b>Kreditkartenzahlung:</b> <br />
+                  <span>
+                    Hier könnte die Integration von Stripe (o.ä.) erfolgen.<br />
+                    <i>Aktuell ist dies ein Platzhalter.</i>
+                  </span>
+                </div>
+              )}
+
+              {(payment === "sofort" || payment === "bank") && !showPayPal && (
+                <div style={{ marginTop: 28, background: "#e1fbe9", borderRadius: 10, padding: 20 }}>
+                  <b>Bankdaten für Überweisung:</b>
+                  <ul style={{margin:"12px 0 0 18px", fontSize:17}}>
+                    <li><b>Bank:</b> Musterbank</li>
+                    <li><b>IBAN:</b> DE12 3456 7890 1234 5678 90</li>
+                    <li><b>Verwendungszweck:</b> Name und Buchungsdatum</li>
+                  </ul>
+                  <p>Bitte überweisen Sie den Gesamtbetrag von <b>{price} €</b> zeitnah.</p>
+                </div>
+              )}
+
+              {payment === "cash" && !showPayPal && (
+                <div style={{ marginTop: 28, background: "#e1fbe9", borderRadius: 10, padding: 20 }}>
+                  <b>Barzahlung:</b> <br />
+                  <span>Sie zahlen bequem vor Ort bei der Fahrzeugübergabe.</span>
+                </div>
+              )}
             </>
-          ) : (
+          )}
+
+          {/* Bestätigungsansicht */}
+          {done === true && (
             <div style={{
               background: "#e1fbe9",
               border: "1px solid #1db95444",
@@ -207,6 +276,34 @@ export default function Zahlung() {
               <img src="/images/green-check.png" alt="" width={54} height={54} style={{marginBottom:18}} />
               <h3 style={{color: "#1db954"}}>Vielen Dank für Ihre Buchung!</h3>
               <div style={{marginTop:10, fontSize:18}}>Sie erhalten in Kürze eine Buchungsbestätigung per E-Mail.</div>
+              <div style={{marginTop:18}}><a href="/" style={{color:"#1db954", fontWeight:600}}>Zurück zur Startseite</a></div>
+            </div>
+          )}
+          {done === "bank" && (
+            <div style={{
+              background: "#e1fbe9",
+              border: "1px solid #1db95444",
+              borderRadius: 12,
+              padding: 28,
+              textAlign: "center"
+            }}>
+              <img src="/images/green-check.png" alt="" width={54} height={54} style={{marginBottom:18}} />
+              <h3 style={{color: "#1db954"}}>Ihre Buchung ist eingegangen!</h3>
+              <div style={{marginTop:10, fontSize:18}}>Bitte überweisen Sie den Betrag auf unser Konto.<br />Sie erhalten eine Bestätigung per E-Mail.</div>
+              <div style={{marginTop:18}}><a href="/" style={{color:"#1db954", fontWeight:600}}>Zurück zur Startseite</a></div>
+            </div>
+          )}
+          {done === "cash" && (
+            <div style={{
+              background: "#e1fbe9",
+              border: "1px solid #1db95444",
+              borderRadius: 12,
+              padding: 28,
+              textAlign: "center"
+            }}>
+              <img src="/images/green-check.png" alt="" width={54} height={54} style={{marginBottom:18}} />
+              <h3 style={{color: "#1db954"}}>Ihre Buchung ist eingegangen!</h3>
+              <div style={{marginTop:10, fontSize:18}}>Sie zahlen bequem vor Ort.<br />Sie erhalten eine Bestätigung per E-Mail.</div>
               <div style={{marginTop:18}}><a href="/" style={{color:"#1db954", fontWeight:600}}>Zurück zur Startseite</a></div>
             </div>
           )}
