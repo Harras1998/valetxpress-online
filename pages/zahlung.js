@@ -18,13 +18,7 @@ const paymentOptions = [
     desc: "Zahlen Sie einfach per PayPal-Konto, Kreditkarte oder SEPA-Lastschrift.",
     icon: "/images/paypal.svg",
   },
-  {
-    key: "sofort",
-    label: "Sofortüberweisung",
-    desc: "Direkt bezahlen per Online-Banking.",
-    icon: "/images/sofort.svg",
-  },
-  {
+   {
     key: "bank",
     label: "Überweisung",
     desc: "Sie erhalten unsere Bankdaten nach Abschluss der Buchung.",
@@ -79,7 +73,11 @@ export default function Zahlung() {
       setShowPayPal(true);
       return;
     }
-    // Bei Sofort, Bank, Cash: einfach als "fertig" markieren
+    
+  setDone(true);
+
+
+// Bei Bank, Cash: einfach als "fertig" markieren
     setDone(true);
   }
 
