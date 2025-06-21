@@ -70,6 +70,54 @@ export default function Buchen() {
     datenschutz: false,
   });
 
+    useEffect(() => {
+    if (typeof window !== "undefined") {
+      const booking = localStorage.getItem("valet_booking");
+      if (booking) {
+        const b = JSON.parse(booking);
+        setForm(b.form || {
+          vorname: "",
+          nachname: "",
+          strasse: "",
+          plz: "",
+          ort: "",
+          email: "",
+          telefon: "",
+          auto: "",
+          kennzeichen: "",
+          abflug: "",
+          abflugUhrzeit: "",
+          ankunftUhrzeit: "",
+          rueckflug: "",
+          rueckflugUhrzeit: "",
+          reiseziel: "",
+          fluggesellschaft: "",
+          flugnummerHin: "",
+          flugnummerRueck: "",
+          terminal: "",
+          handgepaeck: false,
+          bemerkung: "",
+          agb: false,
+          datenschutz: false,
+        });
+        setType(b.type || "valet");
+        setStart(b.start || todayStr());
+        setEnd(b.end || "");
+        setDays(b.days || 0);
+        setAddOut(!!b.addOut);
+        setAddIn(!!b.addIn);
+        setAddTank(!!b.addTank);
+        setAddLade(!!b.addLade);
+
+        // Prüfe auf Schritt 2
+        const url = new URL(window.location.href);
+        if (url.searchParams.get("step") === "2") {
+          setStep(2);
+        }
+      }
+    }
+  }, []);
+
   useEffect(() => {
     if (!end || new Date(end) <= new Date(start)) {
       const next = new Date(start);

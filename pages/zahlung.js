@@ -198,7 +198,7 @@ export default function Zahlung() {
                 </button>
               </form>
               <div style={{ textAlign: "center", margin: "14px 0" }}>
-                <a href="/buchen" style={{ color: "#1db954" }}>&larr; Zurück zur Buchung</a>
+                <a href="/buchen?step=2" style={{ color: "#1db954" }}>&larr; Zurück zur Buchung</a>
               </div>
             </>
           )}
