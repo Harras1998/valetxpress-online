@@ -36,12 +36,6 @@ export default function Buchen() {
   const [addLade, setAddLade] = useState(false);
   const [step, setStep] = useState(1);
 
-  // Vorauswahl nach Query-Parameter beim ersten Laden
-  useEffect(() => {
-    if (!router.isReady) return;
-    const qType = router.query.type;
-    if (qType === "allinclusive" || qType === "valet") setType(qType);
-  }, [router.isReady, router.query]);
 
   // Persönliche Daten
   const [form, setForm] = useState({
@@ -69,6 +63,48 @@ export default function Buchen() {
     agb: false,
     datenschutz: false,
   });
+function syncAllBookingState() {
+  if (typeof window !== "undefined") {
+    const booking = localStorage.getItem("valet_booking");
+    if (booking) {
+      const b = JSON.parse(booking);
+      setForm(b.form || {
+        vorname: "",
+        nachname: "",
+        strasse: "",
+        plz: "",
+        ort: "",
+        email: "",
+        telefon: "",
+        auto: "",
+        kennzeichen: "",
+        abflug: "",
+        abflugUhrzeit: "",
+        ankunftUhrzeit: "",
+        rueckflug: "",
+        rueckflugUhrzeit: "",
+        reiseziel: "",
+        fluggesellschaft: "",
+        flugnummerHin: "",
+        flugnummerRueck: "",
+        terminal: "",
+        handgepaeck: false,
+        bemerkung: "",
+        agb: false,
+        datenschutz: false,
+      });
+      setType(b.type || "valet");
+      setStart(b.start || todayStr());
+      setEnd(b.end || "");
+      setDays(b.days || 0);
+      setPrice(b.price || 0);  // <- neu!
+      setAddOut(!!b.addOut);
+      setAddIn(!!b.addIn);
+      setAddTank(!!b.addTank);
+      setAddLade(!!b.addLade);
+    }
+  }
+}
 
     useEffect(() => {
     if (typeof window !== "undefined") {
@@ -118,6 +154,13 @@ export default function Buchen() {
     }
   }, []);
 
+  // Vorauswahl nach Query-Parameter beim ersten Laden
+  useEffect(() => {
+    if (!router.isReady) return;
+    const qType = router.query.type;
+    if (qType === "allinclusive" || qType === "valet") setType(qType);
+  }, [router.isReady, router.query]);
+
   useEffect(() => {
     if (!end || new Date(end) <= new Date(start)) {
       const next = new Date(start);
@@ -157,10 +200,20 @@ export default function Buchen() {
     }
   }, [type]);
 
-  function handleForm(e) {
-    const { name, value, type, checked } = e.target;
-    setForm({ ...form, [name]: type === "checkbox" ? checked : value });
+  useEffect(() => {
+  if (step === 2) {
+    syncAllBookingState();
   }
+}, [step]);
+
+function handleForm(e) {
+  const { name, value, type, checked } = e.target;
+  setForm({ 
+    ...form, 
+    [name]: type === "checkbox" ? checked : value 
+  });
+}
+
 
   function handleBookingSubmit(e) {
   e.preventDefault();
@@ -366,7 +419,24 @@ export default function Buchen() {
                   opacity: days < 1 ? 0.6 : 1,
                   marginTop: 0
                 }}
-                onClick={() => setStep(2)}
+                onClick={() => {
+               setStep(2);
+  const bookingData = {
+    form,
+    type,
+    start,
+    end,
+    days,
+    price,
+    addOut,
+    addIn,
+    addTank,
+    addLade,
+  };
+  if (typeof window !== "undefined") {
+    localStorage.setItem("valet_booking", JSON.stringify(bookingData));
+  }
+}}
               >
                 Jetzt buchen
               </button>
@@ -619,7 +689,24 @@ export default function Buchen() {
                 <br /><br />
                 <button
                   type="button"
-                  onClick={() => setStep(1)}
+                  onClick={() => {
+        setStep(1);
+  const bookingData = {
+    form,
+    type,
+    start,
+    end,
+    days,
+    price,
+    addOut,
+    addIn,
+    addTank,
+    addLade,
+  };
+  if (typeof window !== "undefined") {
+    localStorage.setItem("valet_booking", JSON.stringify(bookingData));
+  }
+}}
                   style={{
                     width: "100%",
                     padding: 8,
