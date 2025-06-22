@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import Image from "next/image";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
@@ -31,14 +32,16 @@ export default function Header() {
         height: "75px" // kompakt
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <Link href="/" style={{
-            color: "#fff",
-            fontSize: "2rem",
-            fontWeight: "800",
-            textDecoration: "none",
-            letterSpacing: ".5px",
-            lineHeight: 1
-          }}>ValetXpress</Link>
+           <Link href="/"
+             style={{ display: "flex", alignItems: "center" }}>
+              <Image
+                src="/images/Logo.png"   // <-- Logo-Datei im public-Ordner
+                alt="ValetXpress Logo"
+                width={320}                   // Passe Größe nach Wunsch an
+                height={310}
+                priority
+              />
+          </Link>
         </div>
         <div className="desktop-menu" style={{
           display: "flex", gap: 26, alignItems: "center"
