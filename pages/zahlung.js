@@ -38,7 +38,7 @@ async function sendBookingToAPI(booking) {
     // ===>> HIER ggf. deine API-URL anpassen! 
     // Bei lokalem Testen: http://localhost:4000/api/buchung
     // Im Livebetrieb: https://deinedomain.de/api/buchung
-    const response = await fetch("http://217.154.220.163:4000/api/buchung", {
+    const response = await fetch("/api/proxy?path=api/buchung", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(booking),
