@@ -18,7 +18,7 @@ const paymentOptions = [
     desc: "Zahlen Sie einfach per PayPal-Konto, Kreditkarte oder SEPA-Lastschrift.",
     icon: "/images/paypal.svg",
   },
-   {
+  {
     key: "bank",
     label: "Überweisung",
     desc: "Sie erhalten unsere Bankdaten nach Abschluss der Buchung.",
@@ -31,6 +31,26 @@ const paymentOptions = [
     icon: "/images/cash.svg",
   }
 ];
+
+// --- HIER: Funktion für API-Request ---
+async function sendBookingToAPI(booking) {
+  try {
+    // ===>> HIER ggf. deine API-URL anpassen! 
+    // Bei lokalem Testen: http://localhost:4000/api/buchung
+    // Im Livebetrieb: https://deinedomain.de/api/buchung
+    const response = await fetch("http://217.154.220.163:4000/api/buchung", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(booking),
+    });
+    if (!response.ok) {
+      // Fehlerbehandlung (optional)
+      console.error("Fehler beim Senden der Buchung!", await response.text());
+    }
+  } catch (err) {
+    console.error("Netzwerkfehler:", err);
+  }
+}
 
 export default function Zahlung() {
   const [booking, setBooking] = useState(null);
@@ -66,25 +86,23 @@ export default function Zahlung() {
   } = booking;
 
   // Handle Bezahlung
-  function handlePay(e) {
+  async function handlePay(e) {
     e.preventDefault();
-    // Bei PayPal: Zeige PayPal-Widget
     if (payment === "paypal") {
       setShowPayPal(true);
       return;
     }
-    
-  setDone(true);
-
-
-// Bei Bank, Cash: einfach als "fertig" markieren
     setDone(true);
+    // API-Call bei Bank/Bar
+    await sendBookingToAPI(booking);
   }
 
   // PayPal Erfolg
-  function handlePayPalSuccess() {
+  async function handlePayPalSuccess() {
     setDone(true);
     setShowPayPal(false);
+    // API-Call bei PayPal
+    await sendBookingToAPI(booking);
   }
 
   return (
