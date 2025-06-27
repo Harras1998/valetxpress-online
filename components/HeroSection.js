@@ -20,7 +20,7 @@ export default function HeroSection() {
           Sicher & komfortabel<br />
           am Flughafen München parken
         </h1>
-        <p className="blue-stroke">
+        <p>
           ValetXpress bietet Ihnen erstklassigen Service für sorgenfreies Parken – Fahrzeugübergabe direkt am Terminal und sichere Abstellung.
         </p>
         <a href="/buchen" className="hero-btn">Parkplatz buchen</a>
@@ -75,17 +75,10 @@ export default function HeroSection() {
         }
         .hero-content p {
           font-size: 1.45rem;
-          color: #fff;
+          color: #000;
           margin-bottom: 38px;
           text-shadow: 0 2px 12px rgba(0,0,0,0.13);
           max-width: 600px;
-        }
-        .blue-stroke {
-          color: #111;
-          -webkit-text-stroke: 1.2px #1976d2;
-          text-stroke: 1.2px #1976d2;
-          font-weight: 500;
-          text-shadow: 0 2px 12px rgba(0,0,0,0.13);
         }
         .hero-btn {
           display: inline-block;
