@@ -75,7 +75,7 @@ export default function HeroSection() {
         }
         .hero-content p {
           font-size: 1.45rem;
-          color: #000;
+          color: #00FF00;
           margin-bottom: 38px;
           text-shadow: 0 2px 12px rgba(0,0,0,0.13);
           max-width: 600px;
