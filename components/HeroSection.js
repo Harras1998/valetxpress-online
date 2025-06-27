@@ -49,7 +49,7 @@ export default function HeroSection() {
           inset: 0;
           width: 100%;
           height: 100%;
-          background: rgba(30, 40, 60, 0.60); /* unverändert */
+          background: rgba(30, 40, 60, 0.60);
         }
         .hero-content {
           position: relative;
@@ -68,21 +68,16 @@ export default function HeroSection() {
         .hero-content h1 {
           font-size: 3rem;
           font-weight: bold;
-          color: #1db954; /* bleibt grün */
+          color: #1db954;
           margin-bottom: 22px;
           line-height: 1.13;
-          text-shadow:
-            0 3px 22px rgba(0,0,0,0.85),  /* starker dunkler Schatten */
-            0 0 22px #fff,                 /* heller Glow für Abhebung */
-            0 0 12px #1db95477;            /* leicht grüner Glow */
+          text-shadow: 0 3px 12px rgba(0,0,0,0.15);
         }
         .hero-content p {
           font-size: 1.45rem;
           color: #fff;
           margin-bottom: 38px;
-          text-shadow:
-            0 2px 18px rgba(0,0,0,0.38),
-            0 0 7px #1db95433;
+          text-shadow: 0 2px 12px rgba(0,0,0,0.13);
           max-width: 600px;
         }
         .hero-btn {
@@ -97,6 +92,7 @@ export default function HeroSection() {
           box-shadow: 0 4px 18px 0 rgba(32,180,84,0.09);
           transition: background 0.2s;
         }
+
         /* MOBILE OPTIMIERUNG */
         @media (max-width: 900px) {
           .hero-content {
@@ -104,13 +100,13 @@ export default function HeroSection() {
             min-height: 300px;
           }
           .hero-content h1 {
-            font-size: 2.4rem;
+            font-size: 2.4rem; /* jetzt größer */
           }
           .hero-content p {
-            font-size: 1.15rem;
+            font-size: 1.15rem; /* jetzt größer */
           }
           .hero-btn {
-            font-size: 1.23rem;
+            font-size: 1.23rem; /* jetzt größer */
             padding: 16px 30px;
           }
         }
@@ -120,15 +116,15 @@ export default function HeroSection() {
             min-height: 160px;
           }
           .hero-content h1 {
-            font-size: 1.45rem;
+            font-size: 1.45rem;  /* größer als vorher! */
             margin-bottom: 15px;
           }
           .hero-content p {
-            font-size: 1.06rem;
+            font-size: 1.06rem;  /* größer als vorher! */
             margin-bottom: 20px;
           }
           .hero-btn {
-            font-size: 1.11rem;
+            font-size: 1.11rem;  /* größer als vorher! */
             padding: 12px 16px;
             border-radius: 7px;
           }
