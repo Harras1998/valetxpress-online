@@ -21,7 +21,7 @@ export default function HeroSection() {
           am Flughafen München parken
         </h1>
         <p>
-          ValetXpress bietet Ihnen erstklassigen Service für sorgenfreies Parken – Fahrzeugübergabe direkt am Terminal, sichere Abstellung und Wunschreinigung.
+          ValetXpress bietet Ihnen erstklassigen Service für sorgenfreies Parken – Fahrzeugübergabe direkt am Terminal und sichere Abstellung.
         </p>
         <a href="/buchen" className="hero-btn">Parkplatz buchen</a>
       </div>
