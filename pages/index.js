@@ -73,7 +73,7 @@ export default function Home() {
                   marginBottom: 10,
                 }}>Valet-Parking direkt am Terminal</h2>
                 <p style={{ color: "#20313a", fontSize: "1.08rem" }}>
-                  Keine Parkplatzsuche – übergeben Sie Ihr Fahrzeug bequem am Abflug-Terminal und genießen Sie Ihren Flug. Ihr Auto wird sicher geparkt und steht zur Rückkehr bereit – inkl. Übergabe am Terminal.
+                  Keine Parkplatzsuche – übergeben Sie Ihr Fahrzeug bequem am Abflug-Terminal und genießen Sie Ihren Flug. Ihr Auto wird sicher geparkt und steht bei Ihrer Rückkehr bereit – inkl. Übergabe am Terminal.
                 </p>
               </div>
             </section>
