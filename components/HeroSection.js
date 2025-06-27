@@ -81,7 +81,7 @@ export default function HeroSection() {
           max-width: 600px;
         }
         .blue-stroke {
-          color: #fff;
+          color: #111;
           -webkit-text-stroke: 1.2px #1976d2;
           text-stroke: 1.2px #1976d2;
           font-weight: 500;
