@@ -37,8 +37,8 @@ export default function Header() {
               <Image
                 src="/images/Logo.png"   // <-- Logo-Datei im public-Ordner
                 alt="ValetXpress Logo"
-                width={350}                   // Passe Größe nach Wunsch an
-                height={280}
+                width={370}                   // Passe Größe nach Wunsch an
+                height={270}
                 priority
               />
           </Link>
