@@ -422,6 +422,11 @@ export default function Buchen() {
                 }}
                 onClick={() => {
                   setStep(2);
+                  setForm(f => ({
+                    ...f,
+                    abflug: start,
+                    rueckflug: end,
+                  }));
                   const bookingData = {
                     form,
                     type,
@@ -586,10 +591,8 @@ export default function Buchen() {
                   <input
                     name="abflug"
                     type="date"
-                    min={minDate}
-                    value={form.abflug}
-                    onChange={handleForm}
-                    required
+                    value={start}
+                    disabled
                     style={{width:"100%"}}
                   />
                 </label><br /><br />
@@ -602,10 +605,8 @@ export default function Buchen() {
                   <input
                     name="rueckflug"
                     type="date"
-                    min={minDate}
-                    value={form.rueckflug}
-                    onChange={handleForm}
-                    required
+                    value={end}
+                    disabled
                     style={{width:"100%"}}
                   />
                 </label><br /><br />
