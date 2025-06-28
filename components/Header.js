@@ -118,6 +118,11 @@ export default function Header() {
             width: 150px;
             max-height: 40px;
           }
+          .mobile-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+          }
           .mobile-menu :global(a) {
             margin-bottom: 22px;
             padding-top: 8px;
