@@ -132,13 +132,16 @@ export default function Header() {
             width: 140px;
             max-height: 38px;
           }
+          .mobile-menu {
+            text-align: left;    /* <--- Das macht sie linksbündig */
+          }
           .mobile-nav-link {
-            display: inline-block;   /* <--- Das ist der Schlüssel! */
+            display: inline-block;
             margin-bottom: 14px;
             text-align: left;
             width: auto;
             max-width: 100%;
-            padding: 8px 0 8px 0;   /* Kein padding-left, kein 100% */
+            padding: 8px 0 8px 0;
             background: transparent;
             border-radius: 0;
           }
