@@ -29,7 +29,7 @@ export default function Header() {
         alignItems: "center",
         justifyContent: "space-between",
         padding: "0 2vw",
-        height: "75px" // kompakt
+        height: "75px"
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <div className="header-logo-wrapper">
@@ -97,7 +97,7 @@ export default function Header() {
           <a className="mobile-nav-link" style={mobileNavStyle(isAllIn)}>All-Inclusive Parking</a>
         </Link>
         <Link href={buchenUrl} legacyBehavior>
-          <a className="mobile-nav-link"
+          <a className="mobile-nav-link mobile-nav-buchen"
              style={{
                ...mobileNavStyle(router.pathname === "/buchen"),
                background: "#fff",
@@ -129,15 +129,29 @@ export default function Header() {
           .mobile-menu-btn { display: block !important; }
           nav { height: 60px !important; }
           .header-logo-wrapper {
-            width: 110px;
-            max-height: 32px;
+            width: 140px;
+            max-height: 38px;
           }
           .mobile-nav-link {
             display: block;
-            margin-bottom: 26px;
-            margin-left: 0;
-            margin-right: 0;
+            margin-bottom: 14px;
             text-align: left;
+            width: auto;
+            max-width: 100%;
+            padding: 8px 0 8px 0;
+            background: transparent;
+            border-radius: 0;
+          }
+          .mobile-nav-link.mobile-nav-buchen {
+            padding: 9px 22px;
+            display: inline-block;
+            background: #fff;
+            color: #1db954 !important;
+            border-radius: 7px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin: 8px 0;
+            width: auto;
           }
           .mobile-nav-link:last-child {
             margin-bottom: 0;
@@ -164,14 +178,12 @@ function navStyle(active) {
   };
 }
 
-// Mobiles Menü: KEIN Unterstrich (borderBottom)!
 function mobileNavStyle(active) {
   return {
     color: active ? "#fff" : "#e9ffe9",
     textDecoration: "none",
     fontWeight: active ? "bold" : "normal",
     fontSize: "1.12rem",
-    padding: "8px 10px",
     transition: "color 0.15s",
     letterSpacing: ".5px"
   };
