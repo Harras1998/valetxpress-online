@@ -87,21 +87,34 @@ export default function Header() {
         padding: "1rem 6vw",
         fontSize: "1.13rem"
       }}>
-        <Link href="/" style={mobileNavStyle(router.pathname === "/")}>Start</Link>
-        <Link href="/valet-parking" style={mobileNavStyle(isValet)}>Valet Parking</Link>
-        <Link href="/all-inclusive-parking" style={mobileNavStyle(isAllIn)}>All-Inclusive Parking</Link>
-        <Link href={buchenUrl} style={{
-          ...mobileNavStyle(router.pathname === "/buchen"),
-          background: "#fff",
-          color: "#1db954",
-          borderRadius: 7,
-          fontWeight: "bold",
-          padding: "9px 22px",
-          display: "inline-block",
-          fontSize: "1.1rem",
-          margin: "8px 0"
-        }}>Buchen</Link>
-        <Link href="/kontakt" style={mobileNavStyle(router.pathname === "/kontakt")}>Kontakt</Link>
+        <Link href="/" legacyBehavior>
+          <a className="mobile-nav-link" style={mobileNavStyle(router.pathname === "/")}>Start</a>
+        </Link>
+        <Link href="/valet-parking" legacyBehavior>
+          <a className="mobile-nav-link" style={mobileNavStyle(isValet)}>Valet Parking</a>
+        </Link>
+        <Link href="/all-inclusive-parking" legacyBehavior>
+          <a className="mobile-nav-link" style={mobileNavStyle(isAllIn)}>All-Inclusive Parking</a>
+        </Link>
+        <Link href={buchenUrl} legacyBehavior>
+          <a className="mobile-nav-link"
+             style={{
+               ...mobileNavStyle(router.pathname === "/buchen"),
+               background: "#fff",
+               color: "#1db954",
+               borderRadius: 7,
+               fontWeight: "bold",
+               padding: "9px 22px",
+               display: "inline-block",
+               fontSize: "1.1rem",
+               margin: "8px 0"
+             }}>
+            Buchen
+          </a>
+        </Link>
+        <Link href="/kontakt" legacyBehavior>
+          <a className="mobile-nav-link" style={mobileNavStyle(router.pathname === "/kontakt")}>Kontakt</a>
+        </Link>
       </div>
       {/* Responsive CSS */}
       <style jsx>{`
@@ -119,11 +132,14 @@ export default function Header() {
             width: 110px;
             max-height: 32px;
           }
-          .mobile-menu a {
+          .mobile-nav-link {
             display: block;
-            margin-bottom: 22px;
+            margin-bottom: 26px;
+            margin-left: 0;
+            margin-right: 0;
+            text-align: left;
           }
-          .mobile-menu a:last-child {
+          .mobile-nav-link:last-child {
             margin-bottom: 0;
           }
         }
@@ -156,7 +172,6 @@ function mobileNavStyle(active) {
     fontWeight: active ? "bold" : "normal",
     fontSize: "1.12rem",
     padding: "8px 10px",
-    // KEIN borderBottom!
     transition: "color 0.15s",
     letterSpacing: ".5px"
   };
