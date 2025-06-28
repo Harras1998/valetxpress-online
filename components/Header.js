@@ -29,7 +29,7 @@ export default function Header() {
         alignItems: "center",
         justifyContent: "space-between",
         padding: "0 2vw",
-        height: "75px" // kompakt
+        height: "75px"
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <div className="header-logo-wrapper">
@@ -118,9 +118,11 @@ export default function Header() {
             width: 150px;
             max-height: 40px;
           }
-          /* Abstand zwischen den mobilen Links, aber KEIN display: block */
+          /* Optimierter vertikaler Abstand bei mobilen Links */
           .mobile-menu :global(a) {
-            margin: 18px 0;
+            margin-bottom: 22px;
+            padding-top: 8px;
+            padding-bottom: 8px;
           }
           .mobile-menu :global(a:last-child) {
             margin-bottom: 0;
