@@ -32,16 +32,19 @@ export default function Header() {
         height: "75px" // kompakt
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-           <Link href="/"
-             style={{ display: "flex", alignItems: "center" }}>
+          <div className="header-logo-wrapper">
+            <Link href="/"
+              style={{ display: "flex", alignItems: "center" }}>
               <Image
-                src="/images/Logo.png"   // <-- Logo-Datei im public-Ordner
+                src="/images/Logo.png"
                 alt="ValetXpress Logo"
-                width={315}                   // Passe Größe nach Wunsch an
+                width={315}
                 height={215}
+                style={{ width: "100%", height: "auto" }}
                 priority
               />
-          </Link>
+            </Link>
+          </div>
         </div>
         <div className="desktop-menu" style={{
           display: "flex", gap: 26, alignItems: "center"
@@ -102,10 +105,20 @@ export default function Header() {
       </div>
       {/* Responsive CSS */}
       <style jsx>{`
+        .header-logo-wrapper {
+          width: 210px;
+          max-height: 52px;
+          display: flex;
+          align-items: center;
+        }
         @media (max-width: 900px) {
           .desktop-menu { display: none !important; }
           .mobile-menu-btn { display: block !important; }
           nav { height: 60px !important; }
+          .header-logo-wrapper {
+            width: 110px;
+            max-height: 32px;
+          }
         }
         @media (min-width: 901px) {
           .mobile-menu { display: none !important; }
