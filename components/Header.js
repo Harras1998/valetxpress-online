@@ -29,7 +29,7 @@ export default function Header() {
         alignItems: "center",
         justifyContent: "space-between",
         padding: "0 2vw",
-        height: "75px"
+        height: "75px" // kompakt
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <div className="header-logo-wrapper">
@@ -84,37 +84,24 @@ export default function Header() {
       <div className="mobile-menu" style={{
         display: open ? "block" : "none",
         background: "#1db954",
-        padding: "1rem 0",
+        padding: "1rem 6vw",
         fontSize: "1.13rem"
       }}>
-        <Link href="/" legacyBehavior>
-          <a className="mobile-nav-link" style={mobileNavStyle(router.pathname === "/")}>Start</a>
-        </Link>
-        <Link href="/valet-parking" legacyBehavior>
-          <a className="mobile-nav-link" style={mobileNavStyle(isValet)}>Valet Parking</a>
-        </Link>
-        <Link href="/all-inclusive-parking" legacyBehavior>
-          <a className="mobile-nav-link" style={mobileNavStyle(isAllIn)}>All-Inclusive Parking</a>
-        </Link>
-        <Link href={buchenUrl} legacyBehavior>
-          <a className="mobile-nav-link mobile-nav-buchen"
-             style={{
-               ...mobileNavStyle(router.pathname === "/buchen"),
-               background: "#fff",
-               color: "#1db954",
-               borderRadius: 7,
-               fontWeight: "bold",
-               padding: "9px 22px",
-               display: "inline-block",
-               fontSize: "1.1rem",
-               margin: "8px 0"
-             }}>
-            Buchen
-          </a>
-        </Link>
-        <Link href="/kontakt" legacyBehavior>
-          <a className="mobile-nav-link" style={mobileNavStyle(router.pathname === "/kontakt")}>Kontakt</a>
-        </Link>
+        <Link href="/" style={mobileNavStyle(router.pathname === "/")}>Start</Link><br />
+        <Link href="/valet-parking" style={mobileNavStyle(isValet)}>Valet Parking</Link><br />
+        <Link href="/all-inclusive-parking" style={mobileNavStyle(isAllIn)}>All-Inclusive Parking</Link><br />
+        <Link href={buchenUrl} style={{
+          ...mobileNavStyle(router.pathname === "/buchen"),
+          background: "#fff",
+          color: "#1db954",
+          borderRadius: 7,
+          fontWeight: "bold",
+          padding: "9px 22px",
+          display: "inline-block",
+          fontSize: "1.1rem",
+          margin: "8px 0"
+        }}>Buchen</Link><br />
+        <Link href="/kontakt" style={mobileNavStyle(router.pathname === "/kontakt")}>Kontakt</Link>
       </div>
       {/* Responsive CSS */}
       <style jsx>{`
@@ -129,45 +116,8 @@ export default function Header() {
           .mobile-menu-btn { display: block !important; }
           nav { height: 60px !important; }
           .header-logo-wrapper {
-            width: 140px;
-            max-height: 38px;
-          }
-          .mobile-menu {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            max-width: none;
-            margin: 0;
-            z-index: 9999;
-            background: #1db954;
-            text-align: left;
-            padding: 1.5rem 0 1rem 0;
-            box-shadow: 0 2px 16px #0003;
-          }
-          .mobile-nav-link {
-            display: inline-block;
-            margin-bottom: 14px;
-            text-align: left;
-            width: auto;
-            max-width: 100%;
-            padding: 8px 0 8px 8px;
-            background: transparent;
-            border-radius: 0;
-          }
-          .mobile-nav-link.mobile-nav-buchen {
-            padding: 9px 22px;
-            display: inline-block;
-            background: #fff;
-            color: #1db954 !important;
-            border-radius: 7px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            margin: 8px 0;
-            width: auto;
-          }
-          .mobile-nav-link:last-child {
-            margin-bottom: 0;
+            width: 150px;
+            max-height: 40px;
           }
         }
         @media (min-width: 901px) {
@@ -191,12 +141,15 @@ function navStyle(active) {
   };
 }
 
+// Mobiles Menü: KEIN Unterstrich (borderBottom)!
 function mobileNavStyle(active) {
   return {
     color: active ? "#fff" : "#e9ffe9",
     textDecoration: "none",
     fontWeight: active ? "bold" : "normal",
     fontSize: "1.12rem",
+    padding: "8px 10px",
+    // KEIN borderBottom!
     transition: "color 0.15s",
     letterSpacing: ".5px"
   };
