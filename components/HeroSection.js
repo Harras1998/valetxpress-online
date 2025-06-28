@@ -16,11 +16,11 @@ export default function HeroSection() {
       </div>
       {/* Inhalt */}
       <div className="hero-content">
-        <h1 className="outline-only">
+        <h1 className="with-outline-green">
           Sicher & komfortabel<br />
           am Flughafen München parken
         </h1>
-        <p className="outline-only">
+        <p className="with-outline-white">
           ValetXpress bietet Ihnen erstklassigen Service für sorgenfreies Parken – Fahrzeugübergabe direkt am Terminal und sichere Abstellung.
         </p>
         <a href="/buchen" className="hero-btn">Parkplatz buchen</a>
@@ -75,15 +75,20 @@ export default function HeroSection() {
         }
         .hero-content p {
           font-size: 1.45rem;
-          color: #00FF00;
+          color: #fff;
           margin-bottom: 38px;
           text-shadow: 0 2px 12px rgba(0,0,0,0.13);
           max-width: 600px;
         }
-        .outline-only {
-          color: transparent;
-          -webkit-text-stroke: 2px #fff;
-          text-stroke: 2px #fff;
+        .with-outline-green {
+          color: #1db954;
+          -webkit-text-stroke: 1.5px #fff;
+          text-stroke: 1.5px #fff;
+        }
+        .with-outline-white {
+          color: #fff;
+          -webkit-text-stroke: 1.2px #1db954;
+          text-stroke: 1.2px #1db954;
         }
         .hero-btn {
           display: inline-block;
