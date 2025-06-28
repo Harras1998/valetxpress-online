@@ -29,7 +29,7 @@ export default function Header() {
         alignItems: "center",
         justifyContent: "space-between",
         padding: "0 2vw",
-        height: "75px" // kompakt
+        height: "75px"
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <div className="header-logo-wrapper">
@@ -119,11 +119,11 @@ export default function Header() {
             width: 150px;
             max-height: 40px;
           }
-          .mobile-menu a {
+          .mobile-menu :global(a) {
             display: block;
-            margin: 18px 0; /* Abstand oben/unten zwischen den Menüpunkten */
+            margin: 18px 0;
           }
-          .mobile-menu a:last-child {
+          .mobile-menu :global(a:last-child) {
             margin-bottom: 0;
           }
         }
@@ -148,7 +148,6 @@ function navStyle(active) {
   };
 }
 
-// Mobiles Menü: KEIN Unterstrich (borderBottom)!
 function mobileNavStyle(active) {
   return {
     color: active ? "#fff" : "#e9ffe9",
@@ -156,7 +155,6 @@ function mobileNavStyle(active) {
     fontWeight: active ? "bold" : "normal",
     fontSize: "1.12rem",
     padding: "8px 10px",
-    // KEIN borderBottom!
     transition: "color 0.15s",
     letterSpacing: ".5px"
   };
