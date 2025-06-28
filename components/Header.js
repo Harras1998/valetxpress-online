@@ -119,6 +119,13 @@ export default function Header() {
             width: 150px;
             max-height: 40px;
           }
+          .mobile-menu a {
+            display: block;
+            margin: 18px 0; /* Abstand oben/unten zwischen den Menüpunkten */
+          }
+          .mobile-menu a:last-child {
+            margin-bottom: 0;
+          }
         }
         @media (min-width: 901px) {
           .mobile-menu { display: none !important; }
