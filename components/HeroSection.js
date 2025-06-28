@@ -16,11 +16,11 @@ export default function HeroSection() {
       </div>
       {/* Inhalt */}
       <div className="hero-content">
-        <h1 className="with-outline-green">
+        <h1 className="outline-dark">
           Sicher & komfortabel<br />
           am Flughafen München parken
         </h1>
-        <p className="with-outline-white">
+        <p className="outline-dark">
           ValetXpress bietet Ihnen erstklassigen Service für sorgenfreies Parken – Fahrzeugübergabe direkt am Terminal und sichere Abstellung.
         </p>
         <a href="/buchen" className="hero-btn">Parkplatz buchen</a>
@@ -80,15 +80,10 @@ export default function HeroSection() {
           text-shadow: 0 2px 12px rgba(0,0,0,0.13);
           max-width: 600px;
         }
-        .with-outline-green {
-          color: #1db954;
-          -webkit-text-stroke: 1.5px #fff;
-          text-stroke: 1.5px #fff;
-        }
-        .with-outline-white {
+        .outline-dark {
           color: #fff;
-          -webkit-text-stroke: 1.2px #1db954;
-          text-stroke: 1.2px #1db954;
+          -webkit-text-stroke: 1.7px #183820;
+          text-stroke: 1.7px #183820;
         }
         .hero-btn {
           display: inline-block;
@@ -110,13 +105,13 @@ export default function HeroSection() {
             min-height: 300px;
           }
           .hero-content h1 {
-            font-size: 2.4rem;
+            font-size: 2.4rem; /* jetzt größer */
           }
           .hero-content p {
-            font-size: 1.15rem;
+            font-size: 1.15rem; /* jetzt größer */
           }
           .hero-btn {
-            font-size: 1.23rem;
+            font-size: 1.23rem; /* jetzt größer */
             padding: 16px 30px;
           }
         }
@@ -126,15 +121,15 @@ export default function HeroSection() {
             min-height: 160px;
           }
           .hero-content h1 {
-            font-size: 1.45rem;
+            font-size: 1.45rem;  /* größer als vorher! */
             margin-bottom: 15px;
           }
           .hero-content p {
-            font-size: 1.06rem;
+            font-size: 1.06rem;  /* größer als vorher! */
             margin-bottom: 20px;
           }
           .hero-btn {
-            font-size: 1.11rem;
+            font-size: 1.11rem;  /* größer als vorher! */
             padding: 12px 16px;
             border-radius: 7px;
           }
