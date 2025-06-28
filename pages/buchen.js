@@ -282,7 +282,7 @@ export default function Buchen() {
                   </label>
                 </div>
                 <div style={{marginBottom: 8}}>
-                  <label>Anreise:<br />
+                  <label>Abflugdatum:<br />
                     <input
                       type="date"
                       min={minDate}
@@ -298,7 +298,7 @@ export default function Buchen() {
                   </label>
                 </div>
                 <div>
-                  <label>Abreise:<br />
+                  <label>Rückflugdatum:<br />
                     <input
                       type="date"
                       min={start ? (() => {
@@ -422,6 +422,11 @@ export default function Buchen() {
                 }}
                 onClick={() => {
                   setStep(2);
+                  setForm(f => ({
+                    ...f,
+                    abflug: start,
+                    rueckflug: end,
+                  }));
                   const bookingData = {
                     form,
                     type,
@@ -473,8 +478,8 @@ export default function Buchen() {
               >
                 <div style={{ fontSize: 20, minWidth: 180, flex: 1 }}>
                   <strong>Park-Modell:</strong> {type === "valet" ? "Valet-Parking" : "All-Inclusive‑Parking"}<br />
-                  <strong>Anreise:</strong> {toDE(start)}<br />
-                  <strong>Abreise:</strong> {toDE(end)}<br />
+                  <strong>Abflugdatum:</strong> {toDE(start)}<br />
+                  <strong>Rückflugdatum:</strong> {toDE(end)}<br />
                   <strong>Aufenthaltsdauer:</strong> {days} {days === 1 ? "Tag" : "Tage"}<br />
                   {(type === "valet" || type === "allinclusive") && (addOut || addIn || addTank || addLade) && (
                     <>
@@ -586,10 +591,8 @@ export default function Buchen() {
                   <input
                     name="abflug"
                     type="date"
-                    min={minDate}
-                    value={form.abflug}
-                    onChange={handleForm}
-                    required
+                    value={start}
+                    disabled
                     style={{width:"100%"}}
                   />
                 </label><br /><br />
@@ -602,10 +605,8 @@ export default function Buchen() {
                   <input
                     name="rueckflug"
                     type="date"
-                    min={minDate}
-                    value={form.rueckflug}
-                    onChange={handleForm}
-                    required
+                    value={end}
+                    disabled
                     style={{width:"100%"}}
                   />
                 </label><br /><br />
