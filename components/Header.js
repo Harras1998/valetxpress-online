@@ -87,9 +87,9 @@ export default function Header() {
         padding: "1rem 6vw",
         fontSize: "1.13rem"
       }}>
-        <Link href="/" style={mobileNavStyle(router.pathname === "/")}>Start</Link><br />
-        <Link href="/valet-parking" style={mobileNavStyle(isValet)}>Valet Parking</Link><br />
-        <Link href="/all-inclusive-parking" style={mobileNavStyle(isAllIn)}>All-Inclusive Parking</Link><br />
+        <Link href="/" style={mobileNavStyle(router.pathname === "/")}>Start</Link>
+        <Link href="/valet-parking" style={mobileNavStyle(isValet)}>Valet Parking</Link>
+        <Link href="/all-inclusive-parking" style={mobileNavStyle(isAllIn)}>All-Inclusive Parking</Link>
         <Link href={buchenUrl} style={{
           ...mobileNavStyle(router.pathname === "/buchen"),
           background: "#fff",
@@ -100,7 +100,7 @@ export default function Header() {
           display: "inline-block",
           fontSize: "1.1rem",
           margin: "8px 0"
-        }}>Buchen</Link><br />
+        }}>Buchen</Link>
         <Link href="/kontakt" style={mobileNavStyle(router.pathname === "/kontakt")}>Kontakt</Link>
       </div>
       {/* Responsive CSS */}
