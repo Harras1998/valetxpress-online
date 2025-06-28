@@ -82,11 +82,12 @@ export default function Header() {
       </nav>
       {/* Mobile Menu */}
       <div className="mobile-menu" style={{
-        display: open ? "block" : "none",
+        display: open ? "flex" : "none",
         background: "#1db954",
-        padding: "1rem 0",   // <--- HIER NUR OBEN/UNTEN!
+        padding: "1rem 0",
         fontSize: "1.13rem",
-        textAlign: "left"
+        flexDirection: "column",
+        alignItems: "flex-start"
       }}>
         <Link href="/" legacyBehavior>
           <a className="mobile-nav-link" style={mobileNavStyle(router.pathname === "/")}>Start</a>
@@ -136,14 +137,17 @@ export default function Header() {
           .mobile-menu {
             text-align: left;
             padding: 1rem 0;
+            display: flex !important;
+            flex-direction: column;
+            align-items: flex-start;
           }
           .mobile-nav-link {
-            display: inline-block;
+            display: block;
             margin-bottom: 14px;
             text-align: left;
             width: auto;
             max-width: 100%;
-            padding: 8px 0 8px 0;
+            padding: 8px 14px;
             background: transparent;
             border-radius: 0;
           }
