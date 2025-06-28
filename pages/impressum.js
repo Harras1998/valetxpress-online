@@ -15,7 +15,7 @@ export default function Impressum() {
           Tel: 017661839836<br />
           E-Mail: info@valetxpress.de
         </p>
-        <h2 style={{fontSize: "1.1rem", marginTop: 30, marginBottom: 12}}>Haftungsausschluss</h2>
+        <h2 style={{fontSize: "2rem", fontWeight: "bold", marginBottom: 16}}>Haftungsausschluss</h2>
         <p>Der Besuch auf der Website von ValetXpress unterliegt den Bestimmungen des Allgemeinen Haftungsausschlusses. Die bereitgestellten Onlineinformationen auf unserer Website wurden sorgfältig eingestellt, und werden in regelmäßigen Abständen aktualisiert. Trotzdem kann keine Garantie für Genauigkeit Aktualität bzw. Richtigkeit übernommen werden.</p>
       </main>
       <Footer />
