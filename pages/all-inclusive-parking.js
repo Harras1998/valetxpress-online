@@ -9,16 +9,15 @@ export default function AllInclusive() {
       <main style={{maxWidth: 900, margin: "0 auto", padding: "2.5rem 1rem"}}>
         <div style={{display: "flex", gap: 32, flexWrap: "wrap"}}>
           <div style={{flex: "1 1 340px", minWidth: 280}}>
-            <img src="/images/Flugzeug.jpg" alt="All-Inclusive Service" style={{borderRadius: "1rem", width: "100%", maxHeight: 200, objectFit: "cover"}} />
+            <img src="/images/Auto.png" alt="All-Inclusive Service" style={{borderRadius: "1rem", width: "100%", maxHeight: 200, objectFit: "cover"}} />
           </div>
           <div style={{flex: "2 1 350px", minWidth: 280}}>
             <h1 style={{fontSize: "2rem", fontWeight: "bold", marginBottom: 16}}>All-Inclusive Parking</h1>
             <p>
-              Parken mit allem Komfort: Shuttle, Fahrzeugpflege, Überdachung, Ladestationen und mehr. Ideal für Langzeitparker oder maximale Flexibilität.
+              Parken mit allem Komfort: Fahrzeugpflege, Ladestationen und mehr. Ideal für Langzeitparker oder maximale Flexibilität.
             </p>
             <ul style={{margin: "16px 0 16px 24px", listStyle: "disc"}}>
               <li>Valet-Service inklusive</li>
-              <li>Überdachte Parkplätze (nach Verfügbarkeit)</li>
               <li>Reinigungsservice optional</li>
               <li>E-Ladestation nach Wunsch</li>
               <li>Bestpreis-Garantie</li>
