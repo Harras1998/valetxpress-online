@@ -70,7 +70,7 @@ export default function AllInclusive() {
                   marginBottom: 10,
                 }}>All-Inclusive Parking</h1>
                 <p style={{ color: "#20313a", fontSize: "1.08rem", marginBottom: 16 }}>
-                  Parken mit allem Komfort: Fahrzeugpflege, Ladestationen und mehr. Ideal für Langzeitparker oder maximale Flexibilität.
+                  Parken mit allem Komfort: Fahrzeugpflege und mehr. Ideal für Langzeitparker oder maximale Flexibilität.
                 </p>
                 <ul style={{margin: "16px 0 16px 24px", listStyle: "disc", color: "#20313a", fontSize: "1.04rem" }}>
                   <li>Valet-Service inklusive</li>
