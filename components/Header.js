@@ -84,8 +84,9 @@ export default function Header() {
       <div className="mobile-menu" style={{
         display: open ? "block" : "none",
         background: "#1db954",
-        padding: "1rem 6vw",
-        fontSize: "1.13rem"
+        padding: "1rem 0",   // <--- HIER NUR OBEN/UNTEN!
+        fontSize: "1.13rem",
+        textAlign: "left"
       }}>
         <Link href="/" legacyBehavior>
           <a className="mobile-nav-link" style={mobileNavStyle(router.pathname === "/")}>Start</a>
@@ -129,12 +130,12 @@ export default function Header() {
           .mobile-menu-btn { display: block !important; }
           nav { height: 60px !important; }
           .header-logo-wrapper {
-            width: 140px;
-            max-height: 38px;
+            width: 150px;
+            max-height: 40px;
           }
           .mobile-menu {
             text-align: left;
-            padding: 1rem 6vw;
+            padding: 1rem 0;
           }
           .mobile-nav-link {
             display: inline-block;
