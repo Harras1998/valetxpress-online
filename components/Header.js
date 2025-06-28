@@ -84,7 +84,7 @@ export default function Header() {
       <div className="mobile-menu" style={{
         display: open ? "block" : "none",
         background: "#1db954",
-        padding: "1rem 0", // <- Nur das geändert!
+        padding: "1rem 0 1rem 0", // <--- Jetzt wirklich kein linker/rechter Abstand!
         fontSize: "1.13rem"
       }}>
         <Link href="/" legacyBehavior>
@@ -138,7 +138,7 @@ export default function Header() {
             text-align: left;
             width: auto;
             max-width: 100%;
-            padding: 8px 0 8px 0;
+            padding: 8px 0 8px 20px; /* <-- Nur links etwas Abstand */
             background: transparent;
             border-radius: 0;
           }
