@@ -133,7 +133,8 @@ export default function Header() {
             max-height: 38px;
           }
           .mobile-menu {
-            text-align: left; /* <-- EINZIGE NEUE ZEILE! */
+            text-align: left !important;
+            margin: 0 !important;
           }
           .mobile-nav-link {
             display: inline-block;
@@ -141,7 +142,7 @@ export default function Header() {
             text-align: left;
             width: auto;
             max-width: 100%;
-            padding: 8px 0 8px 0;
+            padding: 8px 0 8px 8px; /* <--- Minimal links Luft */
             background: transparent;
             border-radius: 0;
           }
