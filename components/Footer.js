@@ -9,16 +9,13 @@ export default function Footer() {
           <Link href="/datenschutz" className="footer-link">Datenschutz</Link>
         </div>
       </div>
-      <style jsx>{`
-        .footer-link {
-          color: #fff;
+      <style jsx global>{`
+        .footer-link, .footer-link:visited, .footer-link:active {
+          color: #fff !important;
           text-decoration: underline;
         }
-        .footer-link:visited {
-          color: #fff;
-        }
         .footer-link:hover {
-          color: #a5b4fc;
+          color: #a5b4fc !important;
         }
       `}</style>
     </footer>
