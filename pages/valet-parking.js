@@ -9,7 +9,7 @@ export default function ValetParking() {
       <main style={{maxWidth: 900, margin: "0 auto", padding: "2.5rem 1rem"}}>
         <div style={{display: "flex", gap: 32, flexWrap: "wrap"}}>
           <div style={{flex: "1 1 340px", minWidth: 280}}>
-            <img src="Schlüssel.png" alt="Valet Service" style={{borderRadius: "1rem", width: "100%", maxHeight: 200, objectFit: "cover"}} />
+            <img src="images/Schlüssel.png" alt="Valet Service" style={{borderRadius: "1rem", width: "100%", maxHeight: 200, objectFit: "cover"}} />
           </div>
           <div style={{flex: "2 1 350px", minWidth: 280}}>
             <h1 style={{fontSize: "2rem", fontWeight: "bold", marginBottom: 16}}>Valet Parking</h1>
