@@ -31,14 +31,7 @@ export default function Kontakt() {
           padding: "2.5rem 1rem",
         }}>
           <FadeIn>
-            <section style={{
-              background: "#fff",
-              borderRadius: 24,
-              boxShadow: "0 1px 16px #0002",
-              padding: "2rem",
-              marginBottom: "2.5rem",
-              marginTop: "2rem",
-            }}>
+            <section className="kontakt-section">
               <h1 style={{
                 fontSize: "2rem",
                 fontWeight: 600,
@@ -70,6 +63,7 @@ export default function Kontakt() {
                     borderRadius: "0.7rem",
                     border: "1px solid #d1d5db",
                     fontSize: "1rem",
+                    boxSizing: "border-box",
                   }}
                 />
                 <input
@@ -82,6 +76,7 @@ export default function Kontakt() {
                     borderRadius: "0.7rem",
                     border: "1px solid #d1d5db",
                     fontSize: "1rem",
+                    boxSizing: "border-box",
                   }}
                 />
                 <textarea
@@ -95,6 +90,7 @@ export default function Kontakt() {
                     border: "1px solid #d1d5db",
                     fontSize: "1rem",
                     resize: "vertical",
+                    boxSizing: "border-box",
                   }}
                 />
                 <button
@@ -124,11 +120,19 @@ export default function Kontakt() {
           font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
           background: #f5f7fa;
         }
+        .kontakt-section {
+          background: #fff;
+          border-radius: 24px;
+          box-shadow: 0 1px 16px #0002;
+          padding: 2rem 2.3rem;
+          margin-bottom: 2.5rem;
+          margin-top: 2rem;
+        }
         @media (max-width: 700px) {
           h1 { font-size: 2rem !important; }
           h2 { font-size: 1.2rem !important; }
-          main > div { padding: 1.5rem 4vw; }
-          section { padding: 1.1rem !important; }
+          main > div { padding: 1.5rem 2vw; }
+          .kontakt-section { padding: 1.2rem 0.7rem !important; }
         }
       `}</style>
     </>
