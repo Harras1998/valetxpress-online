@@ -247,15 +247,16 @@ function handleForm(e) {
   return (
     <>
       <Header />
-      <main style={{ minHeight: "80vh", background: "#e5e7eb", padding: "2rem 0" }}>
+
+      <main style={{
+        background: "#f5f7fa",
+        minHeight: "85vh",
+        padding: 0,
+      }}>
         <div style={{
-          maxWidth: 700,
-          margin: "2rem auto",
-          padding: 24,
-          background: "#fff",
-          borderRadius: 24,
-          boxShadow: "0 2px 12px #0002",
-          fontFamily: "system-ui, Arial, sans-serif"
+          maxWidth: 900,
+          margin: "0 auto",
+          padding: "2.5rem 1rem",
         }}>
           {step === 1 && (
             <>
