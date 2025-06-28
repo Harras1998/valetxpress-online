@@ -129,8 +129,12 @@ export default function Header() {
           .mobile-menu-btn { display: block !important; }
           nav { height: 60px !important; }
           .header-logo-wrapper {
-            width: 150px;
-            max-height: 40px;
+            width: 140px;
+            max-height: 38px;
+          }
+          .mobile-menu {
+            text-align: left;
+            padding: 1rem 6vw;
           }
           .mobile-nav-link {
             display: inline-block;
