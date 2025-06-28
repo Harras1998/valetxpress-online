@@ -116,8 +116,8 @@ export default function Header() {
           .mobile-menu-btn { display: block !important; }
           nav { height: 60px !important; }
           .header-logo-wrapper {
-            width: 110px;
-            max-height: 32px;
+            width: 150px;
+            max-height: 40px;
           }
         }
         @media (min-width: 901px) {
