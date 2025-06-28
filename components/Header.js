@@ -87,9 +87,9 @@ export default function Header() {
         padding: "1rem 6vw",
         fontSize: "1.13rem"
       }}>
-        <Link href="/" style={mobileNavStyle(router.pathname === "/")}>Start</Link><br />
-        <Link href="/valet-parking" style={mobileNavStyle(isValet)}>Valet Parking</Link><br />
-        <Link href="/all-inclusive-parking" style={mobileNavStyle(isAllIn)}>All-Inclusive Parking</Link><br />
+        <Link href="/" style={{...mobileNavStyle(router.pathname === "/"), display: "block", margin: "18px 0"}}>Start</Link><br />
+        <Link href="/valet-parking" style={{...mobileNavStyle(isValet), display: "block", margin: "18px 0"}}>Valet Parking</Link><br />
+        <Link href="/all-inclusive-parking" style={{...mobileNavStyle(isAllIn), display: "block", margin: "18px 0"}}>All-Inclusive Parking</Link><br />
         <Link href={buchenUrl} style={{
           ...mobileNavStyle(router.pathname === "/buchen"),
           background: "#fff",
@@ -97,11 +97,11 @@ export default function Header() {
           borderRadius: 7,
           fontWeight: "bold",
           padding: "9px 22px",
-          display: "inline-block",
+          display: "block",
           fontSize: "1.1rem",
-          margin: "8px 0"
+          margin: "18px 0"
         }}>Buchen</Link><br />
-        <Link href="/kontakt" style={mobileNavStyle(router.pathname === "/kontakt")}>Kontakt</Link>
+        <Link href="/kontakt" style={{...mobileNavStyle(router.pathname === "/kontakt"), display: "block", margin: "18px 0"}}>Kontakt</Link>
       </div>
       {/* Responsive CSS */}
       <style jsx>{`
@@ -118,13 +118,6 @@ export default function Header() {
           .header-logo-wrapper {
             width: 150px;
             max-height: 40px;
-          }
-          .mobile-menu :global(a) {
-            display: block;
-            margin: 18px 0;
-          }
-          .mobile-menu :global(a:last-child) {
-            margin-bottom: 0;
           }
         }
         @media (min-width: 901px) {
