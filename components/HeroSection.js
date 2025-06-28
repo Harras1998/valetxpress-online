@@ -16,11 +16,11 @@ export default function HeroSection() {
       </div>
       {/* Inhalt */}
       <div className="hero-content">
-        <h1 className="white-stroke">
+        <h1 className="outline-only">
           Sicher & komfortabel<br />
           am Flughafen München parken
         </h1>
-        <p className="white-stroke">
+        <p className="outline-only">
           ValetXpress bietet Ihnen erstklassigen Service für sorgenfreies Parken – Fahrzeugübergabe direkt am Terminal und sichere Abstellung.
         </p>
         <a href="/buchen" className="hero-btn">Parkplatz buchen</a>
@@ -80,7 +80,8 @@ export default function HeroSection() {
           text-shadow: 0 2px 12px rgba(0,0,0,0.13);
           max-width: 600px;
         }
-        .white-stroke {
+        .outline-only {
+          color: transparent;
           -webkit-text-stroke: 2px #fff;
           text-stroke: 2px #fff;
         }
@@ -104,13 +105,13 @@ export default function HeroSection() {
             min-height: 300px;
           }
           .hero-content h1 {
-            font-size: 2.4rem; /* jetzt größer */
+            font-size: 2.4rem;
           }
           .hero-content p {
-            font-size: 1.15rem; /* jetzt größer */
+            font-size: 1.15rem;
           }
           .hero-btn {
-            font-size: 1.23rem; /* jetzt größer */
+            font-size: 1.23rem;
             padding: 16px 30px;
           }
         }
@@ -120,15 +121,15 @@ export default function HeroSection() {
             min-height: 160px;
           }
           .hero-content h1 {
-            font-size: 1.45rem;  /* größer als vorher! */
+            font-size: 1.45rem;
             margin-bottom: 15px;
           }
           .hero-content p {
-            font-size: 1.06rem;  /* größer als vorher! */
+            font-size: 1.06rem;
             margin-bottom: 20px;
           }
           .hero-btn {
-            font-size: 1.11rem;  /* größer als vorher! */
+            font-size: 1.11rem;
             padding: 12px 16px;
             border-radius: 7px;
           }
