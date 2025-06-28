@@ -84,7 +84,7 @@ export default function Header() {
       <div className="mobile-menu" style={{
         display: open ? "block" : "none",
         background: "#1db954",
-        padding: "1rem 0 1rem 0", // <--- Jetzt wirklich kein linker/rechter Abstand!
+        padding: "1rem 0 1rem 0", // Kein horizontales Padding mehr!
         fontSize: "1.13rem"
       }}>
         <Link href="/" legacyBehavior>
@@ -133,12 +133,12 @@ export default function Header() {
             max-height: 38px;
           }
           .mobile-nav-link {
-            display: inline-block;
+            display: block;
             margin-bottom: 14px;
             text-align: left;
-            width: auto;
+            width: 100%;
             max-width: 100%;
-            padding: 8px 0 8px 20px; /* <-- Nur links etwas Abstand */
+            padding: 8px 0 8px 0; /* Kein extra Padding */
             background: transparent;
             border-radius: 0;
           }
