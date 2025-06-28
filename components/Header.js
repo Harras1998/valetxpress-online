@@ -29,7 +29,7 @@ export default function Header() {
         alignItems: "center",
         justifyContent: "space-between",
         padding: "0 2vw",
-        height: "75px"
+        height: "75px" // kompakt
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <div className="header-logo-wrapper">
@@ -87,9 +87,9 @@ export default function Header() {
         padding: "1rem 6vw",
         fontSize: "1.13rem"
       }}>
-        <Link href="/" style={mobileNavStyle(router.pathname === "/")}>Start</Link>
-        <Link href="/valet-parking" style={mobileNavStyle(isValet)}>Valet Parking</Link>
-        <Link href="/all-inclusive-parking" style={mobileNavStyle(isAllIn)}>All-Inclusive Parking</Link>
+        <Link href="/" style={mobileNavStyle(router.pathname === "/")}>Start</Link><br />
+        <Link href="/valet-parking" style={mobileNavStyle(isValet)}>Valet Parking</Link><br />
+        <Link href="/all-inclusive-parking" style={mobileNavStyle(isAllIn)}>All-Inclusive Parking</Link><br />
         <Link href={buchenUrl} style={{
           ...mobileNavStyle(router.pathname === "/buchen"),
           background: "#fff",
@@ -97,13 +97,14 @@ export default function Header() {
           borderRadius: 7,
           fontWeight: "bold",
           padding: "9px 22px",
+          display: "inline-block",
           fontSize: "1.1rem",
           margin: "8px 0"
-        }}>Buchen</Link>
+        }}>Buchen</Link><br />
         <Link href="/kontakt" style={mobileNavStyle(router.pathname === "/kontakt")}>Kontakt</Link>
       </div>
       {/* Responsive CSS */}
-      <style jsx>{`
+      <style jsx>{
         .header-logo-wrapper {
           width: 210px;
           max-height: 52px;
@@ -118,24 +119,11 @@ export default function Header() {
             width: 150px;
             max-height: 40px;
           }
-          .mobile-menu {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-          }
-          .mobile-menu :global(a) {
-            margin-bottom: 22px;
-            padding-top: 8px;
-            padding-bottom: 8px;
-          }
-          .mobile-menu :global(a:last-child) {
-            margin-bottom: 0;
-          }
         }
         @media (min-width: 901px) {
           .mobile-menu { display: none !important; }
         }
-      `}</style>
+      }</style>
     </header>
   );
 }
@@ -153,6 +141,7 @@ function navStyle(active) {
   };
 }
 
+// Mobiles Menü: KEIN Unterstrich (borderBottom)!
 function mobileNavStyle(active) {
   return {
     color: active ? "#fff" : "#e9ffe9",
@@ -160,6 +149,7 @@ function mobileNavStyle(active) {
     fontWeight: active ? "bold" : "normal",
     fontSize: "1.12rem",
     padding: "8px 10px",
+    // KEIN borderBottom!
     transition: "color 0.15s",
     letterSpacing: ".5px"
   };
