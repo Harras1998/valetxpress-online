@@ -9,7 +9,7 @@ export default function Datenschutz() {
         <h1 style={{fontSize: "2rem", fontWeight: "bold", marginBottom: 16}}>Datenschutz</h1>
         <p>
           Wir nehmen den Schutz Ihrer Daten ernst.<br />
-          Die Details zu unserem Umgang mit personenbezogenen Daten finden Sie hier
+          Sobald Sie unseren Service in Anspruch nehmen, werden Daten erhoben, die wir für unsere Dienstleistung an Sie benötigen, Ihren Namen Adresse etc. Die personenbezogenen Daten (Beispiel Name Anschrift e-Mail IP-Adresse) haben Sie freiwillig bzw. automatisch zur Verfügung gestellt. Der Nutzer hat bei der persönlichen Datenabfrage die Angaben wahrheitsgemäß einzutragen. Wir weisen ausdrücklich darauf hin, dass wegen der Impressumspflicht veröffentlichte Daten nicht zur Übersendung durch Dritte für z. B. Informationsmaterialien bzw. Werbung oder Spam-Mails verwendet werden dürfen. Wir als Betreiber nehmen Ihre persönlichen Daten nur als Bearbeitung des Vorganges und halten uns an die Datenschutzgesetze.
         </p>
       </main>
       <Footer />
