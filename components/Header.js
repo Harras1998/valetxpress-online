@@ -104,7 +104,7 @@ export default function Header() {
         <Link href="/kontakt" style={mobileNavStyle(router.pathname === "/kontakt")}>Kontakt</Link>
       </div>
       {/* Responsive CSS */}
-      <style jsx>{
+      <style jsx>{`
         .header-logo-wrapper {
           width: 210px;
           max-height: 52px;
@@ -123,7 +123,7 @@ export default function Header() {
         @media (min-width: 901px) {
           .mobile-menu { display: none !important; }
         }
-      }</style>
+      `}</style>
     </header>
   );
 }
