@@ -84,7 +84,7 @@ export default function Header() {
       <div className="mobile-menu" style={{
         display: open ? "block" : "none",
         background: "#1db954",
-        padding: "1rem 0 1rem 0", // Kein horizontales Padding mehr!
+        padding: "1rem 0",
         fontSize: "1.13rem"
       }}>
         <Link href="/" legacyBehavior>
@@ -133,12 +133,12 @@ export default function Header() {
             max-height: 38px;
           }
           .mobile-nav-link {
-            display: block;
+            display: inline-block;   /* <--- Das ist der Schlüssel! */
             margin-bottom: 14px;
             text-align: left;
-            width: 100%;
+            width: auto;
             max-width: 100%;
-            padding: 8px 0 8px 0; /* Kein extra Padding */
+            padding: 8px 0 8px 0;   /* Kein padding-left, kein 100% */
             background: transparent;
             border-radius: 0;
           }
