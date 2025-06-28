@@ -12,7 +12,6 @@ export default function Footer() {
       <style jsx global>{`
         .footer-link, .footer-link:visited, .footer-link:active {
           color: #fff !important;
-          text-decoration: underline;
         }
         .footer-link:hover {
           color: #a5b4fc !important;
