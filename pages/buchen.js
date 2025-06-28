@@ -36,7 +36,6 @@ export default function Buchen() {
   const [addLade, setAddLade] = useState(false);
   const [step, setStep] = useState(1);
 
-
   // Persönliche Daten
   const [form, setForm] = useState({
     vorname: "",
@@ -63,50 +62,51 @@ export default function Buchen() {
     agb: false,
     datenschutz: false,
   });
-function syncAllBookingState() {
-  if (typeof window !== "undefined") {
-    const booking = localStorage.getItem("valet_booking");
-    if (booking) {
-      const b = JSON.parse(booking);
-      setForm(b.form || {
-        vorname: "",
-        nachname: "",
-        strasse: "",
-        plz: "",
-        ort: "",
-        email: "",
-        telefon: "",
-        auto: "",
-        kennzeichen: "",
-        abflug: "",
-        abflugUhrzeit: "",
-        ankunftUhrzeit: "",
-        rueckflug: "",
-        rueckflugUhrzeit: "",
-        reiseziel: "",
-        fluggesellschaft: "",
-        flugnummerHin: "",
-        flugnummerRueck: "",
-        terminal: "",
-        handgepaeck: false,
-        bemerkung: "",
-        agb: false,
-        datenschutz: false,
-      });
-      setType(b.type || "valet");
-      setStart(b.start || todayStr());
-      setEnd(b.end || "");
-      setDays(b.days || 0);
-      setPrice(b.price || 0);  // <- neu!
-      setAddOut(!!b.addOut);
-      setAddIn(!!b.addIn);
-      setAddTank(!!b.addTank);
-      setAddLade(!!b.addLade);
+
+  function syncAllBookingState() {
+    if (typeof window !== "undefined") {
+      const booking = localStorage.getItem("valet_booking");
+      if (booking) {
+        const b = JSON.parse(booking);
+        setForm(b.form || {
+          vorname: "",
+          nachname: "",
+          strasse: "",
+          plz: "",
+          ort: "",
+          email: "",
+          telefon: "",
+          auto: "",
+          kennzeichen: "",
+          abflug: "",
+          abflugUhrzeit: "",
+          ankunftUhrzeit: "",
+          rueckflug: "",
+          rueckflugUhrzeit: "",
+          reiseziel: "",
+          fluggesellschaft: "",
+          flugnummerHin: "",
+          flugnummerRueck: "",
+          terminal: "",
+          handgepaeck: false,
+          bemerkung: "",
+          agb: false,
+          datenschutz: false,
+        });
+        setType(b.type || "valet");
+        setStart(b.start || todayStr());
+        setEnd(b.end || "");
+        setDays(b.days || 0);
+        setPrice(b.price || 0);  // <- neu!
+        setAddOut(!!b.addOut);
+        setAddIn(!!b.addIn);
+        setAddTank(!!b.addTank);
+        setAddLade(!!b.addLade);
+      }
     }
   }
-}
 
-    useEffect(() => {
+  useEffect(() => {
     if (typeof window !== "undefined") {
       const booking = localStorage.getItem("valet_booking");
       if (booking) {
@@ -154,7 +154,6 @@ function syncAllBookingState() {
     }
   }, []);
 
-  // Vorauswahl nach Query-Parameter beim ersten Laden
   useEffect(() => {
     if (!router.isReady) return;
     const qType = router.query.type;
@@ -201,53 +200,55 @@ function syncAllBookingState() {
   }, [type]);
 
   useEffect(() => {
-  if (step === 2) {
-    syncAllBookingState();
+    if (step === 2) {
+      syncAllBookingState();
+    }
+  }, [step]);
+
+  function handleForm(e) {
+    const { name, value, type, checked } = e.target;
+    setForm({ 
+      ...form, 
+      [name]: type === "checkbox" ? checked : value 
+    });
   }
-}, [step]);
-
-function handleForm(e) {
-  const { name, value, type, checked } = e.target;
-  setForm({ 
-    ...form, 
-    [name]: type === "checkbox" ? checked : value 
-  });
-}
-
 
   function handleBookingSubmit(e) {
-  e.preventDefault();
+    e.preventDefault();
 
-  // Buchungsdaten in einer Variablen speichern
-  const bookingData = {
-    form,
-    type,
-    start,
-    end,
-    days,
-    price,
-    addOut,
-    addIn,
-    addTank,
-    addLade,
-  };
+    // Buchungsdaten in einer Variablen speichern
+    const bookingData = {
+      form,
+      type,
+      start,
+      end,
+      days,
+      price,
+      addOut,
+      addIn,
+      addTank,
+      addLade,
+    };
 
-  // In localStorage speichern (damit wir sie auf der nächsten Seite abrufen können)
-  if (typeof window !== "undefined") {
-    localStorage.setItem("valet_booking", JSON.stringify(bookingData));
+    // In localStorage speichern (damit wir sie auf der nächsten Seite abrufen können)
+    if (typeof window !== "undefined") {
+      localStorage.setItem("valet_booking", JSON.stringify(bookingData));
+    }
+
+    // Zur Zahlungsseite weiterleiten
+    router.push("/zahlung");
   }
-
-  // Zur Zahlungsseite weiterleiten
-  router.push("/zahlung");
-}
-
 
   const minDate = todayStr();
 
   return (
     <>
       <Header />
-      <main style={{ minHeight: "80vh", background: "#e5e7eb", padding: "2rem 0" }}>
+      <main style={{
+        background: "#f5f7fa",
+        minHeight: "85vh",
+        padding: 0,
+      }}>
         <div style={{
           maxWidth: 700,
           margin: "2rem auto",
@@ -376,18 +377,18 @@ function handleForm(e) {
               {(type === "valet" || type === "allinclusive") && days > 0 && (
                 <>
                   <div
-                style={{
-                  background: "#e1fbe9",
-                  border: "1px solid #1db95444",
-                  borderRadius: 12,
-                  padding: "18px 18px 10px 18px",
-                  marginBottom: 20,
-                  fontWeight: "bold",
-                  fontSize: "1.25rem"
-                }}>
-                Fahrzeugübernahme bei Abflug am Flughafenterminal <br /><br />
-                Fahrzeugübergabe bei Rückflug am Flughafenterminal
-              </div>
+                    style={{
+                      background: "#e1fbe9",
+                      border: "1px solid #1db95444",
+                      borderRadius: 12,
+                      padding: "18px 18px 10px 18px",
+                      marginBottom: 20,
+                      fontWeight: "bold",
+                      fontSize: "1.25rem"
+                    }}>
+                    Fahrzeugübernahme bei Abflug am Flughafenterminal <br /><br />
+                    Fahrzeugübergabe bei Rückflug am Flughafenterminal
+                  </div>
 
                   <div style={{
                     background: "#e1fbe9",
@@ -420,23 +421,23 @@ function handleForm(e) {
                   marginTop: 0
                 }}
                 onClick={() => {
-               setStep(2);
-  const bookingData = {
-    form,
-    type,
-    start,
-    end,
-    days,
-    price,
-    addOut,
-    addIn,
-    addTank,
-    addLade,
-  };
-  if (typeof window !== "undefined") {
-    localStorage.setItem("valet_booking", JSON.stringify(bookingData));
-  }
-}}
+                  setStep(2);
+                  const bookingData = {
+                    form,
+                    type,
+                    start,
+                    end,
+                    days,
+                    price,
+                    addOut,
+                    addIn,
+                    addTank,
+                    addLade,
+                  };
+                  if (typeof window !== "undefined") {
+                    localStorage.setItem("valet_booking", JSON.stringify(bookingData));
+                  }
+                }}
               >
                 Jetzt buchen
               </button>
@@ -457,48 +458,47 @@ function handleForm(e) {
               </h2>
 
               {/* Box 1: Zusammenfassung */}
-            <div
-  style={{
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    background: "#e1fbe9",
-    border: "1px solid #1db95444",
-    borderRadius: 12,
-    padding: 18,
-    marginBottom: 20,
-    flexWrap: "wrap"
-  }}
->
-  <div style={{ fontSize: 20, minWidth: 180, flex: 1 }}>
-    <strong>Park-Modell:</strong> {type === "valet" ? "Valet-Parking" : "All-Inclusive‑Parking"}<br />
-    <strong>Anreise:</strong> {toDE(start)}<br />
-    <strong>Abreise:</strong> {toDE(end)}<br />
-    <strong>Aufenthaltsdauer:</strong> {days} {days === 1 ? "Tag" : "Tage"}<br />
-    {/* Zusatzleistungen */}
-    {(type === "valet" || type === "allinclusive") && (addOut || addIn || addTank || addLade) && (
-      <>
-        <strong>Gebuchte Zusatzleistungen:</strong>
-        <ul style={{ margin: "6px 0 0 18px", fontSize: 18, listStyle: "disc" }}>
-          {addOut && <li>Außenreinigung</li>}
-          {addIn && <li>Innenreinigung</li>}
-          {addTank && <li>Tankservice</li>}
-          {addLade && <li>Ladeservice für Elektrofahrzeuge exkl. Stromkosten</li>}
-        </ul>
-      </>
-    )}
-  </div>
-  <div style={{
-    minWidth: 120,
-    textAlign: "right",
-    fontSize: 38,
-    color: "#1db954",
-    fontWeight: "bold",
-    flex: 0.7
-  }}>
-    {price} €
-  </div>
-</div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  background: "#e1fbe9",
+                  border: "1px solid #1db95444",
+                  borderRadius: 12,
+                  padding: 18,
+                  marginBottom: 20,
+                  flexWrap: "wrap"
+                }}
+              >
+                <div style={{ fontSize: 20, minWidth: 180, flex: 1 }}>
+                  <strong>Park-Modell:</strong> {type === "valet" ? "Valet-Parking" : "All-Inclusive‑Parking"}<br />
+                  <strong>Anreise:</strong> {toDE(start)}<br />
+                  <strong>Abreise:</strong> {toDE(end)}<br />
+                  <strong>Aufenthaltsdauer:</strong> {days} {days === 1 ? "Tag" : "Tage"}<br />
+                  {(type === "valet" || type === "allinclusive") && (addOut || addIn || addTank || addLade) && (
+                    <>
+                      <strong>Gebuchte Zusatzleistungen:</strong>
+                      <ul style={{ margin: "6px 0 0 18px", fontSize: 18, listStyle: "disc" }}>
+                        {addOut && <li>Außenreinigung</li>}
+                        {addIn && <li>Innenreinigung</li>}
+                        {addTank && <li>Tankservice</li>}
+                        {addLade && <li>Ladeservice für Elektrofahrzeuge exkl. Stromkosten</li>}
+                      </ul>
+                    </>
+                  )}
+                </div>
+                <div style={{
+                  minWidth: 120,
+                  textAlign: "right",
+                  fontSize: 38,
+                  color: "#1db954",
+                  fontWeight: "bold",
+                  flex: 0.7
+                }}>
+                  {price} €
+                </div>
+              </div>
 
               {/* Box 2: Terminal Hinweise */}
               <div
@@ -690,23 +690,23 @@ function handleForm(e) {
                 <button
                   type="button"
                   onClick={() => {
-        setStep(1);
-  const bookingData = {
-    form,
-    type,
-    start,
-    end,
-    days,
-    price,
-    addOut,
-    addIn,
-    addTank,
-    addLade,
-  };
-  if (typeof window !== "undefined") {
-    localStorage.setItem("valet_booking", JSON.stringify(bookingData));
-  }
-}}
+                    setStep(1);
+                    const bookingData = {
+                      form,
+                      type,
+                      start,
+                      end,
+                      days,
+                      price,
+                      addOut,
+                      addIn,
+                      addTank,
+                      addLade,
+                    };
+                    if (typeof window !== "undefined") {
+                      localStorage.setItem("valet_booking", JSON.stringify(bookingData));
+                    }
+                  }}
                   style={{
                     width: "100%",
                     padding: 8,
@@ -725,6 +725,18 @@ function handleForm(e) {
         </div>
       </main>
       <Footer />
+      <style jsx global>{`
+        html, body {
+          font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+          background: #f5f7fa;
+        }
+        @media (max-width: 700px) {
+          h1 { font-size: 2rem !important; }
+          h2 { font-size: 1.2rem !important; }
+          main > div { padding: 1.5rem 4vw; }
+          section { padding: 1.1rem !important; }
+        }
+      `}</style>
     </>
   );
 }
