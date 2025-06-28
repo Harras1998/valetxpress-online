@@ -133,7 +133,7 @@ export default function Header() {
             max-height: 38px;
           }
           .mobile-menu {
-            text-align: left;    /* <--- Das macht sie linksbündig */
+            text-align: left !important;
           }
           .mobile-nav-link {
             display: inline-block;
