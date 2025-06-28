@@ -74,7 +74,7 @@ export default function AllInclusive() {
                 </p>
                 <ul style={{margin: "16px 0 16px 24px", listStyle: "disc", color: "#20313a", fontSize: "1.04rem" }}>
                   <li>Valet-Service inklusive</li>
-                  <li>Reinigungsservice optional</li>
+                  <li>Reinigungsservice inklusive</li>
                   <li>E-Ladestation nach Wunsch</li>
                   <li>Bestpreis-Garantie</li>
                 </ul>
