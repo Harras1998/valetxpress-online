@@ -129,12 +129,19 @@ export default function Header() {
           .mobile-menu-btn { display: block !important; }
           nav { height: 60px !important; }
           .header-logo-wrapper {
-            width: 140px;
-            max-height: 38px;
+            width: 150px;
+            max-height: 40px;
           }
           .mobile-menu {
-            text-align: left !important;
-            margin: 0 !important;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            z-index: 9999;
+            background: #1db954;
+            text-align: left;
+            padding: 1.5rem 0 1rem 0;
+            box-shadow: 0 2px 16px #0003;
           }
           .mobile-nav-link {
             display: inline-block;
@@ -142,7 +149,7 @@ export default function Header() {
             text-align: left;
             width: auto;
             max-width: 100%;
-            padding: 8px 0 8px 8px; /* <--- Minimal links Luft */
+            padding: 8px 0 8px 8px;
             background: transparent;
             border-radius: 0;
           }
