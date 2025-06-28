@@ -9,7 +9,7 @@ export default function Datenschutz() {
         <h1 style={{fontSize: "2rem", fontWeight: "bold", marginBottom: 16}}>Datenschutz</h1>
         <p>
           Wir nehmen den Schutz Ihrer Daten ernst.<br />
-          Die Details zu unserem Umgang mit personenbezogenen Daten finden Sie hier … (bitte nach DSGVO-Vorgaben ergänzen)
+          Die Details zu unserem Umgang mit personenbezogenen Daten finden Sie hier
         </p>
       </main>
       <Footer />
