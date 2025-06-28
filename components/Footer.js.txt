@@ -5,22 +5,10 @@ export default function Footer() {
       <div className="container mx-auto flex justify-between items-center px-6">
         <span>© {new Date().getFullYear()} ValetXpress – Parken am Flughafen München</span>
         <div className="flex gap-4">
-          <Link href="/impressum" className="footer-link">Impressum</Link>
-          <Link href="/datenschutz" className="footer-link">Datenschutz</Link>
+          <Link href="/impressum">Impressum</Link>
+          <Link href="/datenschutz">Datenschutz</Link>
         </div>
       </div>
-      <style jsx>{`
-        .footer-link {
-          color: #fff;
-          text-decoration: underline;
-        }
-        .footer-link:visited {
-          color: #fff;
-        }
-        .footer-link:hover {
-          color: #a5b4fc;
-        }
-      `}</style>
     </footer>
   );
 }
