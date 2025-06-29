@@ -1,16 +1,38 @@
-import mysql from 'mysql2/promise';
+// index.js (bzw. eigener admin-Route auf deinem Node-Backend!)
+// Dieser Code gehört NICHT in Vercel, sondern in dein Backend auf IONOS!
 
-export default async function handler(req, res) {
-  console.log("DB_HOST:", process.env.DB_HOST);
-  console.log("DB_USER:", process.env.DB_USER);
-  console.log("DB_NAME:", process.env.DB_NAME);
-const connection = await mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME,
-  });
+require("dotenv").config();
+const express = require("express");
+const mysql = require("mysql2");
+const cors = require("cors");
 
+const app = express();
+const PORT = process.env.PORT || 4000;
+
+// --- DB-Verbindung ---
+const db = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT || 3306,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
+
+// --- Middleware ---
+app.use(cors({
+  origin: [
+    "https://valetxpress.de",
+    "https://www.valetxpress.de"
+  ],
+  credentials: true
+}));
+app.use(express.json());
+
+// --- ADMIN API ENDPOINT: Buchungen verwalten ---
+app.all("/api/admin/buchungen", async (req, res) => {
   // Authentifizierung: HTTP Basic Auth (sehr simpel)
   const auth = req.headers.authorization || "";
   const [type, encoded] = auth.split(" ");
@@ -18,7 +40,6 @@ const connection = await mysql.createConnection({
   const [user, pass] = decoded.split(":");
   if (user !== process.env.ADMIN_USER || pass !== process.env.ADMIN_PASS) {
     res.setHeader('WWW-Authenticate', 'Basic realm="Admin"');
-    await connection.end();
     return res.status(401).end("Unauthorized");
   }
 
@@ -42,17 +63,23 @@ const connection = await mysql.createConnection({
       query += " WHERE kennzeichen LIKE ?";
       params.push("%" + search + "%");
     }
-    query +=  ORDER BY ${safeSort} ${dir};
-    const [rows] = await connection.query(query, params);
-    await connection.end();
-    res.status(200).json({ buchungen: rows });
+    query += ` ORDER BY ${safeSort} ${dir}`;
+    db.query(query, params, (err, results) => {
+      if (err) return res.status(500).json({ error: "DB-Fehler", details: err });
+      res.status(200).json({ buchungen: results });
+    });
   } else if (req.method === "DELETE") {
     const { id } = req.body;
-    await connection.query("DELETE FROM bookings WHERE id = ?", [id]);
-    await connection.end();
-    res.status(200).json({ success: true });
+    db.query("DELETE FROM bookings WHERE id = ?", [id], (err, result) => {
+      if (err) return res.status(500).json({ error: "DB-Fehler", details: err });
+      res.status(200).json({ success: true });
+    });
   } else {
-    await connection.end();
     res.status(405).end();
   }
-}
+});
+
+// --- Server starten ---
+app.listen(PORT, "0.0.0.0", () => {
+  console.log("API läuft auf Port " + PORT);
+});
