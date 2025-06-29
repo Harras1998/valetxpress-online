@@ -23,6 +23,52 @@ function todayStr() {
   return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
 }
 
+// Helper für 2-stellige Anzeige
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+
+// --- NEU: Uhrzeit Select Komponente
+function UhrzeitSelect({ value, onChange, name, required = false }) {
+  // value ist "HH:MM" oder leer
+  let [h, m] = value ? value.split(":") : ["08", "00"];
+  if (!h) h = "08";
+  if (!m) m = "00";
+  return (
+    <span style={{ display: "flex", gap: 8, alignItems: "center" }}>
+      <select
+        value={h}
+        onChange={e => {
+          onChange({ target: { name, value: `${e.target.value}:${m}` } });
+        }}
+        required={required}
+        style={{ fontSize: "1rem", padding: "3px 4px", borderRadius: 4 }}
+      >
+        {[...Array(24).keys()].map(hh => (
+          <option key={hh} value={pad2(hh)}>
+            {pad2(hh)}
+          </option>
+        ))}
+      </select>
+      :
+      <select
+        value={m}
+        onChange={e => {
+          onChange({ target: { name, value: `${h}:${e.target.value}` } });
+        }}
+        required={required}
+        style={{ fontSize: "1rem", padding: "3px 4px", borderRadius: 4 }}
+      >
+        {[0,5,10,15,20,25,30,35,40,45,50,55].map(mm => (
+          <option key={mm} value={pad2(mm)}>
+            {pad2(mm)}
+          </option>
+        ))}
+      </select>
+    </span>
+  );
+}
+
 export default function Buchen() {
   const router = useRouter();
   const [type, setType] = useState("valet");
@@ -592,7 +638,7 @@ export default function Buchen() {
                 </label><br /><br />
 
                 <label>Ankunft Uhrzeit am Flughafen*:<br />
-                  <input name="ankunftUhrzeit" type="time" value={form.ankunftUhrzeit} onChange={handleForm} required step="300" style={{width:"100%"}} />
+                  <input name="ankunftUhrzeit" type="time" value={form.ankunftUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
 
                 <label>Abflugdatum*: <br />
@@ -606,7 +652,7 @@ export default function Buchen() {
                 </label><br /><br />
 
                 <label>Abflug-Uhrzeit*: <br />
-                  <input name="abflugUhrzeit" type="time" value={form.abflugUhrzeit} onChange={handleForm} required step="300" style={{width:"100%"}} />
+                  <input name="abflugUhrzeit" type="time" value={form.abflugUhrzeit} onChange={handleForm} required  style={{width:"100%"}} />
                 </label><br /><br />
 
                 <label>Rückflugdatum*: <br />
@@ -620,7 +666,7 @@ export default function Buchen() {
                 </label><br /><br />
 
                 <label>Rückflug-Uhrzeit*: <br />
-                  <input name="rueckflugUhrzeit" type="time" value={form.rueckflugUhrzeit} onChange={handleForm} required step="300" style={{width:"100%"}} />
+                  <input name="rueckflugUhrzeit" type="time" value={form.rueckflugUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
 
                 <label>Reiseziel*:<br />
