@@ -42,7 +42,7 @@ const connection = await mysql.createConnection({
       query += " WHERE kennzeichen LIKE ?";
       params.push("%" + search + "%");
     }
-    query += ` ORDER BY ${safeSort} ${dir}`;
+    query +=  ORDER BY ${safeSort} ${dir};
     const [rows] = await connection.query(query, params);
     await connection.end();
     res.status(200).json({ buchungen: rows });
