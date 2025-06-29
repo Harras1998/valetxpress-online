@@ -137,7 +137,7 @@ export default function Zahlung() {
             <div style={{ margin: "8px 0" }}>
               <b>Park-Modell:</b> {type === "valet" ? "Valet-Parking" : "All-Inclusive‑Parking"}<br />
               <b>Name:</b> {form.vorname} {form.nachname}<br />
-              <b>Abflugdatum:</b> {toDE(start)}, <b>Rückflugdatum:</b> {toDE(end)}<br />
+              <b>Abflugdatum:</b> {toDE(form.abflugdatum || start)}, <b>Rückflugdatum:</b> {toDE(form.rueckflugdatum || end)}<br />
               <b>Aufenthaltsdauer:</b> {days} {days === 1 ? "Tag" : "Tage"}<br />
               {form.auto && (<><b>Fahrzeug:</b> {form.auto}, Kennzeichen: {form.kennzeichen}<br /></>)}
               <b>Gesamtpreis:</b> <span style={{ color: "#1db954", fontWeight: "bold", fontSize: 22 }}>{price} €</span><br />
