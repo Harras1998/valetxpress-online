@@ -47,10 +47,10 @@ export default function Buchen() {
     telefon: "",
     auto: "",
     kennzeichen: "",
-    abflug: "",
+    abflugdatum: "",
     abflugUhrzeit: "",
     ankunftUhrzeit: "",
-    rueckflug: "",
+    rueckflugdatum: "",
     rueckflugUhrzeit: "",
     reiseziel: "",
     fluggesellschaft: "",
@@ -78,10 +78,10 @@ export default function Buchen() {
           telefon: "",
           auto: "",
           kennzeichen: "",
-          abflug: "",
+          abflugdatum: "",
           abflugUhrzeit: "",
           ankunftUhrzeit: "",
-          rueckflug: "",
+          rueckflugdatum: "",
           rueckflugUhrzeit: "",
           reiseziel: "",
           fluggesellschaft: "",
@@ -121,10 +121,10 @@ export default function Buchen() {
           telefon: "",
           auto: "",
           kennzeichen: "",
-          abflug: "",
+          abflugdatum: "",
           abflugUhrzeit: "",
           ankunftUhrzeit: "",
-          rueckflug: "",
+          rueckflugdatum: "",
           rueckflugUhrzeit: "",
           reiseziel: "",
           fluggesellschaft: "",
@@ -218,7 +218,11 @@ export default function Buchen() {
 
     // Buchungsdaten in einer Variablen speichern
     const bookingData = {
-      form,
+      form: {
+      ...form,
+      abflugdatum: start,
+      rueckflugdatum: end,
+      },
       type,
       start,
       end,
@@ -424,11 +428,15 @@ export default function Buchen() {
                   setStep(2);
                   setForm(f => ({
                     ...f,
-                    abflug: start,
-                    rueckflug: end,
+                    abflugdatum: start,
+                    rueckflugdatum: end,
                   }));
                   const bookingData = {
-                    form,
+                    form: {
+                    ...form,
+                    abflugdatum: start,
+                    ruekflugdatum: end,
+                    },
                     type,
                     start,
                     end,
@@ -589,7 +597,7 @@ export default function Buchen() {
 
                 <label>Abflugdatum*: <br />
                   <input
-                    name="abflug"
+                    name="abflugdatum"
                     type="date"
                     value={start}
                     disabled
@@ -603,7 +611,7 @@ export default function Buchen() {
 
                 <label>Rückflugdatum*: <br />
                   <input
-                    name="rueckflug"
+                    name="rueckflugdatum"
                     type="date"
                     value={end}
                     disabled
@@ -693,7 +701,11 @@ export default function Buchen() {
                   onClick={() => {
                     setStep(1);
                     const bookingData = {
-                      form,
+                      form: {
+                    ...form,
+                    abflugdatum: start,
+                    ruekflugdatum: end,
+                    },
                       type,
                       start,
                       end,
