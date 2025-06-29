@@ -592,7 +592,7 @@ export default function Buchen() {
                 </label><br /><br />
 
                 <label>Ankunft Uhrzeit am Flughafen*:<br />
-                  <input name="ankunftUhrzeit" type="time" value={form.ankunftUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
+                  <input name="ankunftUhrzeit" type="time" value={form.ankunftUhrzeit} onChange={handleForm} required step="300" style={{width:"100%"}} />
                 </label><br /><br />
 
                 <label>Abflugdatum*: <br />
@@ -606,7 +606,7 @@ export default function Buchen() {
                 </label><br /><br />
 
                 <label>Abflug-Uhrzeit*: <br />
-                  <input name="abflugUhrzeit" type="time" value={form.abflugUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
+                  <input name="abflugUhrzeit" type="time" value={form.abflugUhrzeit} onChange={handleForm} required step="300" style={{width:"100%"}} />
                 </label><br /><br />
 
                 <label>Rückflugdatum*: <br />
@@ -620,7 +620,7 @@ export default function Buchen() {
                 </label><br /><br />
 
                 <label>Rückflug-Uhrzeit*: <br />
-                  <input name="rueckflugUhrzeit" type="time" value={form.rueckflugUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
+                  <input name="rueckflugUhrzeit" type="time" value={form.rueckflugUhrzeit} onChange={handleForm} required step="300" style={{width:"100%"}} />
                 </label><br /><br />
 
                 <label>Reiseziel*:<br />
