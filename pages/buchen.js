@@ -435,7 +435,7 @@ export default function Buchen() {
                     form: {
                     ...form,
                     abflugdatum: start,
-                    ruekflugdatum: end,
+                    rueckflugdatum: end,
                     },
                     type,
                     start,
@@ -704,7 +704,7 @@ export default function Buchen() {
                       form: {
                     ...form,
                     abflugdatum: start,
-                    ruekflugdatum: end,
+                    rueckflugdatum: end,
                     },
                       type,
                       start,
