@@ -749,7 +749,7 @@ export default function Buchen() {
           main > div { padding: 1.5rem 4vw; }
           section { padding: 1.1rem !important; }
         }
-      }</style>
+      `}</style>
     </>
   );
 }
