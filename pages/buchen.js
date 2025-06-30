@@ -23,6 +23,34 @@ function todayStr() {
   return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
 }
 
+// <---- HIER TimeSelect einfügen ---->
+function TimeSelect({ value, onChange, name, required = false }) {
+  // value ist z.B. "08:00"
+  return (
+    <select
+      name={name}
+      value={value}
+      onChange={onChange}
+      required={required}
+      style={{ width: "100%", fontSize: "1rem", padding: "4px", borderRadius: 4 }}
+    >
+      <option value="">--:--</option>
+      {Array.from({ length: 24 }, (_, h) =>
+        Array.from({ length: 12 }, (_, m) => {
+          const hh = String(h).padStart(2, "0");
+          const mm = String(m * 5).padStart(2, "0");
+          const time = `${hh}:${mm}`;
+          return (
+            <option key={time} value={time}>
+              {time}
+            </option>
+          );
+        })
+      ).flat()}
+    </select>
+  );
+}
+
 export default function Buchen() {
   const router = useRouter();
   const [type, setType] = useState("valet");
@@ -215,16 +243,6 @@ export default function Buchen() {
 
   function handleBookingSubmit(e) {
     e.preventDefault();
-
-  // Prüfen, ob Minuten ein Vielfaches von 5 sind
-  const timeFields = ["ankunftUhrzeit", "abflugUhrzeit", "rueckflugUhrzeit"];
-  for (const field of timeFields) {
-    const t = form[field];
-    if (t && (parseInt(t.split(":")[1], 10) % 5 !== 0)) {
-      alert("Bitte Uhrzeiten nur in 5-Minuten-Schritten auswählen!");
-      return; // Verhindert das Abschicken, wenn ein Wert falsch ist
-    }
-  }
 
     // Buchungsdaten in einer Variablen speichern
     const bookingData = {
@@ -602,7 +620,7 @@ export default function Buchen() {
                 </label><br /><br />
 
                 <label>Ankunft Uhrzeit am Flughafen*:<br />
-                  <input name="ankunftUhrzeit" type="time" value={form.ankunftUhrzeit} onChange={handleForm} required step="300" style={{width:"100%"}} />
+                  <TimeSelect name="ankunftUhrzeit" type="time" value={form.ankunftUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
 
                 <label>Abflugdatum*: <br />
@@ -616,7 +634,7 @@ export default function Buchen() {
                 </label><br /><br />
 
                 <label>Abflug-Uhrzeit*: <br />
-                  <input name="abflugUhrzeit" type="time" value={form.abflugUhrzeit} onChange={handleForm} required step="300" style={{width:"100%"}} />
+                  <TimeSelect name="abflugUhrzeit" type="time" value={form.abflugUhrzeit} onChange={handleForm} required  style={{width:"100%"}} />
                 </label><br /><br />
 
                 <label>Rückflugdatum*: <br />
@@ -630,7 +648,7 @@ export default function Buchen() {
                 </label><br /><br />
 
                 <label>Rückflug-Uhrzeit*: <br />
-                  <input name="rueckflugUhrzeit" type="time" value={form.rueckflugUhrzeit} onChange={handleForm} required step="300" style={{width:"100%"}} />
+                  <TimeSelect name="rueckflugUhrzeit" type="time" value={form.rueckflugUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
 
                 <label>Reiseziel*:<br />
