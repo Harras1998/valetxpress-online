@@ -620,7 +620,7 @@ export default function Buchen() {
                   <input name="email" type="email" value={form.email} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
 
-                <label>Mobilnummer*: <br />
+                <label>Mobilfunk Nr./Telefon Nr.*: <br />
                   <input name="telefon" type="tel" value={form.telefon} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
 
@@ -628,11 +628,11 @@ export default function Buchen() {
                   <input name="auto" value={form.auto} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
 
-                <label>Kennzeichen*: <br />
+                <label>KFZ-Kennzeichen*: <br />
                   <input name="kennzeichen" value={form.kennzeichen} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
 
-                <label>Ankunft Uhrzeit am Flughafen*:<br />
+                <label>Ankunft Uhrzeit am Flughafen (geplante Ankunft am Treffpunkt vor Abflug)*:<br />
                   <HourMinuteSelect name="ankunftUhrzeit" type="time" value={form.ankunftUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
 
@@ -660,7 +660,7 @@ export default function Buchen() {
                   />
                 </label><br /><br />
 
-                <label>Rückflug-Uhrzeit*: <br />
+                <label>Rückflug-Uhrzeit (planmäßige Landung)*: <br />
                   <HourMinuteSelect name="rueckflugUhrzeit" type="time" value={form.rueckflugUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
 
