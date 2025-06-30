@@ -33,6 +33,7 @@ export default function Admin() {
         return res.json();
       })
       .then(data => {
+console.log("Daten vom Proxy:", data); // <--- HIER!
 console.log("Daten aus Backend:", data.buchungen);        
 setBuchungen(data.buchungen);
         setLoading(false);
