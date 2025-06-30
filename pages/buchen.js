@@ -7,7 +7,7 @@ import Footer from "../components/Footer";
 function toDE(dateStr) {
   if (!dateStr) return "";
   const [y, m, d] = dateStr.split("-");
-  return ${d}.${m}.${y};
+  return ${d}.${m}.${y}`;
 }
 
 const valetPrices = [95,97,99,110,116,117,119,120,126,128,131,136,139,143,148,149,150,154,157,161,166];
