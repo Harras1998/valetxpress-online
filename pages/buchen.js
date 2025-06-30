@@ -722,6 +722,17 @@ export default function Buchen() {
                   Ich akzeptiere die <a href="/datenschutz" target="_blank">Datenschutzbestimmungen</a>*
                 </label><br /><br />
 
+{/* HIER Pflichtfeld-Hinweis einfügen */}
+<p style={{
+  color: "#888",
+  fontSize: "0.95rem",
+  marginBottom: 14,
+  marginTop: -8,
+  textAlign: "right"
+}}>
+  *Pflichtfelder
+</p>
+
                 <button
                   type="submit"
                   style={{
