@@ -723,15 +723,17 @@ export default function Buchen() {
                 </label><br /><br />
 
 {/* HIER Pflichtfeld-Hinweis einfügen */}
-<p style={{
-  color: "#888",
-  fontSize: "0.95rem",
+<div style={{
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-start",
   marginBottom: 14,
-  marginTop: -8,
-  textAlign: "right"
+  marginTop: -8
 }}>
-  *Pflichtfelder
-</p>
+  <span style={{ color: "#888", fontSize: "0.97rem", lineHeight: 1 }}>
+    *Pflichtfelder
+  </span>
+</div>
 
                 <button
                   type="submit"
