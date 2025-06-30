@@ -23,33 +23,46 @@ function todayStr() {
   return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
 }
 
-// <---- HIER TimeSelect einfügen ---->
-function TimeSelect({ value, onChange, name, required = false }) {
-  // value ist z.B. "08:00"
+// ----------- HIER NEU: ----------
+function HourMinuteSelect({ value, onChange, name, required = false }) {
+  let [h, m] = value ? value.split(":") : ["", ""];
+  h = h || "";
+  m = m || "";
+
+  function handleHourChange(e) {
+    const newH = e.target.value;
+    const newVal = newH && m ? `${newH}:${m}` : newH ? `${newH}:00` : "";
+    onChange({ target: { name, value: newVal } });
+  }
+  function handleMinuteChange(e) {
+    const newM = e.target.value;
+    const newVal = h && newM ? `${h}:${newM}` : "";
+    onChange({ target: { name, value: newVal } });
+  }
+
   return (
-    <select
-      name={name}
-      value={value}
-      onChange={onChange}
-      required={required}
-      style={{ width: "100%", fontSize: "1rem", padding: "4px", borderRadius: 4 }}
-    >
-      <option value="">--:--</option>
-      {Array.from({ length: 24 }, (_, h) =>
-        Array.from({ length: 12 }, (_, m) => {
-          const hh = String(h).padStart(2, "0");
-          const mm = String(m * 5).padStart(2, "0");
-          const time = `${hh}:${mm}`;
-          return (
-            <option key={time} value={time}>
-              {time}
-            </option>
-          );
-        })
-      ).flat()}
-    </select>
+    <div style={{ display: "flex", gap: 6 }}>
+      <select value={h} onChange={handleHourChange} required={required} style={{ flex: 1 }}>
+        <option value="">--</option>
+        {Array.from({ length: 24 }, (_, i) => (
+          <option key={i} value={String(i).padStart(2, "0")}>
+            {String(i).padStart(2, "0")}
+          </option>
+        ))}
+      </select>
+      <span>:</span>
+      <select value={m} onChange={handleMinuteChange} required={required} style={{ flex: 1 }}>
+        <option value="">--</option>
+        {Array.from({ length: 12 }, (_, i) => (
+          <option key={i} value={String(i * 5).padStart(2, "0")}>
+            {String(i * 5).padStart(2, "0")}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 }
+// ----------- NEU ENDE -----------
 
 export default function Buchen() {
   const router = useRouter();
@@ -620,7 +633,7 @@ export default function Buchen() {
                 </label><br /><br />
 
                 <label>Ankunft Uhrzeit am Flughafen*:<br />
-                  <TimeSelect name="ankunftUhrzeit" type="time" value={form.ankunftUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
+                  <HourMinuteSelect name="ankunftUhrzeit" type="time" value={form.ankunftUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
 
                 <label>Abflugdatum*: <br />
@@ -634,7 +647,7 @@ export default function Buchen() {
                 </label><br /><br />
 
                 <label>Abflug-Uhrzeit*: <br />
-                  <TimeSelect name="abflugUhrzeit" type="time" value={form.abflugUhrzeit} onChange={handleForm} required  style={{width:"100%"}} />
+                  <HourMinuteSelect name="abflugUhrzeit" type="time" value={form.abflugUhrzeit} onChange={handleForm} required  style={{width:"100%"}} />
                 </label><br /><br />
 
                 <label>Rückflugdatum*: <br />
@@ -648,7 +661,7 @@ export default function Buchen() {
                 </label><br /><br />
 
                 <label>Rückflug-Uhrzeit*: <br />
-                  <TimeSelect name="rueckflugUhrzeit" type="time" value={form.rueckflugUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
+                  <HourMinuteSelect name="rueckflugUhrzeit" type="time" value={form.rueckflugUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
 
                 <label>Reiseziel*:<br />
