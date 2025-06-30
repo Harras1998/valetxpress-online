@@ -216,6 +216,16 @@ export default function Buchen() {
   function handleBookingSubmit(e) {
     e.preventDefault();
 
+  // Prüfen, ob Minuten ein Vielfaches von 5 sind
+  const timeFields = ["ankunftUhrzeit", "abflugUhrzeit", "rueckflugUhrzeit"];
+  for (const field of timeFields) {
+    const t = form[field];
+    if (t && (parseInt(t.split(":")[1], 10) % 5 !== 0)) {
+      alert("Bitte Uhrzeiten nur in 5-Minuten-Schritten auswählen!");
+      return; // Verhindert das Abschicken, wenn ein Wert falsch ist
+    }
+  }
+
     // Buchungsdaten in einer Variablen speichern
     const bookingData = {
       form: {
