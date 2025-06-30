@@ -33,7 +33,8 @@ export default function Admin() {
         return res.json();
       })
       .then(data => {
-        setBuchungen(data.buchungen);
+console.log("Daten aus Backend:", data.buchungen);        
+setBuchungen(data.buchungen);
         setLoading(false);
       })
       .catch(e => { setError(e.message); setLoading(false); });
