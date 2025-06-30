@@ -632,7 +632,7 @@ export default function Buchen() {
                   <input name="kennzeichen" value={form.kennzeichen} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
 
-                <label>Ankunft Uhrzeit am Flughafen (geplante Ankunft am Treffpunkt vor Abflug)*:<br />
+                <label>Geplante Ankunftszeit am Treffpunkt(Flughafen) vor Abflug*:<br />
                   <HourMinuteSelect name="ankunftUhrzeit" type="time" value={form.ankunftUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
 
