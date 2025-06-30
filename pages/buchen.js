@@ -7,7 +7,7 @@ import Footer from "../components/Footer";
 function toDE(dateStr) {
   if (!dateStr) return "";
   const [y, m, d] = dateStr.split("-");
-  return `${d}.${m}.${y}`;
+  return ${d}.${m}.${y};
 }
 
 const valetPrices = [95,97,99,110,116,117,119,120,126,128,131,136,139,143,148,149,150,154,157,161,166];
@@ -20,53 +20,7 @@ function getValet(priceList, days) {
 
 function todayStr() {
   const t = new Date();
-  return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
-}
-
-// Helper für 2-stellige Anzeige
-function pad2(n) {
-  return String(n).padStart(2, "0");
-}
-
-// --- NEU: Uhrzeit Select Komponente
-function UhrzeitSelect({ value, onChange, name, required = false }) {
-  // value ist "HH:MM" oder leer
-  let [h, m] = value ? value.split(":") : ["08", "00"];
-  if (!h) h = "08";
-  if (!m) m = "00";
-  return (
-    <span style={{ display: "flex", gap: 8, alignItems: "center" }}>
-      <select
-        value={h}
-        onChange={e => {
-          onChange({ target: { name, value: `${e.target.value}:${m}` } });
-        }}
-        required={required}
-        style={{ fontSize: "1rem", padding: "3px 4px", borderRadius: 4 }}
-      >
-        {[...Array(24).keys()].map(hh => (
-          <option key={hh} value={pad2(hh)}>
-            {pad2(hh)}
-          </option>
-        ))}
-      </select>
-      :
-      <select
-        value={m}
-        onChange={e => {
-          onChange({ target: { name, value: `${h}:${e.target.value}` } });
-        }}
-        required={required}
-        style={{ fontSize: "1rem", padding: "3px 4px", borderRadius: 4 }}
-      >
-        {[0,5,10,15,20,25,30,35,40,45,50,55].map(mm => (
-          <option key={mm} value={pad2(mm)}>
-            {pad2(mm)}
-          </option>
-        ))}
-      </select>
-    </span>
-  );
+  return ${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")};
 }
 
 export default function Buchen() {
@@ -638,7 +592,7 @@ export default function Buchen() {
                 </label><br /><br />
 
                 <label>Ankunft Uhrzeit am Flughafen*:<br />
-                  <UhrzeitSelect name="ankunftUhrzeit" value={form.ankunftUhrzeit} onChange={handleForm} required />
+                  <input name="ankunftUhrzeit" type="time" value={form.ankunftUhrzeit} onChange={handleForm} required step="300" style={{width:"100%"}} />
                 </label><br /><br />
 
                 <label>Abflugdatum*: <br />
@@ -652,7 +606,7 @@ export default function Buchen() {
                 </label><br /><br />
 
                 <label>Abflug-Uhrzeit*: <br />
-                  <UhrzeitSelect name="abflugUhrzeit" value={form.abflugUhrzeit} onChange={handleForm} required />
+                  <input name="abflugUhrzeit" type="time" value={form.abflugUhrzeit} onChange={handleForm} required step="300" style={{width:"100%"}} />
                 </label><br /><br />
 
                 <label>Rückflugdatum*: <br />
@@ -666,7 +620,7 @@ export default function Buchen() {
                 </label><br /><br />
 
                 <label>Rückflug-Uhrzeit*: <br />
-                  <UhrzeitSelect name="rueckflugUhrzeit" value={form.rueckflugUhrzeit} onChange={handleForm} required />
+                  <input name="rueckflugUhrzeit" type="time" value={form.rueckflugUhrzeit} onChange={handleForm} required step="300" style={{width:"100%"}} />
                 </label><br /><br />
 
                 <label>Reiseziel*:<br />
@@ -784,7 +738,7 @@ export default function Buchen() {
         </div>
       </main>
       <Footer />
-      <style jsx global>{`
+      <style jsx global>{
         html, body {
           font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
           background: #f5f7fa;
@@ -795,7 +749,7 @@ export default function Buchen() {
           main > div { padding: 1.5rem 4vw; }
           section { padding: 1.1rem !important; }
         }
-      `}</style>
+      }</style>
     </>
   );
 }
