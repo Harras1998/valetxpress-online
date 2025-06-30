@@ -261,7 +261,7 @@ export default function Zahlung() {
               padding: 28,
               textAlign: "center"
             }}>
-              <img src="/images/green-check.png" alt="" width={54} height={54} style={{ marginBottom: 18 }} />
+              <img src="/images/Check.png" alt="" width={54} height={54} style={{ marginBottom: 18 }} />
               <h3 style={{ color: "#1db954" }}>Vielen Dank für Ihre Buchung!</h3>
               <div style={{ marginTop: 10, fontSize: 18 }}>Sie erhalten in Kürze eine Buchungsbestätigung per E-Mail.</div>
               <div style={{ marginTop: 18 }}><a href="/" style={{ color: "#1db954", fontWeight: 600 }}>Zurück zur Startseite</a></div>
