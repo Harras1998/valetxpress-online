@@ -49,8 +49,8 @@ app.all("/api/admin/buchungen", async (req, res) => {
   const dir = req.query.dir === "desc" ? "DESC" : "ASC";
   const allowedSort = [
     "id","vorname","nachname","email","telefon","auto","kennzeichen",
-    "strasse","plz","ort","abflug","ankunftUhrzeit","abflugUhrzeit",
-    "rueckflug","rueckflugUhrzeit","reiseziel","fluggesellschaft",
+    "strasse","plz","ort","abflugdatum","ankunftUhrzeit","abflugUhrzeit",
+    "rueckflugdatum","rueckflugUhrzeit","reiseziel","fluggesellschaft",
     "flugnummerHin","flugnummerRueck","terminal","handgepaeck","bemerkung",
     "typ","start","end","tage","preis","addOut","addIn","addTank","addLade","bezahlt","erstellt"
   ];

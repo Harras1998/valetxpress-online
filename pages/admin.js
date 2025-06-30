@@ -7,7 +7,7 @@ function formatDate(d) {
 
 const FIELDS = [
   "id","vorname","nachname","strasse","plz","ort","email","telefon",
-  "auto","kennzeichen","abflug","abflugUhrzeit","ankunftUhrzeit","rueckflug","rueckflugUhrzeit","reiseziel",
+  "auto","kennzeichen","abflugdatum","abflugUhrzeit","ankunftUhrzeit","rueckflugdatum","rueckflugUhrzeit","reiseziel",
   "fluggesellschaft","flugnummerHin","flugnummerRueck","terminal","handgepaeck","bemerkung",
   "typ","start","end","tage","preis","addOut","addIn","addTank","addLade","bezahlt","erstellt"
 ];
