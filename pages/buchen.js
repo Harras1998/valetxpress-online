@@ -738,7 +738,7 @@ export default function Buchen() {
         </div>
       </main>
       <Footer />
-      <style jsx global>{
+      <style jsx global>{`
         html, body {
           font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
           background: #f5f7fa;
