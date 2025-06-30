@@ -7,13 +7,14 @@ export default async function handler(req, res) {
   // Welche Route soll angesprochen werden? (z.B. /api/buchung)
   const path = req.query.path || ""; // Übergib in der Anfrage: /api/proxy?path=api/buchung
 
-  // Anfrage-Optionen anpassen (Methode, Header, Body)
+  // Header übernehmen – authorization explizit weitergeben
+  const { authorization, ...headers } = req.headers;
+
   const options = {
     method: req.method,
     headers: {
-      ...req.headers,
-      // Host-Header NICHT weiterleiten
-      host: undefined
+      ...headers,
+      ...(authorization ? { authorization } : {})
     },
     body: ["POST", "PUT", "PATCH"].includes(req.method)
       ? JSON.stringify(req.body)
@@ -21,13 +22,13 @@ export default async function handler(req, res) {
   };
 
   try {
-    // Hole die Antwort vom Backend
+    // Antwort vom Backend holen
     const apiRes = await fetch(`${backendUrl}/${path}`, options);
-
-    // Setze Status und Header (optional anpassen)
     res.status(apiRes.status);
 
-    // Übernehme die Antwort vom Backend
+    // Alle Backend-Header (optional, z.B. für Auth)
+    // Object.entries(apiRes.headers.raw()).forEach(([key, value]) => res.setHeader(key, value));
+
     const data = await apiRes.text();
     res.send(data);
   } catch (err) {
