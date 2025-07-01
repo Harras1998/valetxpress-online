@@ -213,7 +213,7 @@ export default function Buchen() {
     if (!start || !end || new Date(end) <= new Date(start)) {
       setDays(0); setPrice(0); return;
     }
-    const d = Math.ceil((new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24));
+    const d = Math.ceil((new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24)) + 1;
     setDays(d);
   }, [start, end]);
 
