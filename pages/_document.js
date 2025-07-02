@@ -4,7 +4,7 @@ export default function Document() {
   return (
     <Html lang="de">
       <Head>
-        <link rel="icon" href="/Favicon.png" />
+        <link rel="icon" href="/favicon.png" />
       </Head>
       <body>
         <Main />
