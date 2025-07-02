@@ -77,6 +77,10 @@ export default function Buchen() {
   const [addLade, setAddLade] = useState(false);
   const [step, setStep] = useState(1);
 
+  // Fehler-States für Datumseingabe
+  const [dateError, setDateError] = useState("");
+  const [returnDateError, setReturnDateError] = useState("");
+
   // Persönliche Daten
   const [form, setForm] = useState({
     vorname: "",
@@ -284,6 +288,36 @@ export default function Buchen() {
     router.push("/zahlung");
   }
 
+  // Fehlergeprüfte Handler für Datumfelder:
+  function handleStartChange(e) {
+    const val = e.target.value;
+    const min = todayStr();
+    if (new Date(val) < new Date(min)) {
+      setStart(min);
+      setDateError("Das Abflugdatum darf nicht in der Vergangenheit liegen.");
+      setTimeout(() => setDateError(""), 3500);
+    } else {
+      setStart(val);
+      setDateError("");
+    }
+  }
+
+  function handleEndChange(e) {
+    const val = e.target.value;
+    if (new Date(val) <= new Date(start)) {
+      // Setze Enddatum auf den nächstmöglichen Tag nach Start
+      const next = new Date(start);
+      next.setDate(next.getDate() + 1);
+      const safe = next.toISOString().split("T")[0];
+      setEnd(safe);
+      setReturnDateError("Das Rückflugdatum muss nach dem Abflugdatum liegen.");
+      setTimeout(() => setReturnDateError(""), 3500);
+    } else {
+      setEnd(val);
+      setReturnDateError("");
+    }
+  }
+
   const minDate = todayStr();
 
   return (
@@ -326,22 +360,29 @@ export default function Buchen() {
                     </select>
                   </label>
                 </div>
+                {/* ABFLUGDATUM mit Fehleranzeige */}
                 <div style={{marginBottom: 8}}>
                   <label>Abflugdatum:<br />
                     <input
                       type="date"
                       min={minDate}
                       value={start}
-                      onChange={e => setStart(e.target.value)}
+                      onChange={handleStartChange}
                       style={{
                         fontSize: "1rem",
                         borderRadius: 4,
-                        border: "1px solid #bbb",
+                        border: dateError ? "2px solid #e53935" : "1px solid #bbb",
                         padding: "2px 7px"
                       }}
                     />
                   </label>
+                  {dateError && (
+                    <div style={{color: "#e53935", fontSize: "0.97rem", marginTop: 4}}>
+                      {dateError}
+                    </div>
+                  )}
                 </div>
+                {/* RUECKFLUGDATUM mit Fehleranzeige */}
                 <div>
                   <label>Rückflugdatum:<br />
                     <input
@@ -352,15 +393,20 @@ export default function Buchen() {
                         return next.toISOString().split("T")[0];
                       })() : minDate}
                       value={end}
-                      onChange={e => setEnd(e.target.value)}
+                      onChange={handleEndChange}
                       style={{
                         fontSize: "1rem",
                         borderRadius: 4,
-                        border: "1px solid #bbb",
+                        border: returnDateError ? "2px solid #e53935" : "1px solid #bbb",
                         padding: "2px 7px"
                       }}
                     />
                   </label>
+                  {returnDateError && (
+                    <div style={{color: "#e53935", fontSize: "0.97rem", marginTop: 4}}>
+                      {returnDateError}
+                    </div>
+                  )}
                 </div>
               </div>
 
