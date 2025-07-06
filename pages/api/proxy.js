@@ -5,7 +5,13 @@ export default async function handler(req, res) {
   const backendUrl = "http://217.154.220.163:4000";
 
   // Welche Route soll angesprochen werden? (z.B. /api/buchung)
-  const path = req.query.path || ""; // Übergib in der Anfrage: /api/proxy?path=api/buchung
+  // Query-Parameter (außer "path") werden korrekt übergeben!
+  const { path, ...query } = req.query;
+  const queryString = Object.entries(query)
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    .join("&");
+
+  const url = `${backendUrl}/${path}${queryString ? `?${queryString}` : ""}`;
 
   // Header übernehmen – authorization explizit weitergeben
   const { authorization, ...headers } = req.headers;
@@ -21,11 +27,11 @@ export default async function handler(req, res) {
       : undefined,
   };
 
-console.log("Proxy-Request:", backendUrl, path, options); // <--- LOGGEN!
+  console.log("Proxy-Request:", url, options); // <--- LOGGEN!
 
   try {
     // Antwort vom Backend holen
-    const apiRes = await fetch(`${backendUrl}/${path}`, options);
+    const apiRes = await fetch(url, options);
     res.status(apiRes.status);
 
     // Alle Backend-Header (optional, z.B. für Auth)
@@ -35,7 +41,7 @@ console.log("Proxy-Request:", backendUrl, path, options); // <--- LOGGEN!
     console.log("Proxy-Response:", data); // <--- LOGGEN!
     res.send(data);
   } catch (err) {
-    console.error("Proxy-Fehler:", err); // <--- LOGGEN!    
+    console.error("Proxy-Fehler:", err); // <--- LOGGEN!
     res.status(500).json({ error: "Proxy-Fehler", details: err.message });
   }
 }
