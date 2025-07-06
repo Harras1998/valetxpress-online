@@ -25,7 +25,7 @@ export default function Admin() {
   // Fetch Buchungen
   function fetchBuchungen(benutzerAuth = auth) {
     setLoading(true);
-    fetch(`/api/admin/buchungen?suchtext=${encodeURIComponent(suchtext)}&sort=${sort}&dir=${dir}`, {
+    fetch(`/api/proxy?path=api/admin/buchungen&suchtext=${encodeURIComponent(suchtext)}&sort=${sort}&dir=${dir}`, {
       headers: { Authorization: `Basic ${benutzerAuth}` }
     })
       .then(async res => {
@@ -33,9 +33,9 @@ export default function Admin() {
         return res.json();
       })
       .then(data => {
-console.log("Daten vom Proxy:", data); // <--- HIER!
-console.log("Daten aus Backend:", data.buchungen);        
-setBuchungen(data.buchungen);
+        console.log("Daten vom Proxy:", data); // <--- HIER!
+        console.log("Daten aus Backend:", data.buchungen);
+        setBuchungen(data.buchungen);
         setLoading(false);
       })
       .catch(e => { setError(e.message); setLoading(false); });
