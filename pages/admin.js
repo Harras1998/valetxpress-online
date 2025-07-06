@@ -58,7 +58,7 @@ export default function Admin() {
   // Delete
   async function handleDelete(id) {
     if (!window.confirm("Wirklich löschen?")) return;
-    await fetch("/api/admin/buchungen", {
+    await fetch(`/api/proxy?path=api/admin/buchungen`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` },
       body: JSON.stringify({ id }),
