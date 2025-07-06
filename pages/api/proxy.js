@@ -22,7 +22,7 @@ export default async function handler(req, res) {
       ...headers,
       ...(authorization ? { authorization } : {})
     },
-    body: ["POST", "PUT", "PATCH"].includes(req.method)
+    body: ["POST", "PUT", "PATCH", "DELETE"].includes(req.method)    // <--- HIER!
       ? JSON.stringify(req.body)
       : undefined,
   };
