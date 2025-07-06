@@ -21,6 +21,8 @@ export default async function handler(req, res) {
       : undefined,
   };
 
+console.log("Proxy-Request:", backendUrl, path, options); // <--- LOGGEN!
+
   try {
     // Antwort vom Backend holen
     const apiRes = await fetch(`${backendUrl}/${path}`, options);
@@ -30,8 +32,10 @@ export default async function handler(req, res) {
     // Object.entries(apiRes.headers.raw()).forEach(([key, value]) => res.setHeader(key, value));
 
     const data = await apiRes.text();
+    console.log("Proxy-Response:", data); // <--- LOGGEN!
     res.send(data);
   } catch (err) {
+    console.error("Proxy-Fehler:", err); // <--- LOGGEN!    
     res.status(500).json({ error: "Proxy-Fehler", details: err.message });
   }
 }
