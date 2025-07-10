@@ -4,20 +4,6 @@ export default async function handler(req, res) {
   // URL deines Backends (ohne / am Ende!)
   const backendUrl = "http://217.154.220.163:4000";
 
-  // Damit funktionieren auch POST/PUT/PATCH/DELETE im lokalen Next.js-API-Router korrekt!
-  if (req.method !== "GET") {
-    let data = '';
-    await new Promise(resolve => {
-      req.on('data', chunk => { data += chunk; });
-      req.on('end', resolve);
-    });
-    try {
-      req.body = JSON.parse(data || '{}');
-    } catch (e) {
-      req.body = {};
-    }
-  }
-
   // Welche Route soll angesprochen werden? (z.B. /api/buchung)
   // Query-Parameter (außer "path") werden korrekt übergeben!
   const { path, ...query } = req.query;
@@ -34,10 +20,9 @@ export default async function handler(req, res) {
     method: req.method,
     headers: {
       ...headers,
-      ...(authorization ? { authorization } : {}),
-      ...(req.method !== "GET" ? { "Content-Type": "application/json" } : {}),
+      ...(authorization ? { authorization } : {})
     },
-    body: req.method !== "GET"
+    body: ["POST", "PUT", "PATCH", "DELETE"].includes(req.method)    // <--- HIER!
       ? JSON.stringify(req.body)
       : undefined,
   };
