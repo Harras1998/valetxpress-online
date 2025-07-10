@@ -90,7 +90,7 @@ export default function FahrerListe() {
   function priceDisplay(row) {
     let val = row.betrag || row.preis;
     if (!val) return "";
-    if (typeof val === "string") val = val.replace(",", "."); // für Kommazahlen
+    if (typeof val === "string") val = val.replace(",", ".");
     return `${parseFloat(val).toFixed(0)} €`;
   }
 
@@ -161,19 +161,22 @@ export default function FahrerListe() {
             }}
           >
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: "bold", fontSize: 20, marginBottom: 2 }}>
-                {row.abflugUhrzeit} | {row.terminal} | {row.status || "geplant"} | <b>{row.typ === "valet" ? "Valet" : "All Inclusive"}</b> | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
-                <a href={`tel:${row.telefon}`} style={{ color: "#0277FF", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
+              {/* Überschrift */}
+              <div style={{ fontWeight: "bold", fontSize: 22, marginBottom: 2 }}>
+                {row.abflugUhrzeit} | {row.terminal} | {row.status || "geplant"} | {row.typ} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
+                <a href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
               </div>
-              <div style={{ fontSize: 15, margin: "3px 0" }}>
+              {/* Abflugdatum & Notizen */}
+              <div style={{ fontSize: 17, margin: "3px 0", color: "#444" }}>
                 <b>{formatDE(row.abflugdatum)}</b> {row.abflugUhrzeit} {row.flugnummerHin} | <b>Notizen:</b> {row.bemerkung}
               </div>
-              <div style={{ fontSize: 15, margin: "3px 0", color: "#008000", display: "flex", alignItems: "center" }}>
-                <span style={{ fontWeight: "bold", color: "#222" }}>{row.kennzeichen}</span>
-                <span style={{ marginLeft: 18, color: "red", fontWeight: "bold" }}>{priceDisplay(row)}</span>
-              </div>
-              <div style={{ fontSize: 15, color: "#008000" }}>
-                {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
+              {/* Rückflug-Info | Kennzeichen | Preis */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 17, marginTop: 2 }}>
+                <span style={{ color: "#16b000", fontWeight: 600 }}>
+                  {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
+                </span>
+                <span style={{ fontWeight: "bold", color: "#111", marginLeft: 12 }}>{row.kennzeichen}</span>
+                <span style={{ color: "red", fontWeight: "bold", marginLeft: 12 }}>{priceDisplay(row)}</span>
               </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 18, alignItems: "flex-end" }}>
