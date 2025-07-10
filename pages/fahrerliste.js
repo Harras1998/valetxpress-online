@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
 
 function parseDate(dt, time) {
-  // Hilfsfunktion: kombiniere Datum+Uhrzeit (z.B. 2025-07-10 + 17:00)
   if (!dt) return new Date(0);
   return new Date(`${dt}T${(time || "00:00")}:00`);
 }
-
-function euro(val) {
-  if (!val) return "";
-  if (typeof val === "number") return val.toFixed(2) + " €";
-  if (typeof val === "string") return val.replace('.', ',') + " €";
-  return val + " €";
+function formatDE(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  const tag = d.getDate().toString().padStart(2, '0');
+  const monat = (d.getMonth() + 1).toString().padStart(2, '0');
+  const jahr = d.getFullYear();
+  return `${tag}.${monat}.${jahr}`;
 }
 
 export default function FahrerListe() {
@@ -21,8 +22,6 @@ export default function FahrerListe() {
   const [suchtext, setSuchtext] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [editId, setEditId] = useState(null);
-  const [editData, setEditData] = useState({});
 
   // Login
   function handleLogin(e) {
@@ -67,7 +66,6 @@ export default function FahrerListe() {
       (b.flugnummerRueck || "").toLowerCase().includes(search)
     );
   }
-  // Sortieren nach Abflug- und Rückflugdatum/-zeit
   filtered = [...filtered].sort((a, b) => {
     const a1 = parseDate(a.abflugdatum, a.abflugUhrzeit);
     const b1 = parseDate(b.abflugdatum, b.abflugUhrzeit);
@@ -103,7 +101,6 @@ export default function FahrerListe() {
 
   return (
     <div style={{ maxWidth: 900, margin: "1rem auto", fontFamily: "Arial" }}>
-      {/* Tabs/Filter */}
       <div style={{ display: "flex", gap: 12, marginBottom: 14 }}>
         {["heute", "2tage", "alle"].map(t => (
           <button
@@ -130,13 +127,11 @@ export default function FahrerListe() {
         />
       </div>
 
-      {/* Debug-Bereich */}
       <div style={{padding:12, color:"#777", fontSize:14}}>
         {loading ? "Lade Daten..." : ""}
         <b> Anzahl Fahrten: {filtered.length}</b>
       </div>
 
-      {/* Fahrerliste */}
       <div>
         {filtered.length === 0 && (
           <div style={{margin:30, color:'#888', fontSize:20}}>Keine Fahrten gefunden.</div>
@@ -146,36 +141,37 @@ export default function FahrerListe() {
             key={row.id}
             style={{
               marginBottom: 16,
-              borderRadius: 8,
+              borderRadius: 12,
               background: cardColor(row),
               padding: "16px 22px",
               boxShadow: "0 2px 8px #0001",
               border: "1px solid #ccc",
               display: "flex",
               alignItems: "flex-start",
-              gap: 12,
-              fontSize: "16px"
+              gap: 15,
+              fontSize: "17px"
             }}
           >
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: "bold", fontSize: 18, marginBottom: 2 }}>
-                {row.abflugUhrzeit} | {row.terminal} | {row.status || "geplant"} | {row.auto} | {row.vorname} {row.nachname} | {row.reiseziel} | <a href={`tel:${row.telefon}`} style={{ color: "#0277FF" }}>{row.telefon}</a>
+              <div style={{ fontWeight: "bold", fontSize: 20, marginBottom: 2 }}>
+                {row.abflugUhrzeit} | {row.terminal} | {row.status || "geplant"} | <b>{row.typ === "valet" ? "Valet" : "All Inclusive"}</b> | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
+                <a href={`tel:${row.telefon}`} style={{ color: "#0277FF", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
               </div>
               <div style={{ fontSize: 15, margin: "3px 0" }}>
-                <b>{row.abflugdatum}</b> {row.abflugUhrzeit} {row.flugnummerHin} | <b>Notizen:</b> {row.bemerkung}
+                <b>{formatDE(row.abflugdatum)}</b> {row.abflugUhrzeit} {row.flugnummerHin} | <b>Notizen:</b> {row.bemerkung}
               </div>
               <div style={{ fontSize: 15, margin: "3px 0", color: "#008000" }}>
-                {row.rueckflugdatum} {row.rueckflugUhrzeit} {row.flugnummerRueck} | <span style={{ color: "red", fontWeight: "bold" }}>{row.betrag ? euro(row.betrag) : row.preis ? euro(row.preis) : ""}</span>
+                {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck} | <span style={{ color: "red", fontWeight: "bold" }}>{row.betrag ? row.betrag + ",00 €" : row.preis ? row.preis + ",00 €" : ""}</span>
               </div>
               <div style={{ fontSize: 16, marginTop: 2 }}>
                 {row.kennzeichen && <b>{row.kennzeichen}</b>}
               </div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <button style={{ background: "none", border: "none", fontSize: 23, cursor: "pointer" }} title="Bearbeiten">✏️</button>
-              <button style={{ background: "none", border: "none", fontSize: 23, cursor: "pointer" }} title="Status">✔️</button>
+            <div style={{ display: "flex", flexDirection: "column", gap: 18, alignItems: "flex-end" }}>
+              <button style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer" }} title="Bearbeiten">✏️</button>
+              <button style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "purple" }} title="Status">✔️</button>
               <a href={`tel:${row.telefon}`}>
-                <button style={{ background: "none", border: "none", fontSize: 23, cursor: "pointer" }} title="Anrufen">📞</button>
+                <button style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "crimson" }} title="Anrufen">📞</button>
               </a>
             </div>
           </div>
