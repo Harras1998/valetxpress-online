@@ -4,12 +4,13 @@ export default async function handler(req, res) {
   // URL deines Backends (ohne / am Ende!)
   const backendUrl = "http://217.154.220.163:4000";
 
-  // Next.js übergibt bei DELETE den Body NICHT automatisch!
-  // Damit funktionieren auch POST/PUT/PATCH im lokalen Next.js-API-Router immer korrekt!
+  // Damit funktionieren auch POST/PUT/PATCH/DELETE im lokalen Next.js-API-Router korrekt!
   if (req.method !== "GET") {
     let data = '';
-    req.on('data', chunk => { data += chunk; });
-    await new Promise(resolve => req.on('end', resolve));
+    await new Promise(resolve => {
+      req.on('data', chunk => { data += chunk; });
+      req.on('end', resolve);
+    });
     try {
       req.body = JSON.parse(data || '{}');
     } catch (e) {
@@ -35,7 +36,7 @@ export default async function handler(req, res) {
       ...headers,
       ...(authorization ? { authorization } : {})
     },
-    body: ["POST", "PUT", "PATCH", "DELETE"].includes(req.method)
+    body: req.method !== "GET"
       ? JSON.stringify(req.body)
       : undefined,
   };
