@@ -4,6 +4,18 @@ export default async function handler(req, res) {
   // URL deines Backends (ohne / am Ende!)
   const backendUrl = "http://217.154.220.163:4000";
 
+  // Next.js übergibt bei DELETE den Body NICHT automatisch!
+  if (req.method === "DELETE") {
+    let data = '';
+    req.on('data', chunk => { data += chunk; });
+    await new Promise(resolve => req.on('end', resolve));
+    try {
+      req.body = JSON.parse(data || '{}');
+    } catch (e) {
+      req.body = {};
+    }
+  }
+
   // Welche Route soll angesprochen werden? (z.B. /api/buchung)
   // Query-Parameter (außer "path") werden korrekt übergeben!
   const { path, ...query } = req.query;
