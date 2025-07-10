@@ -167,10 +167,10 @@ export default function FahrerListe() {
                 {row.abflugUhrzeit} | {row.terminal} | {row.status || "geplant"} | {parkModellStr(row.typ)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
                 <a href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
               </div>
-              {/* Abflugdatum, Abfluguhrzeit und FlugnummerHin in Wunschfarbe */}
+              {/* Abflugdatum, Abfluguhrzeit und FlugnummerHin: alles fett und in #444 */}
               <div style={{ fontSize: 17, margin: "3px 0", color: "#444", display: "flex", alignItems: "center" }}>
                 <b>{formatDE(row.abflugdatum)}</b>
-                <span style={{ marginLeft: 8, color: "#444" }}>
+                <span style={{ marginLeft: 8, fontWeight: 600, color: "#444" }}>
                   {row.abflugUhrzeit} {row.flugnummerHin}
                 </span>
                 <span style={{ marginLeft: 12 }}>| <b>Notizen:</b> {row.bemerkung}</span>
