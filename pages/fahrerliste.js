@@ -170,7 +170,7 @@ export default function FahrerListe() {
               {/* Abflugdatum, Abfluguhrzeit und FlugnummerHin in Wunschfarbe */}
               <div style={{ fontSize: 17, margin: "3px 0", color: "#444", display: "flex", alignItems: "center" }}>
                 <b>{formatDE(row.abflugdatum)}</b>
-                <span style={{ marginLeft: 8, color: "#0072ff" }}>
+                <span style={{ marginLeft: 8, color: "#444" }}>
                   {row.abflugUhrzeit} {row.flugnummerHin}
                 </span>
                 <span style={{ marginLeft: 12 }}>| <b>Notizen:</b> {row.bemerkung}</span>
