@@ -1,5 +1,4 @@
 import Image from "next/image";
-import AvailabilityChecker from "./AvailabilityChecker"; // Import hinzugefügt!
 
 export default function HeroSection() {
   return (
