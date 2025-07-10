@@ -13,6 +13,10 @@ function formatDE(dateStr) {
   const jahr = d.getFullYear();
   return `${tag}.${monat}.${jahr}`;
 }
+function capitalize(str) {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
 
 export default function FahrerListe() {
   const [tab, setTab] = useState("alle");
@@ -163,14 +167,14 @@ export default function FahrerListe() {
             <div style={{ flex: 1 }}>
               {/* Überschrift */}
               <div style={{ fontWeight: "bold", fontSize: 22, marginBottom: 2 }}>
-                {row.abflugUhrzeit} | {row.terminal} | {row.status || "geplant"} | {row.typ} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
+                {row.abflugUhrzeit} | {row.terminal} | {row.status || "geplant"} | <b>{capitalize(row.typ)}</b> | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
                 <a href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
               </div>
               {/* Abflugdatum & Notizen */}
               <div style={{ fontSize: 17, margin: "3px 0", color: "#444" }}>
                 <b>{formatDE(row.abflugdatum)}</b> {row.abflugUhrzeit} {row.flugnummerHin} | <b>Notizen:</b> {row.bemerkung}
               </div>
-              {/* Rückflug-Info | Kennzeichen | Preis */}
+              {/* Rückflug-Info} | {Kennzeichen} | {Preis */}
               <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 17, marginTop: 2 }}>
                 <span style={{ color: "#16b000", fontWeight: 600 }}>
                   {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
