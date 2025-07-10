@@ -1,5 +1,5 @@
 import Image from "next/image";
-import AvailabilityChecker from "./AvailabilityChecker"; // Pfad ggf. anpassen!
+import AvailabilityChecker from "./AvailabilityChecker"; // Import hinzugefügt!
 
 export default function HeroSection() {
   return (
@@ -24,9 +24,7 @@ export default function HeroSection() {
         <p>
           ValetXpress bietet Ihnen erstklassigen Service für sorgenfreies Parken – Fahrzeugübergabe direkt am Terminal und sichere Abstellung.
         </p>
-        <div style={{ marginTop: 14, width: "100%" }}>
-          <AvailabilityChecker />
-        </div>
+        <a href="/buchen" className="hero-btn">Parkplatz buchen</a>
       </div>
       <style jsx>{`
         .hero-section {
@@ -83,6 +81,18 @@ export default function HeroSection() {
           text-shadow: 0 2px 12px rgba(0,0,0,0.13);
           max-width: 600px;
         }
+        .hero-btn {
+          display: inline-block;
+          background: #1db954;
+          color: #fff;
+          font-weight: bold;
+          font-size: 1.5rem;
+          border-radius: 12px;
+          padding: 18px 48px;
+          text-decoration: none;
+          box-shadow: 0 4px 18px 0 rgba(32,180,84,0.09);
+          transition: background 0.2s;
+        }
 
         /* MOBILE OPTIMIERUNG */
         @media (max-width: 900px) {
@@ -91,10 +101,14 @@ export default function HeroSection() {
             min-height: 300px;
           }
           .hero-content h1 {
-            font-size: 2.4rem;
+            font-size: 2.4rem; /* jetzt größer */
           }
           .hero-content p {
-            font-size: 1.15rem;
+            font-size: 1.15rem; /* jetzt größer */
+          }
+          .hero-btn {
+            font-size: 1.23rem; /* jetzt größer */
+            padding: 16px 30px;
           }
         }
         @media (max-width: 540px) {
@@ -103,12 +117,17 @@ export default function HeroSection() {
             min-height: 160px;
           }
           .hero-content h1 {
-            font-size: 1.45rem;
+            font-size: 1.45rem;  /* größer als vorher! */
             margin-bottom: 15px;
           }
           .hero-content p {
-            font-size: 1.06rem;
+            font-size: 1.06rem;  /* größer als vorher! */
             margin-bottom: 20px;
+          }
+          .hero-btn {
+            font-size: 1.11rem;  /* größer als vorher! */
+            padding: 12px 16px;
+            border-radius: 7px;
           }
         }
       `}</style>
