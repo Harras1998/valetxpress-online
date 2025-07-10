@@ -86,6 +86,14 @@ export default function FahrerListe() {
     return "#e0e0e0";
   }
 
+  // Format Preis ohne Komma und immer mit €
+  function priceDisplay(row) {
+    let val = row.betrag || row.preis;
+    if (!val) return "";
+    if (typeof val === "string") val = val.replace(",", "."); // für Kommazahlen
+    return `${parseFloat(val).toFixed(0)} €`;
+  }
+
   if (!auth)
     return (
       <div style={{ maxWidth: 400, margin: "5rem auto", background: "#fff", borderRadius: 12, padding: 32, boxShadow: "0 2px 12px #0002", fontFamily: "Arial" }}>
@@ -160,11 +168,12 @@ export default function FahrerListe() {
               <div style={{ fontSize: 15, margin: "3px 0" }}>
                 <b>{formatDE(row.abflugdatum)}</b> {row.abflugUhrzeit} {row.flugnummerHin} | <b>Notizen:</b> {row.bemerkung}
               </div>
-              <div style={{ fontSize: 15, margin: "3px 0", color: "#008000" }}>
-                {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck} | <span style={{ color: "red", fontWeight: "bold" }}>{row.betrag ? row.betrag + ",00 €" : row.preis ? row.preis + ",00 €" : ""}</span>
+              <div style={{ fontSize: 15, margin: "3px 0", color: "#008000", display: "flex", alignItems: "center" }}>
+                <span style={{ fontWeight: "bold", color: "#222" }}>{row.kennzeichen}</span>
+                <span style={{ marginLeft: 18, color: "red", fontWeight: "bold" }}>{priceDisplay(row)}</span>
               </div>
-              <div style={{ fontSize: 16, marginTop: 2 }}>
-                {row.kennzeichen && <b>{row.kennzeichen}</b>}
+              <div style={{ fontSize: 15, color: "#008000" }}>
+                {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
               </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 18, alignItems: "flex-end" }}>
