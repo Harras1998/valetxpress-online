@@ -3,6 +3,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Image from "next/image";
 import HeroSection from "../components/HeroSection";
+import AvailabilityChecker from "../components/AvailabilityChecker";
 
 // Hilfsfunktion für Scroll-FadeIn Animation
 function FadeIn({ children, delay = 0 }) {
@@ -30,7 +31,7 @@ export default function Home() {
         padding: 0,
       }}>
         <HeroSection />
-
+<AvailabilityChecker />
         <div style={{
           maxWidth: 900,
           margin: "0 auto",
