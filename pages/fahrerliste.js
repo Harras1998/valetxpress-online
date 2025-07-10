@@ -29,14 +29,12 @@ export default function FahrerListe() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Login
   function handleLogin(e) {
     e.preventDefault();
     const encoded = btoa(`${login.user}:${login.pass}`);
     setAuth(encoded);
   }
 
-  // Daten laden
   useEffect(() => {
     if (!auth) return;
     setLoading(true);
@@ -48,7 +46,6 @@ export default function FahrerListe() {
       .catch(() => { setError("Fehler beim Laden"); setLoading(false); });
   }, [auth, suchtext]);
 
-  // Filtern & Sortieren
   let filtered = list;
   const today = new Date();
   if (tab === "heute") {
@@ -82,7 +79,6 @@ export default function FahrerListe() {
     return a2 - b2;
   });
 
-  // Card-Color: Weiß für Abflug steht an, grau nach Landung/Rückflug
   function cardColor(b) {
     const now = new Date();
     const abflug = parseDate(b.abflugdatum, b.abflugUhrzeit);
@@ -92,7 +88,6 @@ export default function FahrerListe() {
     return "#e0e0e0";
   }
 
-  // Format Preis ohne Komma und immer mit €
   function priceDisplay(row) {
     let val = row.betrag || row.preis;
     if (!val) return "";
@@ -172,9 +167,13 @@ export default function FahrerListe() {
                 {row.abflugUhrzeit} | {row.terminal} | {row.status || "geplant"} | {parkModellStr(row.typ)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
                 <a href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
               </div>
-              {/* Abflugdatum & Notizen */}
-              <div style={{ fontSize: 17, margin: "3px 0", color: "#444" }}>
-                <b>{formatDE(row.abflugdatum)}</b> {row.abflugUhrzeit} {row.flugnummerHin} | <b>Notizen:</b> {row.bemerkung}
+              {/* Abflugdatum, Abfluguhrzeit und FlugnummerHin in Wunschfarbe */}
+              <div style={{ fontSize: 17, margin: "3px 0", color: "#444", display: "flex", alignItems: "center" }}>
+                <b>{formatDE(row.abflugdatum)}</b>
+                <span style={{ marginLeft: 8, color: "#0072ff" }}>
+                  {row.abflugUhrzeit} {row.flugnummerHin}
+                </span>
+                <span style={{ marginLeft: 12 }}>| <b>Notizen:</b> {row.bemerkung}</span>
               </div>
               {/* Rückflug-Info | Kennzeichen | Preis */}
               <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 17, marginTop: 2 }}>
