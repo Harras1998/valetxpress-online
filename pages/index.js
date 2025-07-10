@@ -31,7 +31,7 @@ export default function Home() {
         padding: 0,
       }}>
         <HeroSection />
-<AvailabilityChecker />
+
         <div style={{
           maxWidth: 900,
           margin: "0 auto",
