@@ -13,6 +13,10 @@ function formatDE(dateStr) {
   const jahr = d.getFullYear();
   return `${tag}.${monat}.${jahr}`;
 }
+function capitalize(str) {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
 
 export default function FahrerListe() {
   const [tab, setTab] = useState("alle");
@@ -149,41 +153,41 @@ export default function FahrerListe() {
             key={row.id}
             style={{
               marginBottom: 16,
-              borderRadius: 12,
+              borderRadius: 18,
               background: cardColor(row),
-              padding: "16px 22px",
+              padding: "18px 28px",
               boxShadow: "0 2px 8px #0001",
               border: "1px solid #ccc",
               display: "flex",
               alignItems: "flex-start",
               gap: 15,
-              fontSize: "17px"
+              fontSize: "18px"
             }}
           >
             <div style={{ flex: 1 }}>
               {/* Überschrift */}
-              <div style={{ fontWeight: "bold", fontSize: 22, marginBottom: 2 }}>
-                {row.abflugUhrzeit} | {row.terminal} | {row.status || "geplant"} | {row.typ} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
-                <a href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
+              <div style={{ fontWeight: "bold", fontSize: 26, marginBottom: 2 }}>
+                {row.abflugUhrzeit} | {row.terminal} | geplant | {capitalize(row.typ)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
+                <a href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600, fontSize: 24 }}>{row.telefon}</a>
               </div>
               {/* Abflugdatum & Notizen */}
-              <div style={{ fontSize: 17, margin: "3px 0", color: "#444" }}>
+              <div style={{ fontSize: 20, margin: "5px 0 0 0", color: "#222" }}>
                 <b>{formatDE(row.abflugdatum)}</b> {row.abflugUhrzeit} {row.flugnummerHin} | <b>Notizen:</b> {row.bemerkung}
               </div>
               {/* Rückflug-Info | Kennzeichen | Preis */}
-              <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 17, marginTop: 2 }}>
-                <span style={{ color: "#16b000", fontWeight: 600 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 32, fontSize: 22, marginTop: 8 }}>
+                <span style={{ color: "#14d104", fontWeight: 600 }}>
                   {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
                 </span>
-                <span style={{ fontWeight: "bold", color: "#111", marginLeft: 12 }}>{row.kennzeichen}</span>
-                <span style={{ color: "red", fontWeight: "bold", marginLeft: 12 }}>{priceDisplay(row)}</span>
+                <span style={{ fontWeight: "bold", color: "#222" }}>{row.kennzeichen}</span>
+                <span style={{ color: "red", fontWeight: "bold" }}>{priceDisplay(row)}</span>
               </div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 18, alignItems: "flex-end" }}>
-              <button style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer" }} title="Bearbeiten">✏️</button>
-              <button style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "purple" }} title="Status">✔️</button>
+            <div style={{ display: "flex", flexDirection: "column", gap: 22, alignItems: "flex-end" }}>
+              <button style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer" }} title="Bearbeiten">✏️</button>
+              <button style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer", color: "purple" }} title="Status">✔️</button>
               <a href={`tel:${row.telefon}`}>
-                <button style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "crimson" }} title="Anrufen">📞</button>
+                <button style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer", color: "crimson" }} title="Anrufen">📞</button>
               </a>
             </div>
           </div>
