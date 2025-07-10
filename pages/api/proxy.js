@@ -34,7 +34,8 @@ export default async function handler(req, res) {
     method: req.method,
     headers: {
       ...headers,
-      ...(authorization ? { authorization } : {})
+      ...(authorization ? { authorization } : {}),
+      ...(req.method !== "GET" ? { "Content-Type": "application/json" } : {}),
     },
     body: req.method !== "GET"
       ? JSON.stringify(req.body)
