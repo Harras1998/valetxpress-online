@@ -1,7 +1,7 @@
 // fahrerliste.js
 import { useState, useEffect } from "react";
 
-// Header-Komponente wie oben beschrieben
+// Header-Komponente wie gehabt
 function PXHeader({
   username,
   tab,
@@ -18,9 +18,8 @@ function PXHeader({
       background: "linear-gradient(#222 85%,#eee 100%)",
       margin: 0,
       padding: 0,
-      overflowX: "hidden"   // Verhindert horizontales Scrollen im Header
+      overflowX: "hidden"
     }}>
-      {/* Top bar */}
       <div style={{
         width: "100%",
         display: "flex",
@@ -57,7 +56,6 @@ function PXHeader({
           >&#x23FB;</span>
         </div>
       </div>
-      {/* Tabs + Suche + Sortieren + Logo */}
       <div style={{
         background: "#ededed",
         width: "100%",
@@ -67,7 +65,6 @@ function PXHeader({
         justifyContent: "space-between",
         borderBottom: "1.5px solid #dedede"
       }}>
-        {/* Tabs */}
         <div style={{ display: "flex", alignItems: "center", marginLeft: 14, gap: 0 }}>
           <button
             onClick={() => setTab("heute")}
@@ -107,7 +104,6 @@ function PXHeader({
               borderRadius: "0 16px 16px 0"
             }}>Alle</button>
         </div>
-        {/* Suchfeld */}
         <div style={{ flex: 1, display: "flex", alignItems: "center", margin: "0 26px", maxWidth: 620 }}>
           <input
             type="text"
@@ -125,7 +121,6 @@ function PXHeader({
             }}
           />
         </div>
-        {/* Sortieren + Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 32, marginRight: 38 }}>
           <select
             value={sort}
@@ -144,7 +139,6 @@ function PXHeader({
             <option value="abflugdatum">Sortieren: Abflugdatum</option>
             <option value="rueckflugdatum">Sortieren: Rückflugdatum</option>
             <option value="name">Sortieren: Name</option>
-            {/* Weitere Sortieroptionen falls nötig */} 
           </select>
           <img src="/images/Logo.png" alt="ValetXpress" height={58} style={{ marginLeft: 18, marginRight: 10 }} />
         </div>
@@ -153,7 +147,6 @@ function PXHeader({
   );
 }
 
-// Hilfsfunktionen für Datum und Preis
 function parseDate(dt, time) {
   if (!dt) return new Date(0);
   return new Date(`${dt}T${(time || "00:00")}:00`);
@@ -183,9 +176,8 @@ export default function FahrerListe() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [sort, setSort] = useState("abflugdatum");
-  const [username, setUsername] = useState(""); // hier Username verwalten
+  const [username, setUsername] = useState("");
 
-  // Login
   function handleLogin(e) {
     e.preventDefault();
     const encoded = btoa(`${login.user}:${login.pass}`);
@@ -198,7 +190,6 @@ export default function FahrerListe() {
     setLogin({ user: "", pass: "" });
   }
 
-  // Daten laden
   useEffect(() => {
     if (!auth) return;
     setLoading(true);
@@ -210,7 +201,6 @@ export default function FahrerListe() {
       .catch(() => { setError("Fehler beim Laden"); setLoading(false); });
   }, [auth, suchtext, sort]);
 
-  // Filtern & Sortieren
   let filtered = list;
   const today = new Date();
   if (tab === "heute") {
@@ -235,14 +225,12 @@ export default function FahrerListe() {
     );
   }
   filtered = [...filtered].sort((a, b) => {
-    // Sortierung über das Dropdown
     if (sort === "name") {
       const an = (a.nachname + a.vorname).toLowerCase();
       const bn = (b.nachname + b.vorname).toLowerCase();
       if (an < bn) return -1;
       if (an > bn) return 1;
     }
-    // Default: Abflugdatum dann Rückflugdatum
     const a1 = parseDate(a.abflugdatum, a.abflugUhrzeit);
     const b1 = parseDate(b.abflugdatum, b.abflugUhrzeit);
     if (a1 < b1) return -1;
@@ -252,7 +240,6 @@ export default function FahrerListe() {
     return a2 - b2;
   });
 
-  // Card-Color: Weiß für Abflug steht an, grau nach Landung/Rückflug
   function cardColor(b) {
     const now = new Date();
     const abflug = parseDate(b.abflugdatum, b.abflugUhrzeit);
@@ -272,7 +259,7 @@ export default function FahrerListe() {
         padding: 32,
         boxShadow: "0 2px 12px #0002",
         fontFamily: "Arial",
-        overflowX: "hidden" // Scrollen verhindern
+        overflowX: "hidden"
       }}>
         <h2>Fahrer-Login</h2>
         <form onSubmit={handleLogin}>
@@ -290,7 +277,7 @@ export default function FahrerListe() {
       minHeight: "100vh",
       background: "#e2e2e2",
       fontFamily: "Arial",
-      overflowX: "hidden" // Verhindert horizontales Scrollen global
+      overflowX: "hidden"
     }}>
       <PXHeader
         username={username}
@@ -302,66 +289,77 @@ export default function FahrerListe() {
         setSort={setSort}
         onLogout={handleLogout}
       />
-
       <div style={{
-        maxWidth: 1200,
+        maxWidth: "100%",
         margin: "auto",
         marginTop: 30,
-        overflowX: "hidden" // Verhindert horizontales Scrollen im Content
+        overflowX: "hidden"
       }}>
-        <div style={{ padding: 12, color: "#777", fontSize: 14 }}>
+        <div style={{ padding: 12, color: "#777", fontSize: 18, marginLeft: 10 }}>
           {loading ? "Lade Daten..." : ""}
           <b> Anzahl Fahrten: {filtered.length}</b>
         </div>
         <div>
           {filtered.length === 0 && (
-            <div style={{ margin: 30, color: '#888', fontSize: 20 }}>Keine Fahrten gefunden.</div>
+            <div style={{ margin: 30, color: '#888', fontSize: 28 }}>Keine Fahrten gefunden.</div>
           )}
           {filtered.map(row => (
             <div
               key={row.id}
               style={{
-                marginBottom: 16,
-                borderRadius: 12,
+                marginBottom: 0,
+                borderRadius: 0,
                 background: cardColor(row),
-                padding: "16px 22px",
-                boxShadow: "0 2px 8px #0001",
-                border: "1px solid #ccc",
+                padding: "16px 0 8px 0",
+                boxShadow: "none",
+                border: "none",
+                borderBottom: "2px solid #ccc",
                 display: "flex",
                 alignItems: "flex-start",
-                gap: 15,
-                fontSize: "17px"
+                fontSize: "32px",
+                fontFamily: "Arial, Helvetica, sans-serif"
               }}
             >
-              <div style={{ flex: 1 }}>
-                {/* Überschrift */}
-                <div style={{ fontWeight: "bold", fontSize: 22, marginBottom: 2 }}>
+              <div style={{ flex: 1, marginLeft: 18 }}>
+                <div style={{ fontWeight: "bold", fontSize: 36, marginBottom: 0 }}>
                   {row.abflugUhrzeit} | {row.terminal} | {row.status || "geplant"} | {row.typ === "AllInclusive" ? "All" : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
                   <a href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
                 </div>
-                {/* Abflugdatum & Notizen */}
-                <div style={{ fontSize: 17, margin: "18px 0 3px 0", color: "#444", display: "flex", alignItems: "center" }}>
-                  <span style={{ fontWeight: "bold" }}>{formatDE(row.abflugdatum)}</span>
-                  <span style={{ fontWeight: "bold", marginLeft: 7 }}>{row.abflugUhrzeit} {row.flugnummerHin}</span>
-                  <span style={{ margin: "0 10px" }}>|</span>
+                <div style={{ fontSize: 26, margin: "12px 0 0 0", color: "#444", display: "flex", alignItems: "center", fontWeight: 700 }}>
+                  <span>{formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin}</span>
+                  <span style={{ margin: "0 15px", fontWeight: 500 }}>|</span>
                   <span><b>Notizen:</b> {row.bemerkung}</span>
                 </div>
-                {/* Rückflug-Info | Kennzeichen | Betrag */}
-                <div style={{ display: "flex", alignItems: "center", gap: 0, fontSize: 17, marginTop: 2 }}>
-                  <span style={{ color: "#16b000", fontWeight: 600 }}>
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0,
+                  fontSize: 26,
+                  marginTop: 0,
+                  fontWeight: 700
+                }}>
+                  <span style={{ color: "#16b000" }}>
                     {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
                   </span>
-                  <span style={{ color: "#888", fontWeight: "bold", margin: "0 14px" }}>|</span>
-                  <span style={{ fontWeight: "bold", color: "#111" }}>{row.kennzeichen}</span>
-                  <span style={{ color: "#888", fontWeight: "bold", margin: "0 14px" }}>|</span>
-                  <span style={{ color: "red", fontWeight: "bold" }}>{priceDisplay(row)}</span>
+                  <span style={{ color: "#888", margin: "0 15px" }}>|</span>
+                  <span style={{ color: "#111" }}>{row.kennzeichen}</span>
+                  <span style={{ color: "#888", margin: "0 15px" }}>|</span>
+                  <span style={{ color: "red" }}>{priceDisplay(row)}</span>
                 </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 18, alignItems: "flex-end" }}>
-                <button style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer" }} title="Bearbeiten">✏️</button>
-                <button style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "purple" }} title="Status">✔️</button>
+              <div style={{
+                display: "flex",
+                flexDirection: "row",
+                gap: 38,
+                alignItems: "center",
+                minWidth: 270,
+                justifyContent: "flex-end",
+                marginRight: 30
+              }}>
+                <span style={{ fontSize: 38, color: "#444", cursor: "pointer" }} title="Bearbeiten">✏️</span>
+                <span style={{ fontSize: 38, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
                 <a href={`tel:${row.telefon}`}>
-                  <button style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "crimson" }} title="Anrufen">📞</button>
+                  <span style={{ fontSize: 38, color: "#444", cursor: "pointer" }} title="Anrufen">📞</span>
                 </a>
               </div>
             </div>
