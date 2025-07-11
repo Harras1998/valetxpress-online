@@ -157,7 +157,6 @@ export default function FahrerListe() {
               border: "1px solid #ccc",
               display: "flex",
               alignItems: "flex-start",
-              gap: 15,
               fontSize: "17px"
             }}
           >
@@ -165,25 +164,19 @@ export default function FahrerListe() {
               {/* Überschrift */}
               <div style={{ fontWeight: "bold", fontSize: 22, marginBottom: 2 }}>
                 {row.abflugUhrzeit} | {row.terminal} | {row.status || "geplant"} | {parkModellStr(row.typ)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
-                <a href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
+                <a href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a> |
               </div>
-              {/* Abflugdatum, Abfluguhrzeit und FlugnummerHin: alles fett und in #444 */}
-              <div style={{ fontSize: 17, margin: "3px 0", color: "#444", display: "flex", alignItems: "center" }}>
-                <b>{formatDE(row.abflugdatum)}</b>
-                <span style={{ marginLeft: 8, fontWeight: 600, color: "#444" }}>
-                  {row.abflugUhrzeit} {row.flugnummerHin}
-                </span>
-                <span style={{ marginLeft: 12 }}>| <b>Notizen:</b> {row.bemerkung}</span>
+              {/* Abflugdatum, Uhrzeit, Flugnummer, Notizen */}
+              <div style={{ fontSize: 17, margin: "3px 0", color: "#444" }}>
+                <b>{formatDE(row.abflugdatum)}</b> {row.abflugUhrzeit} {row.flugnummerHin} | <b>Notizen:</b> {row.bemerkung}
               </div>
-              {/* Rückflug-Info | | Kennzeichen | | Preis */}
-              <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 17, marginTop: 2 }}>
-                <span style={{ color: "#16b000", fontWeight: 600 }}>
-                  {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
-                </span>
-                <span style={{ margin: "0 8px", color: "#aaa" }}>|</span>
-                <span style={{ fontWeight: "bold", color: "#111" }}>{row.kennzeichen}</span>
-                <span style={{ margin: "0 8px", color: "#aaa" }}>|</span>
-                <span style={{ color: "red", fontWeight: "bold" }}>{priceDisplay(row)}</span>
+              {/* Rückflug-Info | Kennzeichen | Preis */}
+              <div style={{ fontSize: 17, color: "#16b000", fontWeight: 600, marginTop: 2 }}>
+                {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck} |{" "}
+                <span style={{ color: "#222", fontWeight: 600 }}>{row.kennzeichen}</span>
+                {row.preis || row.betrag ? (
+                  <> | <span style={{ color: "red", fontWeight: "bold" }}>{priceDisplay(row)}</span></>
+                ) : null}
               </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 18, alignItems: "flex-end" }}>
