@@ -170,13 +170,15 @@ export default function FahrerListe() {
               <div style={{ fontSize: 17, margin: "3px 0", color: "#444" }}>
                 <b>{formatDE(row.abflugdatum)}</b> {row.abflugUhrzeit} {row.flugnummerHin} | <b>Notizen:</b> {row.bemerkung}
               </div>
-              {/* Rückflug-Info | Kennzeichen | Preis */}
-              <div style={{ fontSize: 17, color: "#16b000", fontWeight: 600, marginTop: 2 }}>
-                {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck} |{" "}
-                <span style={{ color: "#222", fontWeight: 600 }}>{row.kennzeichen}</span>
-                {row.preis || row.betrag ? (
-                  <> | <span style={{ color: "red", fontWeight: "bold" }}>{priceDisplay(row)}</span></>
-                ) : null}
+              {/* Rückflug-Info | Kennzeichen | Preis, Pipes alle #444 */}
+              <div style={{ fontSize: 17, fontWeight: 600, marginTop: 2, display: "flex", alignItems: "center" }}>
+                <span style={{ color: "#16b000" }}>
+                  {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
+                </span>
+                <span style={{ color: "#444", margin: "0 8px" }}>|</span>
+                <span style={{ color: "#222" }}>{row.kennzeichen}</span>
+                <span style={{ color: "#444", margin: "0 8px" }}>|</span>
+                <span style={{ color: "red", fontWeight: "bold" }}>{priceDisplay(row)}</span>
               </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 18, alignItems: "flex-end" }}>
