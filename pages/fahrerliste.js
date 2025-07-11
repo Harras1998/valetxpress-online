@@ -1,7 +1,7 @@
 // fahrerliste.js
 import { useState, useEffect } from "react";
 
-// Header-Komponente (wie vorher)
+// Header-Komponente wie oben beschrieben
 function PXHeader({
   username,
   tab,
@@ -13,7 +13,13 @@ function PXHeader({
   onLogout,
 }) {
   return (
-    <div style={{ width: "100%", background: "linear-gradient(#222 85%,#eee 100%)", margin: 0, padding: 0 }}>
+    <div style={{
+      width: "100%",
+      background: "linear-gradient(#222 85%,#eee 100%)",
+      margin: 0,
+      padding: 0,
+      overflowX: "hidden"   // Verhindert horizontales Scrollen im Header
+    }}>
       {/* Top bar */}
       <div style={{
         width: "100%",
@@ -138,6 +144,7 @@ function PXHeader({
             <option value="abflugdatum">Sortieren: Abflugdatum</option>
             <option value="rueckflugdatum">Sortieren: Rückflugdatum</option>
             <option value="name">Sortieren: Name</option>
+            {/* Weitere Sortieroptionen falls nötig */} 
           </select>
           <img src="/images/Logo.png" alt="ValetXpress" height={58} style={{ marginLeft: 18, marginRight: 10 }} />
         </div>
@@ -146,8 +153,7 @@ function PXHeader({
   );
 }
 
-// Hilfsfunktionen
-
+// Hilfsfunktionen für Datum und Preis
 function parseDate(dt, time) {
   if (!dt) return new Date(0);
   return new Date(`${dt}T${(time || "00:00")}:00`);
@@ -177,8 +183,9 @@ export default function FahrerListe() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [sort, setSort] = useState("abflugdatum");
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState(""); // hier Username verwalten
 
+  // Login
   function handleLogin(e) {
     e.preventDefault();
     const encoded = btoa(`${login.user}:${login.pass}`);
@@ -191,6 +198,7 @@ export default function FahrerListe() {
     setLogin({ user: "", pass: "" });
   }
 
+  // Daten laden
   useEffect(() => {
     if (!auth) return;
     setLoading(true);
@@ -202,7 +210,7 @@ export default function FahrerListe() {
       .catch(() => { setError("Fehler beim Laden"); setLoading(false); });
   }, [auth, suchtext, sort]);
 
-  // Filter und Sortierung wie gehabt ...
+  // Filtern & Sortieren
   let filtered = list;
   const today = new Date();
   if (tab === "heute") {
@@ -227,12 +235,14 @@ export default function FahrerListe() {
     );
   }
   filtered = [...filtered].sort((a, b) => {
+    // Sortierung über das Dropdown
     if (sort === "name") {
       const an = (a.nachname + a.vorname).toLowerCase();
       const bn = (b.nachname + b.vorname).toLowerCase();
       if (an < bn) return -1;
       if (an > bn) return 1;
     }
+    // Default: Abflugdatum dann Rückflugdatum
     const a1 = parseDate(a.abflugdatum, a.abflugUhrzeit);
     const b1 = parseDate(b.abflugdatum, b.abflugUhrzeit);
     if (a1 < b1) return -1;
@@ -242,18 +252,28 @@ export default function FahrerListe() {
     return a2 - b2;
   });
 
+  // Card-Color: Weiß für Abflug steht an, grau nach Landung/Rückflug
   function cardColor(b) {
     const now = new Date();
     const abflug = parseDate(b.abflugdatum, b.abflugUhrzeit);
     const rueck = parseDate(b.rueckflugdatum, b.rueckflugUhrzeit);
     if (now < abflug) return "#fff";
-    if (now >= abflug && now < rueck) return "#e0e0e0";
-    return "#d3d3d3";
+    if (now >= abflug && now < rueck) return "#eee";
+    return "#e0e0e0";
   }
 
   if (!auth)
     return (
-      <div style={{ maxWidth: 400, margin: "5rem auto", background: "#fff", borderRadius: 12, padding: 32, boxShadow: "0 2px 12px #0002", fontFamily: "Arial" }}>
+      <div style={{
+        maxWidth: 400,
+        margin: "5rem auto",
+        background: "#fff",
+        borderRadius: 12,
+        padding: 32,
+        boxShadow: "0 2px 12px #0002",
+        fontFamily: "Arial",
+        overflowX: "hidden" // Scrollen verhindern
+      }}>
         <h2>Fahrer-Login</h2>
         <form onSubmit={handleLogin}>
           <input type="text" placeholder="Benutzername" value={login.user} onChange={e => setLogin({ ...login, user: e.target.value })} required style={{ width: "100%", marginBottom: 8 }} />
@@ -270,80 +290,78 @@ export default function FahrerListe() {
       minHeight: "100vh",
       background: "#e2e2e2",
       fontFamily: "Arial",
-      overflowX: "hidden"
+      overflowX: "hidden" // Verhindert horizontales Scrollen global
     }}>
-      {/* Header bleibt unverändert - falls nötig, einbauen */}
-      {/* Buchungs-Liste - KEIN maxWidth, volle Breite! */}
-      <div style={{ width: "100%", margin: "0", padding: 0 }}>
-        <div style={{padding:12, color:"#777", fontSize:14}}>
+      <PXHeader
+        username={username}
+        tab={tab}
+        setTab={setTab}
+        suchtext={suchtext}
+        setSuchtext={setSuchtext}
+        sort={sort}
+        setSort={setSort}
+        onLogout={handleLogout}
+      />
+
+      <div style={{
+        maxWidth: 1200,
+        margin: "auto",
+        marginTop: 30,
+        overflowX: "hidden" // Verhindert horizontales Scrollen im Content
+      }}>
+        <div style={{ padding: 12, color: "#777", fontSize: 14 }}>
           {loading ? "Lade Daten..." : ""}
           <b> Anzahl Fahrten: {filtered.length}</b>
         </div>
         <div>
           {filtered.length === 0 && (
-            <div style={{margin:30, color:'#888', fontSize:20}}>Keine Fahrten gefunden.</div>
+            <div style={{ margin: 30, color: '#888', fontSize: 20 }}>Keine Fahrten gefunden.</div>
           )}
           {filtered.map(row => (
             <div
               key={row.id}
               style={{
-                marginBottom: 0,
-                borderRadius: 0,
+                marginBottom: 16,
+                borderRadius: 12,
                 background: cardColor(row),
-                padding: "13px 0px 13px 7px",
-                border: "none",
-                borderBottom: "1.5px solid #c8c8c8",
+                padding: "16px 22px",
+                boxShadow: "0 2px 8px #0001",
+                border: "1px solid #ccc",
                 display: "flex",
-                alignItems: "center",
-                fontSize: "30px",
-                fontFamily: "Arial, Helvetica, sans-serif",
-                width: "100%"
+                alignItems: "flex-start",
+                gap: 15,
+                fontSize: "17px"
               }}
             >
               <div style={{ flex: 1 }}>
                 {/* Überschrift */}
-                <div style={{ fontWeight: "bold", fontSize: 34, marginBottom: 2 }}>
+                <div style={{ fontWeight: "bold", fontSize: 22, marginBottom: 2 }}>
                   {row.abflugUhrzeit} | {row.terminal} | {row.status || "geplant"} | {row.typ === "AllInclusive" ? "All" : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
                   <a href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
                 </div>
                 {/* Abflugdatum & Notizen */}
-                <div style={{ fontSize: 24, margin: "12px 0 0 0", color: "#444", display: "flex", alignItems: "center", fontWeight: 600 }}>
-                  {formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin} | <b>Notizen:</b>: {row.bemerkung}
+                <div style={{ fontSize: 17, margin: "18px 0 3px 0", color: "#444", display: "flex", alignItems: "center" }}>
+                  <span style={{ fontWeight: "bold" }}>{formatDE(row.abflugdatum)}</span>
+                  <span style={{ fontWeight: "bold", marginLeft: 7 }}>{row.abflugUhrzeit} {row.flugnummerHin}</span>
+                  <span style={{ margin: "0 10px" }}>|</span>
+                  <span><b>Notizen:</b> {row.bemerkung}</span>
                 </div>
                 {/* Rückflug-Info | Kennzeichen | Betrag */}
-                <div style={{ display: "flex", alignItems: "center", fontSize: 24, marginTop: 5 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 0, fontSize: 17, marginTop: 2 }}>
                   <span style={{ color: "#16b000", fontWeight: 600 }}>
                     {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
                   </span>
-                  <span style={{ color: "#888", fontWeight: "bold", margin: "0 13px" }}>|</span>
-                  <span style={{ fontWeight: "bold", color: "#222" }}>{row.kennzeichen}</span>
-                  <span style={{ color: "#888", fontWeight: "bold", margin: "0 13px" }}>|</span>
+                  <span style={{ color: "#888", fontWeight: "bold", margin: "0 14px" }}>|</span>
+                  <span style={{ fontWeight: "bold", color: "#111" }}>{row.kennzeichen}</span>
+                  <span style={{ color: "#888", fontWeight: "bold", margin: "0 14px" }}>|</span>
                   <span style={{ color: "red", fontWeight: "bold" }}>{priceDisplay(row)}</span>
                 </div>
               </div>
-              {/* Icons exakt wie Screenshot */}
-              <div style={{
-                display: "flex",
-                flexDirection: "row",
-                gap: 36,
-                alignItems: "center",
-                minWidth: 200,
-                justifyContent: "flex-end",
-                marginLeft: 12
-              }}>
-                <button style={{
-                  background: "none", border: "none", fontSize: 36,
-                  cursor: "pointer", color: "#444", margin: "0 7px"
-                }} title="Bearbeiten">✏️</button>
-                <button style={{
-                  background: "none", border: "none", fontSize: 38,
-                  cursor: "pointer", color: "#444", margin: "0 7px"
-                }} title="Status">✔️</button>
+              <div style={{ display: "flex", flexDirection: "column", gap: 18, alignItems: "flex-end" }}>
+                <button style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer" }} title="Bearbeiten">✏️</button>
+                <button style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "purple" }} title="Status">✔️</button>
                 <a href={`tel:${row.telefon}`}>
-                  <button style={{
-                    background: "none", border: "none", fontSize: 38,
-                    cursor: "pointer", color: "#444", margin: "0 7px"
-                  }} title="Anrufen">📞</button>
+                  <button style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "crimson" }} title="Anrufen">📞</button>
                 </a>
               </div>
             </div>
