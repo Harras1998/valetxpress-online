@@ -13,7 +13,7 @@ function PXHeader({
   onLogout,
 }) {
   return (
-    <div style={{ width: "100vw", background: "linear-gradient(#222 85%,#eee 100%)", margin: 0, padding: 0 }}>
+    <div style={{ width: "100%", background: "linear-gradient(#222 85%,#eee 100%)", margin: 0, padding: 0 }}>
       {/* Top bar */}
       <div style={{
         width: "100%",
@@ -270,7 +270,7 @@ export default function FahrerListe() {
 
   return (
     <div style={{
-      width: "100vw",
+      width: "100%",
       minHeight: "100vh",
       background: "#e2e2e2",
       fontFamily: "Arial",
