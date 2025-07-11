@@ -140,7 +140,7 @@ function PXHeader({
             <option value="name">Sortieren: Name</option>
             {/* Weitere Sortieroptionen falls nötig */}
           </select>
-          <img src="/parkxpress-logo.png" alt="PARKXPRESS" height={58} style={{ marginLeft: 18, marginRight: 10 }} />
+          <img src="/public/Logo.png" alt="ValetXpress" height={58} style={{ marginLeft: 18, marginRight: 10 }} />
         </div>
       </div>
     </div>
