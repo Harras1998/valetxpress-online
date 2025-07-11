@@ -316,16 +316,16 @@ export default function FahrerListe() {
                 borderBottom: "2px solid #ccc",
                 display: "flex",
                 alignItems: "flex-start",
-                fontSize: "25px",
+                fontSize: "32px",
                 fontFamily: "Arial, Helvetica, sans-serif"
               }}
             >
               <div style={{ flex: 1, marginLeft: 18 }}>
-                <div style={{ fontWeight: "bold", fontSize: 36, marginBottom: 0 }}>
+                <div style={{ fontWeight: "bold", fontSize: 25, marginBottom: 0 }}>
                   {row.abflugUhrzeit} | {row.terminal} | {row.status || "geplant"} | {row.typ === "AllInclusive" ? "All" : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
                   <a href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
                 </div>
-                <div style={{ fontSize: 26, margin: "12px 0 0 0", color: "#444", display: "flex", alignItems: "center", fontWeight: 700 }}>
+                <div style={{ fontSize: 17, margin: "12px 0 0 0", color: "#444", display: "flex", alignItems: "center", fontWeight: 700 }}>
                   <span>{formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin}</span>
                   <span style={{ margin: "0 15px", fontWeight: 500 }}>|</span>
                   <span><b>Notizen:</b> {row.bemerkung}</span>
@@ -334,7 +334,7 @@ export default function FahrerListe() {
                   display: "flex",
                   alignItems: "center",
                   gap: 0,
-                  fontSize: 26,
+                  fontSize: 17,
                   marginTop: 0,
                   fontWeight: 700
                 }}>
