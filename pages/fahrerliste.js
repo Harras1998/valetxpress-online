@@ -171,14 +171,14 @@ export default function FahrerListe() {
                 <b>{formatDE(row.abflugdatum)}</b>{" "}
                 <b>{row.abflugUhrzeit} {row.flugnummerHin}</b> | <b>Notizen:</b> {row.bemerkung}
               </div>
-              {/* Rückflug-Info | Kennzeichen | Preis, Pipes jetzt #444 */}
+              {/* Rückflug-Info | Kennzeichen | Preis, Pipes #444, margin 0 6px */}
               <div style={{ fontSize: 17, fontWeight: 600, marginTop: 2 }}>
                 <span style={{ color: "#16b000" }}>
                   {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
                 </span>
-                <span style={{ color: "#444", margin: "0 8px" }}>|</span>
+                <span style={{ color: "#444", margin: "0 6px" }}>|</span>
                 <span style={{ color: "#222" }}>{row.kennzeichen}</span>
-                <span style={{ color: "#444", margin: "0 8px" }}>|</span>
+                <span style={{ color: "#444", margin: "0 6px" }}>|</span>
                 <span style={{ color: "red", fontWeight: "bold" }}>{priceDisplay(row)}</span>
               </div>
             </div>
