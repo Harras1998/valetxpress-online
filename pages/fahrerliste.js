@@ -168,7 +168,8 @@ export default function FahrerListe() {
               </div>
               {/* Abflugdatum, Uhrzeit, Flugnummer, Notizen */}
               <div style={{ fontSize: 17, margin: "3px 0", color: "#444" }}>
-                <b>{formatDE(row.abflugdatum)}</b> {row.abflugUhrzeit} {row.flugnummerHin} | <b>Notizen:</b> {row.bemerkung}
+                <b>{formatDE(row.abflugdatum)}</b>{" "}
+                <b>{row.abflugUhrzeit} {row.flugnummerHin}</b> | <b>Notizen:</b> {row.bemerkung}
               </div>
               {/* Rückflug-Info | Kennzeichen | Preis, Pipes jetzt #444 */}
               <div style={{ fontSize: 17, fontWeight: 600, marginTop: 2 }}>
