@@ -109,8 +109,8 @@ export default function FahrerListe() {
     );
 
   return (
-    <div style={{ maxWidth: 900, margin: "1rem auto", fontFamily: "Arial" }}>
-      <div style={{ display: "flex", gap: 12, marginBottom: 14 }}>
+    <div style={{ width: "100vw", margin: 0, padding: 0, fontFamily: "Arial" }}>
+      <div style={{ display: "flex", gap: 12, margin: "14px 16px 0 16px" }}>
         {["heute", "2tage", "alle"].map(t => (
           <button
             key={t}
@@ -136,7 +136,7 @@ export default function FahrerListe() {
         />
       </div>
 
-      <div style={{padding:12, color:"#777", fontSize:14}}>
+      <div style={{padding:"12px 16px", color:"#777", fontSize:14}}>
         {loading ? "Lade Daten..." : ""}
         <b> Anzahl Fahrten: {filtered.length}</b>
       </div>
@@ -157,21 +157,21 @@ export default function FahrerListe() {
               border: "1px solid #ccc",
               display: "flex",
               alignItems: "flex-start",
-              fontSize: "17px"
+              fontSize: "17px",
+              width: "calc(100vw - 44px)",
+              minWidth: 0,
+              maxWidth: "100vw",
             }}
           >
             <div style={{ flex: 1 }}>
-              {/* Überschrift */}
               <div style={{ fontWeight: "bold", fontSize: 22, marginBottom: 18 }}>
                 {row.abflugUhrzeit} | {row.terminal} | {row.status || "geplant"} | {parkModellStr(row.typ)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
                 <a href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a> |
               </div>
-              {/* Abflugdatum, Uhrzeit, Flugnummer, Notizen */}
               <div style={{ fontSize: 17, margin: "3px 0", color: "#444" }}>
                 <b>{formatDE(row.abflugdatum)}</b>{" "}
                 <b>{row.abflugUhrzeit} {row.flugnummerHin}</b> | <b>Notizen:</b> {row.bemerkung}
               </div>
-              {/* Rückflug-Info | Kennzeichen | Preis, Pipes #444, margin 0 6px */}
               <div style={{ fontSize: 17, fontWeight: 600, marginTop: 2 }}>
                 <span style={{ color: "#16b000" }}>
                   {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
