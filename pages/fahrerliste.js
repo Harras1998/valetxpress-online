@@ -162,7 +162,7 @@ export default function FahrerListe() {
           >
             <div style={{ flex: 1 }}>
               {/* Überschrift */}
-              <div style={{ fontWeight: "bold", fontSize: 22, marginBottom: 2 }}>
+              <div style={{ fontWeight: "bold", fontSize: 22, marginBottom: 18 }}>
                 {row.abflugUhrzeit} | {row.terminal} | {row.status || "geplant"} | {parkModellStr(row.typ)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
                 <a href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a> |
               </div>
