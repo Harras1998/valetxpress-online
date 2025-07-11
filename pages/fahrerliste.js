@@ -316,7 +316,7 @@ export default function FahrerListe() {
                 borderBottom: "2px solid #ccc",
                 display: "flex",
                 alignItems: "flex-start",
-                fontSize: "32px",
+                fontSize: "25px",
                 fontFamily: "Arial, Helvetica, sans-serif"
               }}
             >
