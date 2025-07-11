@@ -175,13 +175,15 @@ export default function FahrerListe() {
                 </span>
                 <span style={{ marginLeft: 12 }}>| <b>Notizen:</b> {row.bemerkung}</span>
               </div>
-              {/* Rückflug-Info | Kennzeichen | Preis */}
+              {/* Rückflug-Info | | Kennzeichen | | Preis */}
               <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 17, marginTop: 2 }}>
                 <span style={{ color: "#16b000", fontWeight: 600 }}>
                   {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
                 </span>
-                <span style={{ fontWeight: "bold", color: "#111", marginLeft: 12 }}>{row.kennzeichen}</span>
-                <span style={{ color: "red", fontWeight: "bold", marginLeft: 12 }}>{priceDisplay(row)}</span>
+                <span style={{ margin: "0 8px", color: "#aaa" }}>|</span>
+                <span style={{ fontWeight: "bold", color: "#111" }}>{row.kennzeichen}</span>
+                <span style={{ margin: "0 8px", color: "#aaa" }}>|</span>
+                <span style={{ color: "red", fontWeight: "bold" }}>{priceDisplay(row)}</span>
               </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 18, alignItems: "flex-end" }}>
