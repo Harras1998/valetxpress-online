@@ -4,6 +4,11 @@ import { useState, useEffect } from "react";
 // ======= Mobile Style-Injection für ParkXpress-Optik =======
 const mobileStyles = `
 @media (max-width: 500px) {
+  .fahrer-card-title {
+    font-size: 11px !important;
+    font-weight: bold !important;
+    line-height: 1.2 !important;
+  }
   .fahrer-card {
     font-size: 10px !important;
     padding: 3px 1px 2px 2px !important;
@@ -382,7 +387,7 @@ export default function FahrerListe() {
               }}
             >
               <div style={{ flex: 1, marginLeft: 18 }}>
-                <div style={{ fontWeight: "bold", fontSize: 25, marginBottom: 0 }}>
+                <div className="fahrer-card-title" style={{ fontWeight: "bold", marginBottom: 0 }}>
                   {row.abflugUhrzeit} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
                   ? "All"
                   : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
