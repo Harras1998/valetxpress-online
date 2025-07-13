@@ -1,6 +1,66 @@
 // fahrerliste.js
 import { useState, useEffect } from "react";
 
+// ======= Mobile Style-Injection für ParkXpress-Optik =======
+const mobileStyles = `
+@media (max-width: 500px) {
+  .fahrer-card {
+    font-size: 13px !important;
+    padding: 7px 3px 5px 6px !important;
+    border-radius: 0 !important;
+    margin-bottom: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    border-bottom: 1.5px solid #ccc !important;
+    display: block !important;
+    overflow-x: auto !important;
+  }
+  .fahrer-card .info-zeile {
+    font-size: 11px !important;
+    margin: 2px 0 0 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 2px !important;
+  }
+  .fahrer-card .actions {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    min-width: 0 !important;
+    margin: 4px 5px 0 0 !important;
+    font-size: 14px !important;
+  }
+  .fahrer-card a {
+    font-size: 13px !important;
+    word-break: break-all !important;
+  }
+  .fahrer-card span, .fahrer-card b {
+    font-size: 12px !important;
+  }
+  .fahrer-card .notiz-label {
+    font-size: 11px !important;
+  }
+  .fahrer-card .telefon-link {
+    font-size: 13px !important;
+    color: #001cff !important;
+    font-weight: 600 !important;
+    text-decoration: underline !important;
+    word-break: break-all !important;
+  }
+}
+`;
+
+if (typeof document !== "undefined" && !document.getElementById("mobile-fahrerlist-style")) {
+  const style = document.createElement("style");
+  style.id = "mobile-fahrerlist-style";
+  style.innerHTML = mobileStyles;
+  document.head.appendChild(style);
+}
+// ============================================================
+
 // Header-Komponente wie gehabt
 function PXHeader({
   username,
@@ -306,6 +366,7 @@ export default function FahrerListe() {
           {filtered.map(row => (
             <div
               key={row.id}
+              className="fahrer-card"
               style={{
                 marginBottom: 0,
                 borderRadius: 0,
@@ -323,22 +384,19 @@ export default function FahrerListe() {
               <div style={{ flex: 1, marginLeft: 18 }}>
                 <div style={{ fontWeight: "bold", fontSize: 25, marginBottom: 0 }}>
                   {row.abflugUhrzeit} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
-    ? "All"
-    : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
-                  <a href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
+                  ? "All"
+                  : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
+                  <a className="telefon-link" href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
                 </div>
-                <div style={{ fontSize: 17, margin: "12px 0 0 0", color: "#444", display: "flex", alignItems: "center", fontWeight: 700 }}>
+                <div className="info-zeile" style={{
+                  fontSize: 17, margin: "12px 0 0 0", color: "#444", display: "flex", alignItems: "center", fontWeight: 700
+                }}>
                   <span>{formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin}</span>
                   <span style={{ margin: "0 5px", fontWeight: 500 }}>|</span>
-                  <span><b>Notizen:</b> {row.bemerkung}</span>
+                  <span className="notiz-label"><b>Notizen:</b> {row.bemerkung}</span>
                 </div>
-                <div style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0,
-                  fontSize: 17,
-                  marginTop: 0,
-                  fontWeight: 700
+                <div className="info-zeile" style={{
+                  display: "flex", alignItems: "center", gap: 0, fontSize: 17, marginTop: 0, fontWeight: 700
                 }}>
                   <span style={{ color: "#16b000" }}>
                     {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
@@ -349,7 +407,7 @@ export default function FahrerListe() {
                   <span style={{ color: "red" }}>{priceDisplay(row)}</span>
                 </div>
               </div>
-              <div style={{
+              <div className="actions" style={{
                 display: "flex",
                 flexDirection: "row",
                 gap: 38,
