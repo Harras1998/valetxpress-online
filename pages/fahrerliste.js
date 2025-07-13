@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 const mobileStyles = `
 @media (max-width: 500px) {
   .fahrer-card {
-    font-size: 13px !important;
+    font-size: 5px !important;
     padding: 7px 3px 5px 6px !important;
     border-radius: 0 !important;
     margin-bottom: 0 !important;
