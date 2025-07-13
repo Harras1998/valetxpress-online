@@ -8,9 +8,9 @@ const mobileStyles = `
   .PXHeader,
   .ui-header,
   .header-bar {
-    height: 36px !important;
+    height: 10px !important;
     min-height: 0 !important;
-    font-size: 13px !important;
+    font-size: 10px !important;
     padding: 0 4px !important;
   }
 
@@ -23,7 +23,7 @@ const mobileStyles = `
   .px-header-title,
   .fahrerliste-label,
   .px-header-username {
-    font-size: 13px !important;
+    font-size: 10px !important;
     line-height: 1.2 !important;
     font-weight: bold !important;
     padding: 0 2px !important;
@@ -32,46 +32,46 @@ const mobileStyles = `
 
   /* Power-Button im Header */
   [title="Abmelden"] {
-    font-size: 20px !important;
+    font-size: 9px !important;
     padding-right: 8px !important;
   }
 
   /* Logo kleiner */
   img[alt="ValetXpress"] {
-    height: 28px !important;
+    height: 9px !important;
     margin-left: 5px !important;
     margin-right: 3px !important;
   }
 
   /* Tabs und Buttons */
   button {
-    font-size: 12px !important;
+    font-size: 7px !important;
     padding: 3px 8px !important;
     border-radius: 8px !important;
   }
   button:nth-child(2) {
     white-space: nowrap !important;
-    font-size: 11px !important;
+    font-size: 7px !important;
     padding: 2px 6px !important;
   }
 
   /* Suchfeld und Sortierung */
   input[type="text"] {
-    font-size: 11px !important;
+    font-size: 7px !important;
     padding: 4px 7px !important;
     border-radius: 5px !important;
     margin-left: 4px !important;
     margin-right: 4px !important;
   }
   select {
-    font-size: 11px !important;
+    font-size: 8px !important;
     padding: 3px 4px !important;
     min-width: 0 !important;
   }
 
   /* "Anzahl Fahrten" kleiner */
   .anzahl-fahrten {
-    font-size: 10px !important;
+    font-size: 5px !important;
     padding: 6px 0 6px 4px !important;
     margin-left: 2px !important;
   }
