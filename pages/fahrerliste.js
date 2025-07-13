@@ -5,46 +5,46 @@ import { useState, useEffect } from "react";
 const mobileStyles = `
 @media (max-width: 500px) {
   .fahrer-card {
-    font-size: 5px !important;
-    padding: 7px 3px 5px 6px !important;
+    font-size: 10px !important;
+    padding: 3px 1px 2px 2px !important;
     border-radius: 0 !important;
     margin-bottom: 0 !important;
     background: #fff !important;
     box-shadow: none !important;
-    border-bottom: 1.5px solid #ccc !important;
+    border-bottom: 1px solid #ccc !important;
     display: block !important;
     overflow-x: auto !important;
   }
   .fahrer-card .info-zeile {
-    font-size: 11px !important;
-    margin: 2px 0 0 0 !important;
+    font-size: 9px !important;
+    margin: 1px 0 0 0 !important;
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: wrap !important;
-    gap: 2px !important;
+    gap: 1px !important;
   }
   .fahrer-card .actions {
     display: flex !important;
     flex-direction: row !important;
-    gap: 8px !important;
+    gap: 5px !important;
     align-items: center !important;
     justify-content: flex-end !important;
     min-width: 0 !important;
-    margin: 4px 5px 0 0 !important;
-    font-size: 14px !important;
+    margin: 2px 2px 0 0 !important;
+    font-size: 10px !important;
   }
   .fahrer-card a {
-    font-size: 13px !important;
+    font-size: 10px !important;
     word-break: break-all !important;
   }
   .fahrer-card span, .fahrer-card b {
-    font-size: 12px !important;
+    font-size: 10px !important;
   }
   .fahrer-card .notiz-label {
-    font-size: 11px !important;
+    font-size: 9px !important;
   }
   .fahrer-card .telefon-link {
-    font-size: 13px !important;
+    font-size: 10px !important;
     color: #001cff !important;
     font-weight: 600 !important;
     text-decoration: underline !important;
