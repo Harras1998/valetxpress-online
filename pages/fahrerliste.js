@@ -1,117 +1,6 @@
 // fahrerliste.js
 import { useState, useEffect } from "react";
 
-// Mobile-optimierte Styles mit Media Queries
-const responsive = {
-  // z.B. für die Haupt-Container-Breite und Fontgrößen
-  container: {
-    width: "100%",
-    minHeight: "100vh",
-    background: "#e2e2e2",
-    fontFamily: "Arial",
-    overflowX: "hidden",
-  },
-  fahrtenBox: {
-    marginBottom: 0,
-    borderRadius: 0,
-    background: "#fff",
-    padding: "16px 0 8px 0",
-    boxShadow: "none",
-    border: "none",
-    borderBottom: "2px solid #ccc",
-    display: "flex",
-    alignItems: "flex-start",
-    fontSize: "32px",
-    fontFamily: "Arial, Helvetica, sans-serif",
-  },
-  cardLeft: {
-    flex: 1,
-    marginLeft: 18,
-    minWidth: 0,
-  },
-  cardHeader: {
-    fontWeight: "bold",
-    fontSize: 25,
-    marginBottom: 0,
-    wordBreak: "break-word",
-  },
-  abflugInfo: {
-    fontSize: 17,
-    margin: "12px 0 0 0",
-    color: "#444",
-    display: "flex",
-    alignItems: "center",
-    fontWeight: 700,
-    flexWrap: "wrap",
-  },
-  rueckflugInfo: {
-    display: "flex",
-    alignItems: "center",
-    gap: 0,
-    fontSize: 17,
-    marginTop: 0,
-    fontWeight: 700,
-    flexWrap: "wrap",
-  },
-  iconCol: {
-    display: "flex",
-    flexDirection: "row",
-    gap: 38,
-    alignItems: "center",
-    minWidth: 120,
-    justifyContent: "flex-end",
-    marginRight: 10,
-  },
-  // Responsive Anpassungen
-  '@media (max-width: 650px)': {
-    fahrtenBox: {
-      flexDirection: "column",
-      fontSize: "21px",
-      padding: "12px 3vw 12px 2vw",
-    },
-    cardHeader: {
-      fontSize: 19,
-    },
-    abflugInfo: {
-      fontSize: 14,
-      flexWrap: "wrap",
-    },
-    rueckflugInfo: {
-      fontSize: 14,
-      flexWrap: "wrap",
-    },
-    cardLeft: {
-      marginLeft: 0,
-      marginBottom: 12,
-    },
-    iconCol: {
-      gap: 28,
-      minWidth: 0,
-      marginRight: 0,
-    },
-  }
-};
-
-// Inline Style Helper für Media Queries (funktioniert mit React)
-function applyResponsive(base, styleObj) {
-  // base: z.B. responsive.fahrtenBox
-  // styleObj: responsive
-  let result = { ...base };
-  if (typeof window !== "undefined" && window.matchMedia) {
-    if (window.matchMedia("(max-width: 650px)").matches) {
-      // Merge überschreiben
-      Object.keys(styleObj["@media (max-width: 650px)"] || {}).forEach(k => {
-        if (k === Object.keys(base)[0]) {
-          Object.assign(result, styleObj["@media (max-width: 650px)"][k]);
-        } else if (k === "fahrtenBox" && base === responsive.fahrtenBox) {
-          Object.assign(result, styleObj["@media (max-width: 650px)"][k]);
-        }
-      });
-    }
-  }
-  return result;
-}
-
 // Header-Komponente wie gehabt
 function PXHeader({
   username,
@@ -123,8 +12,6 @@ function PXHeader({
   setSort,
   onLogout,
 }) {
-  // Header: Mobile Optimierung
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 650;
   return (
     <div style={{
       width: "100%",
@@ -137,27 +24,27 @@ function PXHeader({
         width: "100%",
         display: "flex",
         alignItems: "center",
-        padding: isMobile ? "0 10px 0 10px" : "0 0 0 24px",
-        height: isMobile ? 48 : 56,
+        padding: "0 0 0 24px",
+        height: 56,
         background: "linear-gradient(#222,#222 85%,#222a 100%)",
         borderBottom: "1.5px solid #666",
         color: "#fff",
-        fontSize: isMobile ? 21 : 28,
+        fontSize: 28,
         fontWeight: "bold",
         letterSpacing: 0.5,
-        fontFamily: "Arial, Helvetica, sans-serif",
+        fontFamily: "Arial, Helvetica, sans-serif"
       }}>
-        <div style={{ fontSize: isMobile ? 18 : 28, fontWeight: "bold", minWidth: isMobile ? 80 : undefined }}>{username || ""}</div>
-        <div style={{ flex: 1, textAlign: "center", fontWeight: "bold", fontSize: isMobile ? 19 : 28 }}>
+        <div style={{ fontSize: 28, fontWeight: "bold" }}>{username || ""}</div>
+        <div style={{ flex: 1, textAlign: "center", fontWeight: "bold", fontSize: 28 }}>
           <span style={{ color: "#fff" }}>Valet</span>
           <span style={{ color: "#a2ff44" }}>X</span>
           <span style={{ color: "#fff" }}>press-</span>
-          <span style={{ color: "#fff", fontWeight: 400, fontSize: isMobile ? 15 : 24 }}>Fahrerliste</span>
+          <span style={{ color: "#fff", fontWeight: 400, fontSize: 24 }}>Fahrerliste</span>
         </div>
-        <div style={{ minWidth: isMobile ? 36 : 50, textAlign: "right", paddingRight: isMobile ? 12 : 28 }}>
+        <div style={{ minWidth: 50, textAlign: "right", paddingRight: 28 }}>
           <span
             style={{
-              fontSize: isMobile ? 26 : 36,
+              fontSize: 36,
               fontWeight: 200,
               color: "#fff",
               cursor: "pointer",
@@ -172,22 +59,21 @@ function PXHeader({
       <div style={{
         background: "#ededed",
         width: "100%",
-        minHeight: isMobile ? 42 : 68,
+        minHeight: 68,
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        borderBottom: "1.5px solid #dedede",
-        flexWrap: isMobile ? "wrap" : undefined,
+        borderBottom: "1.5px solid #dedede"
       }}>
-        <div style={{ display: "flex", alignItems: "center", marginLeft: isMobile ? 4 : 14, gap: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", marginLeft: 14, gap: 0 }}>
           <button
             onClick={() => setTab("heute")}
             style={{
               background: tab === "heute" ? "#6DB6E2" : "#fff",
               color: tab === "heute" ? "#fff" : "#222",
               fontWeight: "bold",
-              fontSize: isMobile ? 15 : 24,
-              padding: isMobile ? "3px 14px" : "7px 36px",
+              fontSize: 24,
+              padding: "7px 36px",
               border: "1px solid #ccc",
               borderRight: "none",
               borderRadius: "16px 0 0 16px"
@@ -198,8 +84,8 @@ function PXHeader({
               background: tab === "2tage" ? "#6DB6E2" : "#fff",
               color: tab === "2tage" ? "#fff" : "#222",
               fontWeight: "bold",
-              fontSize: isMobile ? 15 : 24,
-              padding: isMobile ? "3px 14px" : "7px 36px",
+              fontSize: 24,
+              padding: "7px 36px",
               border: "1px solid #ccc",
               borderRight: "none",
               borderLeft: "none",
@@ -211,20 +97,14 @@ function PXHeader({
               background: tab === "alle" ? "#6DB6E2" : "#fff",
               color: tab === "alle" ? "#fff" : "#222",
               fontWeight: "bold",
-              fontSize: isMobile ? 15 : 24,
-              padding: isMobile ? "3px 14px" : "7px 36px",
+              fontSize: 24,
+              padding: "7px 36px",
               border: "1px solid #ccc",
               borderLeft: "none",
               borderRadius: "0 16px 16px 0"
             }}>Alle</button>
         </div>
-        <div style={{
-          flex: 1,
-          display: "flex",
-          alignItems: "center",
-          margin: isMobile ? "0 5px" : "0 26px",
-          maxWidth: isMobile ? 230 : 620,
-        }}>
+        <div style={{ flex: 1, display: "flex", alignItems: "center", margin: "0 26px", maxWidth: 620 }}>
           <input
             type="text"
             value={suchtext}
@@ -232,40 +112,35 @@ function PXHeader({
             placeholder="Suche nach Kennzeichen, Name, Flug…"
             style={{
               width: "100%",
-              fontSize: isMobile ? 12 : 18,
-              padding: isMobile ? "4px 5px" : "7px 15px",
+              fontSize: 18,
+              padding: "7px 15px",
               borderRadius: 8,
               border: "1px solid #bbb",
-              marginLeft: isMobile ? 7 : 16,
-              marginRight: isMobile ? 7 : 16
+              marginLeft: 16,
+              marginRight: 16
             }}
           />
         </div>
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          gap: isMobile ? 12 : 32,
-          marginRight: isMobile ? 7 : 38
-        }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 32, marginRight: 38 }}>
           <select
             value={sort}
             onChange={e => setSort(e.target.value)}
             style={{
               color: "#1689ca",
-              fontSize: isMobile ? 14 : 22,
+              fontSize: 22,
               fontWeight: "bold",
               border: "none",
               background: "none",
               textDecoration: "underline",
               cursor: "pointer",
-              marginRight: isMobile ? 5 : 20
+              marginRight: 20
             }}
           >
             <option value="abflugdatum">Sortieren: Abflugdatum</option>
             <option value="rueckflugdatum">Sortieren: Rückflugdatum</option>
             <option value="name">Sortieren: Name</option>
           </select>
-          <img src="/images/Logo.png" alt="ValetXpress" height={isMobile ? 34 : 58} style={{ marginLeft: isMobile ? 3 : 18, marginRight: isMobile ? 3 : 10 }} />
+          <img src="/images/Logo.png" alt="ValetXpress" height={58} style={{ marginLeft: 18, marginRight: 10 }} />
         </div>
       </div>
     </div>
@@ -396,9 +271,14 @@ export default function FahrerListe() {
       </div>
     );
 
-  // --- MOBILE Style Logic: nutze applyResponsive für Boxen ---
   return (
-    <div style={responsive.container}>
+    <div style={{
+      width: "100%",
+      minHeight: "100vh",
+      background: "#e2e2e2",
+      fontFamily: "Arial",
+      overflowX: "hidden"
+    }}>
       <PXHeader
         username={username}
         tab={tab}
@@ -426,21 +306,40 @@ export default function FahrerListe() {
           {filtered.map(row => (
             <div
               key={row.id}
-              style={applyResponsive(responsive.fahrtenBox, responsive)}
+              style={{
+                marginBottom: 0,
+                borderRadius: 0,
+                background: cardColor(row),
+                padding: "16px 0 8px 0",
+                boxShadow: "none",
+                border: "none",
+                borderBottom: "2px solid #ccc",
+                display: "flex",
+                alignItems: "flex-start",
+                fontSize: "32px",
+                fontFamily: "Arial, Helvetica, sans-serif"
+              }}
             >
-              <div style={applyResponsive(responsive.cardLeft, responsive)}>
-                <div style={applyResponsive(responsive.cardHeader, responsive)}>
+              <div style={{ flex: 1, marginLeft: 18 }}>
+                <div style={{ fontWeight: "bold", fontSize: 25, marginBottom: 0 }}>
                   {row.abflugUhrzeit} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
-                    ? "All"
-                    : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
+    ? "All"
+    : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
                   <a href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
                 </div>
-                <div style={applyResponsive(responsive.abflugInfo, responsive)}>
+                <div style={{ fontSize: 17, margin: "12px 0 0 0", color: "#444", display: "flex", alignItems: "center", fontWeight: 700 }}>
                   <span>{formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin}</span>
                   <span style={{ margin: "0 5px", fontWeight: 500 }}>|</span>
                   <span><b>Notizen:</b> {row.bemerkung}</span>
                 </div>
-                <div style={applyResponsive(responsive.rueckflugInfo, responsive)}>
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0,
+                  fontSize: 17,
+                  marginTop: 0,
+                  fontWeight: 700
+                }}>
                   <span style={{ color: "#16b000" }}>
                     {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
                   </span>
@@ -450,7 +349,15 @@ export default function FahrerListe() {
                   <span style={{ color: "red" }}>{priceDisplay(row)}</span>
                 </div>
               </div>
-              <div style={applyResponsive(responsive.iconCol, responsive)}>
+              <div style={{
+                display: "flex",
+                flexDirection: "row",
+                gap: 38,
+                alignItems: "center",
+                minWidth: 270,
+                justifyContent: "flex-end",
+                marginRight: 30
+              }}>
                 <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Bearbeiten">✏️</span>
                 <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
                 <a href={`tel:${row.telefon}`}>
