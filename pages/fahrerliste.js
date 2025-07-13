@@ -4,6 +4,70 @@ import { useState, useEffect } from "react";
 // ======= Mobile Style-Injection für ParkXpress-Optik =======
 const mobileStyles = `
 @media (max-width: 500px) {
+  /* Header allgemein kleiner */
+  .ui-header, .header-bar, .PXHeader, .px-header {
+    height: 38px !important;
+    min-height: 0 !important;
+    font-size: 14px !important;
+    padding: 0 4px !important;
+  }
+  /* Username, Logo und Titel kompakt */
+  .PXHeader > div,
+  .ui-header > div,
+  .header-bar > div {
+    font-size: 14px !important;
+    padding: 0 2px !important;
+    min-height: 0 !important;
+  }
+  /* ValetXpress "Markenlogo"-Text noch kleiner */
+  .PXHeader span,
+  .header-bar span {
+    font-size: 13px !important;
+    letter-spacing: 0 !important;
+  }
+  /* Power-Button kleiner */
+  .PXHeader [title="Abmelden"], .ui-header [title="Abmelden"] {
+    font-size: 20px !important;
+    padding-right: 8px !important;
+  }
+  /* Tabs kleiner */
+  button {
+    font-size: 12px !important;
+    padding: 3px 8px !important;
+    border-radius: 8px !important;
+  }
+  /* "2-Tage" Tab zentriert, Zeilenumbruch reduzieren */
+  button:nth-child(2) {
+    white-space: nowrap !important;
+    font-size: 11px !important;
+    padding: 2px 6px !important;
+  }
+  /* Suchfeld */
+  input[type="text"] {
+    font-size: 11px !important;
+    padding: 4px 7px !important;
+    border-radius: 5px !important;
+    margin-left: 4px !important;
+    margin-right: 4px !important;
+  }
+  select {
+    font-size: 11px !important;
+    padding: 3px 4px !important;
+    min-width: 0 !important;
+  }
+  /* Logo kleiner */
+  img[alt="ValetXpress"] {
+    height: 28px !important;
+    margin-left: 5px !important;
+    margin-right: 3px !important;
+  }
+  /* "Anzahl Fahrten" kleiner */
+  .anzahl-fahrten {
+    font-size: 10px !important;
+    padding: 6px 0 6px 4px !important;
+    margin-left: 2px !important;
+  }
+}
   .fahrer-card-title {
     font-size: 11px !important;
     font-weight: bold !important;
