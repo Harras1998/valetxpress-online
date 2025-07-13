@@ -4,17 +4,18 @@ import { useState, useEffect } from "react";
 // ======= Mobile Style-Injection für ParkXpress-Optik =======
 const mobileStyles = `
 @media (max-width: 500px) {
-  /* HEADER-BEREICH EXTREM KOMPAKT */
+  /* HEADER kompakt wie ParkXpress */
   .PXHeader,
   .ui-header,
   .header-bar {
-    height: 25px !important;
+    height: 32px !important;
     min-height: 0 !important;
-    font-size: 9px !important;
-    padding: 0 1px !important;
+    font-size: 11px !important;
+    padding: 0 2px !important;
+    background: linear-gradient(#222 85%, #eee 100%) !important;
   }
 
-  /* Header-Titel, Username, Unterzeile */
+  /* Header-Titel und Username */
   .PXHeader > div,
   .PXHeader > div > span,
   .PXHeader span,
@@ -23,61 +24,62 @@ const mobileStyles = `
   .px-header-title,
   .fahrerliste-label,
   .px-header-username {
-    font-size: 9px !important;
+    font-size: 12px !important;
     line-height: 1.1 !important;
     font-weight: bold !important;
     padding: 0 1px !important;
     letter-spacing: 0 !important;
   }
 
-  /* Power-Button im Header */
+  /* Logout-Button (Power Icon) */
   [title="Abmelden"] {
-    font-size: 13px !important;
-    padding-right: 3px !important;
+    font-size: 18px !important;
+    padding-right: 4px !important;
   }
 
-  /* Logo noch kleiner */
-  img[alt="ValetXpress"] {
-    height: 14px !important;
-    margin-left: 1px !important;
-    margin-right: 1px !important;
+  /* Logo/Brand */
+  img[alt="ValetXpress"], img[alt="PARKXPRESS"] {
+    height: 20px !important;
+    margin-left: 2px !important;
+    margin-right: 2px !important;
   }
 
-  /* Tabs/Buttons MINI */
+  /* Tabs/Buttons */
   button {
-    font-size: 8px !important;
-    padding: 1px 4px !important;
-    border-radius: 5px !important;
-    height: 18px !important;
-    min-width: 32px !important;
+    font-size: 11px !important;
+    padding: 2px 10px !important;
+    border-radius: 8px !important;
+    height: 24px !important;
+    min-width: 38px !important;
+    margin-right: 1px !important;
   }
   button:nth-child(2) {
     white-space: nowrap !important;
-    font-size: 8px !important;
-    padding: 1px 3px !important;
+    font-size: 11px !important;
+    padding: 2px 6px !important;
   }
 
-  /* Suchfeld und Sortierung winzig */
+  /* Input und Select */
   input[type="text"] {
-    font-size: 8px !important;
-    padding: 2px 4px !important;
-    border-radius: 3px !important;
+    font-size: 11px !important;
+    padding: 3px 6px !important;
+    border-radius: 6px !important;
     margin-left: 2px !important;
     margin-right: 2px !important;
-    height: 16px !important;
-    min-width: 40px !important;
+    height: 22px !important;
+    min-width: 60px !important;
   }
   select {
-    font-size: 8px !important;
-    padding: 2px 3px !important;
-    min-width: 20px !important;
-    height: 16px !important;
+    font-size: 11px !important;
+    padding: 2px 5px !important;
+    min-width: 40px !important;
+    height: 22px !important;
   }
 
-  /* "Anzahl Fahrten" extra klein */
+  /* "Anzahl Fahrten" */
   .anzahl-fahrten {
-    font-size: 8px !important;
-    padding: 3px 0 3px 2px !important;
+    font-size: 11px !important;
+    padding: 5px 0 5px 2px !important;
     margin-left: 1px !important;
   }
 
