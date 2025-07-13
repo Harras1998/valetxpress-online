@@ -4,45 +4,58 @@ import { useState, useEffect } from "react";
 // ======= Mobile Style-Injection für ParkXpress-Optik =======
 const mobileStyles = `
 @media (max-width: 500px) {
-  /* Header allgemein kleiner */
-  .ui-header, .header-bar, .PXHeader, .px-header {
-    height: 38px !important;
+  /* HEADER-BEREICH KOMPAKT */
+  .PXHeader,
+  .ui-header,
+  .header-bar {
+    height: 36px !important;
     min-height: 0 !important;
-    font-size: 14px !important;
+    font-size: 13px !important;
     padding: 0 4px !important;
   }
-  /* Username, Logo und Titel kompakt */
+
+  /* Header-Titel und Username (zentral und links) */
   .PXHeader > div,
-  .ui-header > div,
-  .header-bar > div {
-    font-size: 14px !important;
-    padding: 0 2px !important;
-    min-height: 0 !important;
-  }
-  /* ValetXpress "Markenlogo"-Text noch kleiner */
+  .PXHeader > div > span,
   .PXHeader span,
-  .header-bar span {
+  .ui-header > div,
+  .ui-header span,
+  .px-header-title,
+  .fahrerliste-label,
+  .px-header-username {
     font-size: 13px !important;
+    line-height: 1.2 !important;
+    font-weight: bold !important;
+    padding: 0 2px !important;
     letter-spacing: 0 !important;
   }
-  /* Power-Button kleiner */
-  .PXHeader [title="Abmelden"], .ui-header [title="Abmelden"] {
+
+  /* Power-Button im Header */
+  [title="Abmelden"] {
     font-size: 20px !important;
     padding-right: 8px !important;
   }
-  /* Tabs kleiner */
+
+  /* Logo kleiner */
+  img[alt="ValetXpress"] {
+    height: 28px !important;
+    margin-left: 5px !important;
+    margin-right: 3px !important;
+  }
+
+  /* Tabs und Buttons */
   button {
     font-size: 12px !important;
     padding: 3px 8px !important;
     border-radius: 8px !important;
   }
-  /* "2-Tage" Tab zentriert, Zeilenumbruch reduzieren */
   button:nth-child(2) {
     white-space: nowrap !important;
     font-size: 11px !important;
     padding: 2px 6px !important;
   }
-  /* Suchfeld */
+
+  /* Suchfeld und Sortierung */
   input[type="text"] {
     font-size: 11px !important;
     padding: 4px 7px !important;
@@ -55,19 +68,15 @@ const mobileStyles = `
     padding: 3px 4px !important;
     min-width: 0 !important;
   }
-  /* Logo kleiner */
-  img[alt="ValetXpress"] {
-    height: 28px !important;
-    margin-left: 5px !important;
-    margin-right: 3px !important;
-  }
+
   /* "Anzahl Fahrten" kleiner */
   .anzahl-fahrten {
     font-size: 10px !important;
     padding: 6px 0 6px 4px !important;
     margin-left: 2px !important;
   }
-}
+
+  /* FAHRTENKARTEN KOMPAKT */
   .fahrer-card-title {
     font-size: 11px !important;
     font-weight: bold !important;
@@ -106,7 +115,8 @@ const mobileStyles = `
     font-size: 10px !important;
     word-break: break-all !important;
   }
-  .fahrer-card span, .fahrer-card b {
+  .fahrer-card span,
+  .fahrer-card b {
     font-size: 10px !important;
   }
   .fahrer-card .notiz-label {
@@ -121,6 +131,7 @@ const mobileStyles = `
   }
 }
 `;
+
 
 if (typeof document !== "undefined" && !document.getElementById("mobile-fahrerlist-style")) {
   const style = document.createElement("style");
