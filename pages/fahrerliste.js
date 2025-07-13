@@ -4,17 +4,17 @@ import { useState, useEffect } from "react";
 // ======= Mobile Style-Injection für ParkXpress-Optik =======
 const mobileStyles = `
 @media (max-width: 500px) {
-  /* HEADER-BEREICH KOMPAKT */
+  /* HEADER-BEREICH EXTREM KOMPAKT */
   .PXHeader,
   .ui-header,
   .header-bar {
-    height: 10px !important;
+    height: 25px !important;
     min-height: 0 !important;
-    font-size: 10px !important;
-    padding: 0 4px !important;
+    font-size: 9px !important;
+    padding: 0 1px !important;
   }
 
-  /* Header-Titel und Username (zentral und links) */
+  /* Header-Titel, Username, Unterzeile */
   .PXHeader > div,
   .PXHeader > div > span,
   .PXHeader span,
@@ -23,68 +23,73 @@ const mobileStyles = `
   .px-header-title,
   .fahrerliste-label,
   .px-header-username {
-    font-size: 10px !important;
-    line-height: 1.2 !important;
+    font-size: 9px !important;
+    line-height: 1.1 !important;
     font-weight: bold !important;
-    padding: 0 2px !important;
+    padding: 0 1px !important;
     letter-spacing: 0 !important;
   }
 
   /* Power-Button im Header */
   [title="Abmelden"] {
-    font-size: 9px !important;
-    padding-right: 8px !important;
+    font-size: 13px !important;
+    padding-right: 3px !important;
   }
 
-  /* Logo kleiner */
+  /* Logo noch kleiner */
   img[alt="ValetXpress"] {
-    height: 9px !important;
-    margin-left: 5px !important;
-    margin-right: 3px !important;
+    height: 14px !important;
+    margin-left: 1px !important;
+    margin-right: 1px !important;
   }
 
-  /* Tabs und Buttons */
+  /* Tabs/Buttons MINI */
   button {
-    font-size: 7px !important;
-    padding: 3px 8px !important;
-    border-radius: 8px !important;
+    font-size: 8px !important;
+    padding: 1px 4px !important;
+    border-radius: 5px !important;
+    height: 18px !important;
+    min-width: 32px !important;
   }
   button:nth-child(2) {
     white-space: nowrap !important;
-    font-size: 7px !important;
-    padding: 2px 6px !important;
+    font-size: 8px !important;
+    padding: 1px 3px !important;
   }
 
-  /* Suchfeld und Sortierung */
+  /* Suchfeld und Sortierung winzig */
   input[type="text"] {
-    font-size: 7px !important;
-    padding: 4px 7px !important;
-    border-radius: 5px !important;
-    margin-left: 4px !important;
-    margin-right: 4px !important;
+    font-size: 8px !important;
+    padding: 2px 4px !important;
+    border-radius: 3px !important;
+    margin-left: 2px !important;
+    margin-right: 2px !important;
+    height: 16px !important;
+    min-width: 40px !important;
   }
   select {
     font-size: 8px !important;
-    padding: 3px 4px !important;
-    min-width: 0 !important;
+    padding: 2px 3px !important;
+    min-width: 20px !important;
+    height: 16px !important;
   }
 
-  /* "Anzahl Fahrten" kleiner */
+  /* "Anzahl Fahrten" extra klein */
   .anzahl-fahrten {
-    font-size: 5px !important;
-    padding: 6px 0 6px 4px !important;
-    margin-left: 2px !important;
+    font-size: 8px !important;
+    padding: 3px 0 3px 2px !important;
+    margin-left: 1px !important;
   }
 
-  /* FAHRTENKARTEN KOMPAKT */
+  /* FAHRTENKARTEN SEHR KOMPAKT */
   .fahrer-card-title {
-    font-size: 11px !important;
+    font-size: 8px !important;
     font-weight: bold !important;
-    line-height: 1.2 !important;
+    line-height: 1.1 !important;
   }
   .fahrer-card {
-    font-size: 10px !important;
-    padding: 3px 1px 2px 2px !important;
+    font-size: 7px !important;
+    padding: 1px 0px 1px 1px !important;
     border-radius: 0 !important;
     margin-bottom: 0 !important;
     background: #fff !important;
@@ -94,36 +99,36 @@ const mobileStyles = `
     overflow-x: auto !important;
   }
   .fahrer-card .info-zeile {
-    font-size: 9px !important;
-    margin: 1px 0 0 0 !important;
+    font-size: 7px !important;
+    margin: 0 !important;
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: wrap !important;
-    gap: 1px !important;
+    gap: 0 !important;
   }
   .fahrer-card .actions {
     display: flex !important;
     flex-direction: row !important;
-    gap: 5px !important;
+    gap: 2px !important;
     align-items: center !important;
     justify-content: flex-end !important;
     min-width: 0 !important;
-    margin: 2px 2px 0 0 !important;
-    font-size: 10px !important;
+    margin: 1px 1px 0 0 !important;
+    font-size: 8px !important;
   }
   .fahrer-card a {
-    font-size: 10px !important;
+    font-size: 7px !important;
     word-break: break-all !important;
   }
   .fahrer-card span,
   .fahrer-card b {
-    font-size: 10px !important;
+    font-size: 7px !important;
   }
   .fahrer-card .notiz-label {
-    font-size: 9px !important;
+    font-size: 7px !important;
   }
   .fahrer-card .telefon-link {
-    font-size: 10px !important;
+    font-size: 7px !important;
     color: #001cff !important;
     font-weight: 600 !important;
     text-decoration: underline !important;
