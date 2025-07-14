@@ -95,11 +95,19 @@ export default function AvailabilityChecker() {
           >
             VERFÜGBARKEIT PRÜFEN
           </button>
-          {status && (
-            <div className={`availability-status ${status === "AUSGEBUCHT" ? "soldout" : "available"}`}>
-              {status}
-            </div>
-          )}
+          {/* Status-Feld bleibt IMMER erhalten – nur Farbe/Text ändert sich */}
+          <div
+            className={`availability-status ${
+              status === "AUSGEBUCHT"
+                ? "soldout"
+                : status === "VERFÜGBAR"
+                ? "available"
+                : ""
+            }`}
+            aria-live="polite"
+          >
+            {status ? status : ""}
+          </div>
         </div>
       </div>
       <style jsx global>{`
@@ -154,13 +162,21 @@ export default function AvailabilityChecker() {
         .availability-status {
           font-weight: 700;
           font-size: 1.09rem;
-          padding: 0.9rem 1.6rem;
           border-radius: 8px;
-          margin-left: 8px;
           text-align: center;
+          width: 210px !important;
+          min-width: 0 !important;
+          max-width: 100% !important;
           height: 54px;
           display: flex;
           align-items: center;
+          justify-content: center;
+          background: transparent;
+          color: transparent;
+          border: none;
+          padding: 0;
+          margin-left: 8px;
+          transition: background 0.2s, color 0.2s;
         }
         .availability-status.soldout {
           color: #df1b1b;
@@ -196,7 +212,7 @@ export default function AvailabilityChecker() {
           .availability-status {
             margin-top: 4px;
             margin-left: 0;
-            height: auto;
+            height: 54px;
           }
         }
       `}</style>
