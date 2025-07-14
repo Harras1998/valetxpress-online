@@ -156,30 +156,39 @@ export default function AvailabilityChecker() {
           background: #ecffe6;
         }
         @media (max-width: 640px) {
-          .availability-checker {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 12px;
-            padding: 1.1rem 0.5rem;
-          }
-          .availability-input {
-            width: 100% !important;
-            min-width: 0 !important;
-            font-size: 1rem !important;
-            padding: 0.95rem 0.8rem !important;
-          }
-          .availability-btn {
-            width: 100%;
-            padding: 1.1rem 0;
-            font-size: 1.05rem;
-          }
-          .availability-status {
-            width: 100%;
-            margin-left: 0;
-            text-align: center;
-            margin-top: 2px;
-          }
-        }
+  .availability-checker {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 1.1rem 0.5rem;
+  }
+  .availability-input {
+    width: 100% !important;
+    max-width: 400px !important;
+    min-width: 0 !important;
+    font-size: 1rem !important;
+    padding: 0.95rem 0.8rem !important;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+  }
+  .availability-btn {
+    width: 100%;
+    max-width: 400px;
+    padding: 1.1rem 0;
+    font-size: 1.05rem;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+  }
+  .availability-status {
+    width: 100%;
+    max-width: 400px;
+    margin: 2px auto 0 auto;
+    text-align: center;
+    display: block;
+  }
+}
         /* React-datepicker Anpassungen */
         .react-datepicker__input-container input {
           width: 100%;
