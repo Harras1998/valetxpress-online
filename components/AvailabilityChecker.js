@@ -1,16 +1,13 @@
 import { useState } from "react";
 
-// Beispiel: Ausgebuchte Zeiträume (kannst du jederzeit ändern!)
 const soldOutDates = [
-  { from: "2025-07-10", to: "2025-07-23" }, // Beispielzeitraum, einfach anpassen!
-  // weitere ausgebuchte Zeiträume hinzufügen ...
+  { from: "2025-07-10", to: "2025-07-23" },
+  // beliebig ergänzen!
 ];
 
 function isSoldOut(from, to) {
-  // Checks if the selected range overlaps with any sold out range
   return soldOutDates.some(
-    period =>
-      (from <= period.to && to >= period.from)
+    period => (from <= period.to && to >= period.from)
   );
 }
 
@@ -32,79 +29,111 @@ export default function AvailabilityChecker() {
   };
 
   return (
-    <div style={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      gap: 16,
-      background: "rgba(80,80,80,0.4)",
-      padding: "2rem 1rem",
-      borderRadius: 16,
-      marginBottom: 36,
-      marginTop: 24,
-      maxWidth: 800,
-      marginLeft: "auto",
-      marginRight: "auto",
-    }}>
-      <input
-        type="date"
-        value={from}
-        onChange={e => setFrom(e.target.value)}
-        style={{
-          fontSize: "1rem",
-          padding: "1.2rem 1rem",
-          borderRadius: 7,
-          border: "none",
-          boxShadow: "0 1px 6px #0001",
-          width: 180,
-          marginRight: 8,
-        }}
-        placeholder="Datum Hinflug"
-      />
-      <input
-        type="date"
-        value={to}
-        onChange={e => setTo(e.target.value)}
-        style={{
-          fontSize: "1rem",
-          padding: "1.2rem 1rem",
-          borderRadius: 7,
-          border: "none",
-          boxShadow: "0 1px 6px #0001",
-          width: 180,
-          marginRight: 8,
-        }}
-        placeholder="Datum Rückflug"
-      />
-      <button
-        onClick={handleCheck}
-        style={{
-          background: "#8fd642",
-          color: "#fff",
-          fontWeight: 700,
-          padding: "1.2rem 2rem",
-          border: "none",
-          borderRadius: 8,
-          fontSize: "1.1rem",
-          cursor: "pointer",
-          transition: "background .2s",
-        }}
-      >
-        VERFÜGBARKEIT PRÜFEN
-      </button>
-      {status && (
-        <div style={{
-          marginLeft: 16,
-          fontWeight: 700,
-          fontSize: "1.08rem",
-          color: status === "AUSGEBUCHT" ? "#df1b1b" : "#40b355",
-          background: status === "AUSGEBUCHT" ? "#ffebeb" : "#ecffe6",
-          padding: "0.7rem 1.3rem",
-          borderRadius: 8,
-        }}>
-          {status}
-        </div>
-      )}
-    </div>
+    <>
+      <div className="availability-checker">
+        <input
+          type="date"
+          value={from}
+          onChange={e => setFrom(e.target.value)}
+          className="availability-input"
+          placeholder="Datum Hinflug"
+        />
+        <input
+          type="date"
+          value={to}
+          onChange={e => setTo(e.target.value)}
+          className="availability-input"
+          placeholder="Datum Rückflug"
+        />
+        <button
+          onClick={handleCheck}
+          className="availability-btn"
+        >
+          VERFÜGBARKEIT PRÜFEN
+        </button>
+        {status && (
+          <div className={`availability-status ${status === "AUSGEBUCHT" ? "soldout" : "available"}`}>
+            {status}
+          </div>
+        )}
+      </div>
+      <style jsx>{`
+        .availability-checker {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          align-items: center;
+          gap: 18px;
+          background: rgba(80,80,80,0.11);
+          padding: 2rem 1rem;
+          border-radius: 16px;
+          margin-bottom: 36px;
+          margin-top: 10px;
+          max-width: 900px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+        .availability-input {
+          font-size: 1.07rem;
+          padding: 1.18rem 1rem;
+          border-radius: 8px;
+          border: none;
+          box-shadow: 0 1px 6px #0001;
+          width: 210px;
+          background: #fff;
+        }
+        .availability-btn {
+          background: #8fd642;
+          color: #fff;
+          font-weight: 700;
+          padding: 1.18rem 2.1rem;
+          border: none;
+          border-radius: 9px;
+          font-size: 1.12rem;
+          cursor: pointer;
+          transition: background .2s;
+        }
+        .availability-status {
+          font-weight: 700;
+          font-size: 1.09rem;
+          padding: 0.9rem 1.6rem;
+          border-radius: 8px;
+          margin-left: 8px;
+        }
+        .availability-status.soldout {
+          color: #df1b1b;
+          background: #ffebeb;
+        }
+        .availability-status.available {
+          color: #40b355;
+          background: #ecffe6;
+        }
+        @media (max-width: 640px) {
+          .availability-checker {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+            padding: 1.1rem 0.5rem;
+          }
+          .availability-input {
+            width: 100%;
+            min-width: 0;
+            font-size: 1rem;
+            padding: 0.95rem 0.8rem;
+          }
+          .availability-btn {
+            width: 100%;
+            padding: 1.1rem 0;
+            font-size: 1.05rem;
+          }
+          .availability-status {
+            width: 100%;
+            margin-left: 0;
+            text-align: center;
+            margin-top: 2px;
+          }
+        }
+      `}</style>
+    </>
   );
 }

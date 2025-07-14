@@ -1,4 +1,5 @@
 import Image from "next/image";
+import AvailabilityChecker from "./AvailabilityChecker";
 
 export default function HeroSection() {
   return (
@@ -23,7 +24,10 @@ export default function HeroSection() {
         <p>
           ValetXpress bietet Ihnen erstklassigen Service für sorgenfreies Parken – Fahrzeugübergabe direkt am Terminal und sichere Abstellung.
         </p>
-        <a href="/buchen" className="hero-btn">Parkplatz buchen</a>
+        {/* Nur dieser Bereich wurde ersetzt! */}
+        <div style={{ marginTop: 14, width: "100%" }}>
+          <AvailabilityChecker />
+        </div>
       </div>
       <style jsx>{`
         .hero-section {
@@ -92,7 +96,6 @@ export default function HeroSection() {
           box-shadow: 0 4px 18px 0 rgba(32,180,84,0.09);
           transition: background 0.2s;
         }
-
         /* MOBILE OPTIMIERUNG */
         @media (max-width: 900px) {
           .hero-content {
