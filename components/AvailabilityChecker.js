@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useRouter } from "next/router";
 import DatePicker, { registerLocale } from "react-datepicker";
 import de from "date-fns/locale/de";
 import "react-datepicker/dist/react-datepicker.css";
@@ -33,20 +34,36 @@ function addOneDay(date) {
 }
 
 export default function AvailabilityChecker() {
+  const router = useRouter();
   const [from, setFrom] = useState(null);
   const [to, setTo] = useState(null);
   const [status, setStatus] = useState(null);
+
+  // Speichert das letzte verfügbare Paar
+  const [lastAvailable, setLastAvailable] = useState({ from: null, to: null });
 
   const handleCheck = () => {
     if (!from || !to) {
       setStatus("Bitte beide Daten auswählen.");
       return;
     }
-    setStatus(
-      isSoldOut(from, to)
-        ? "AUSGEBUCHT"
-        : "VERFÜGBAR"
-    );
+    if (isSoldOut(from, to)) {
+      setStatus("AUSGEBUCHT");
+      return;
+    }
+    setStatus("VERFÜGBAR");
+    // Daten merken für Buchen-Seite
+    if (typeof window !== "undefined") {
+      localStorage.setItem(
+        "valet_booking_init",
+        JSON.stringify({
+          from: from.toISOString().split("T")[0],
+          to: to.toISOString().split("T")[0],
+        })
+      );
+    }
+    // Sofort weiterleiten
+    router.push("/buchen");
   };
 
   const minToDate = from ? addOneDay(from) : todayDate();
@@ -95,7 +112,6 @@ export default function AvailabilityChecker() {
           >
             VERFÜGBARKEIT PRÜFEN
           </button>
-          {/* Status-Feld bleibt IMMER erhalten – nur Farbe/Text ändert sich */}
           <div
             className={`availability-status ${
               status === "AUSGEBUCHT"
