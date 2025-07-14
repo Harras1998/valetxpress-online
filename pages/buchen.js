@@ -133,17 +133,20 @@ export default function Buchen() {
       const bookingInit = localStorage.getItem("valet_booking_init");
       if (bookingInit) {
         const { from, to } = JSON.parse(bookingInit);
-        setStart(from);
-        setEnd(to);
-        setForm(f => ({
-          ...f,
-          abflugdatum: from,
-          rueckflugdatum: to
-        }));
-        setLastAvailable({ start: from, end: to });
+        if (from && to) {
+          setStart(from);
+          setEnd(to);
+          setForm(f => ({
+            ...f,
+            abflugdatum: from,
+            rueckflugdatum: to
+          }));
+          setLastAvailable({ start: from, end: to });
+        }
       }
     }
   }, []);
+  // -----------------------------------------------------
 
   // Merke letzten verfügbaren Zeitraum
   useEffect(() => {
@@ -158,7 +161,6 @@ export default function Buchen() {
       });
     }
   }, [start, end]);
-  // -----------------------------------------------------
 
   function syncAllBookingState() {
     if (typeof window !== "undefined") {
