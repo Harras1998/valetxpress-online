@@ -1,4 +1,10 @@
 import { useState } from "react";
+import DatePicker, { registerLocale } from "react-datepicker";
+import de from "date-fns/locale/de";
+import "react-datepicker/dist/react-datepicker.css";
+
+// Deutsche Lokalisierung für react-datepicker registrieren
+registerLocale("de", de);
 
 const soldOutDates = [
   { from: "2025-07-10", to: "2025-07-23" },
@@ -6,18 +12,23 @@ const soldOutDates = [
 ];
 
 function isSoldOut(from, to) {
+  if (!from || !to) return false;
+  const fromISO = from.toISOString().split("T")[0];
+  const toISO = to.toISOString().split("T")[0];
   return soldOutDates.some(
-    period => (from <= period.to && to >= period.from)
+    period => (fromISO <= period.to && toISO >= period.from)
   );
 }
 
-function todayISO() {
-  return new Date().toISOString().split("T")[0];
+function todayDate() {
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  return now;
 }
 
 export default function AvailabilityChecker() {
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
+  const [from, setFrom] = useState(null);
+  const [to, setTo] = useState(null);
   const [status, setStatus] = useState(null);
 
   const handleCheck = () => {
@@ -35,30 +46,37 @@ export default function AvailabilityChecker() {
   return (
     <>
       <div className="availability-checker">
-        <div className="availability-field">
-          <label htmlFor="from">Abflugdatum</label>
-          <input
-            id="from"
-            type="date"
-            value={from}
-            min={todayISO()}
-            onChange={e => setFrom(e.target.value)}
-            className="availability-input"
-            aria-label="Abflugdatum"
-          />
-        </div>
-        <div className="availability-field">
-          <label htmlFor="to">Rückflugdatum</label>
-          <input
-            id="to"
-            type="date"
-            value={to}
-            min={todayISO()}
-            onChange={e => setTo(e.target.value)}
-            className="availability-input"
-            aria-label="Rückflugdatum"
-          />
-        </div>
+        <DatePicker
+          locale="de"
+          selected={from}
+          onChange={date => setFrom(date)}
+          selectsStart
+          startDate={from}
+          endDate={to}
+          minDate={todayDate()}
+          placeholderText="Abflugdatum"
+          className="availability-input"
+          dateFormat="dd.MM.yyyy"
+          aria-label="Abflugdatum"
+          autoComplete="off"
+          showPopperArrow={false}
+        />
+        <DatePicker
+          locale="de"
+          selected={to}
+          onChange={date => setTo(date)}
+          selectsEnd
+          startDate={from}
+          endDate={to}
+          minDate={from || todayDate()}
+          placeholderText="Rückflugdatum"
+          className="availability-input"
+          dateFormat="dd.MM.yyyy"
+          aria-label="Rückflugdatum"
+          autoComplete="off"
+          disabled={!from}
+          showPopperArrow={false}
+        />
         <button
           onClick={handleCheck}
           className="availability-btn"
@@ -71,7 +89,7 @@ export default function AvailabilityChecker() {
           </div>
         )}
       </div>
-      <style jsx>{`
+      <style jsx global>{`
         .availability-checker {
           display: flex;
           flex-wrap: wrap;
@@ -87,25 +105,14 @@ export default function AvailabilityChecker() {
           margin-left: auto;
           margin-right: auto;
         }
-        .availability-field {
-          display: flex;
-          flex-direction: column;
-        }
-        .availability-field label {
-          font-size: 1.08rem;
-          font-weight: 500;
-          color: #444;
-          margin-bottom: 0.32em;
-          margin-left: 0.1em;
-        }
         .availability-input {
-          font-size: 1.07rem;
-          padding: 1.18rem 1rem;
-          border-radius: 8px;
-          border: none;
-          box-shadow: 0 1px 6px #0001;
-          width: 210px;
-          background: #fff;
+          font-size: 1.07rem !important;
+          padding: 1.18rem 1rem !important;
+          border-radius: 8px !important;
+          border: none !important;
+          box-shadow: 0 1px 6px #0001 !important;
+          width: 210px !important;
+          background: #fff !important;
         }
         .availability-btn {
           background: #8fd642;
@@ -140,14 +147,11 @@ export default function AvailabilityChecker() {
             gap: 12px;
             padding: 1.1rem 0.5rem;
           }
-          .availability-field {
-            width: 100%;
-          }
           .availability-input {
-            width: 100%;
-            min-width: 0;
-            font-size: 1rem;
-            padding: 0.95rem 0.8rem;
+            width: 100% !important;
+            min-width: 0 !important;
+            font-size: 1rem !important;
+            padding: 0.95rem 0.8rem !important;
           }
           .availability-btn {
             width: 100%;
@@ -160,6 +164,14 @@ export default function AvailabilityChecker() {
             text-align: center;
             margin-top: 2px;
           }
+        }
+        /* React-datepicker Anpassungen */
+        .react-datepicker__input-container input {
+          width: 100%;
+          box-sizing: border-box;
+        }
+        .react-datepicker-popper {
+          z-index: 10002;
         }
       `}</style>
     </>
