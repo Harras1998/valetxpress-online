@@ -26,6 +26,14 @@ function todayDate() {
   return now;
 }
 
+// +1 Tag Hilfsfunktion
+function addOneDay(date) {
+  if (!date) return null;
+  const newDate = new Date(date);
+  newDate.setDate(newDate.getDate() + 1);
+  return newDate;
+}
+
 export default function AvailabilityChecker() {
   const [from, setFrom] = useState(null);
   const [to, setTo] = useState(null);
@@ -43,13 +51,20 @@ export default function AvailabilityChecker() {
     );
   };
 
+  // Rückflug mindestens 1 Tag nach Abflug
+  const minToDate = from ? addOneDay(from) : todayDate();
+
   return (
     <>
       <div className="availability-checker">
         <DatePicker
           locale="de"
           selected={from}
-          onChange={date => setFrom(date)}
+          onChange={date => {
+            setFrom(date);
+            // Rückflugdatum zurücksetzen, wenn vor neuem Abflugdatum
+            if (to && date && to <= date) setTo(null);
+          }}
           selectsStart
           startDate={from}
           endDate={to}
@@ -68,7 +83,7 @@ export default function AvailabilityChecker() {
           selectsEnd
           startDate={from}
           endDate={to}
-          minDate={from || todayDate()}
+          minDate={minToDate}
           placeholderText="Rückflugdatum"
           className="availability-input"
           dateFormat="dd.MM.yyyy"
