@@ -11,7 +11,6 @@ function isSoldOut(from, to) {
   );
 }
 
-// Hilfsfunktion für heutiges Datum im YYYY-MM-DD Format
 function todayISO() {
   return new Date().toISOString().split("T")[0];
 }
@@ -36,24 +35,30 @@ export default function AvailabilityChecker() {
   return (
     <>
       <div className="availability-checker">
-        <input
-          type="date"
-          value={from}
-          min={todayISO()}
-          onChange={e => setFrom(e.target.value)}
-          className="availability-input"
-          placeholder="Abflugdatum"
-          aria-label="Abflugdatum"
-        />
-        <input
-          type="date"
-          value={to}
-          min={todayISO()}
-          onChange={e => setTo(e.target.value)}
-          className="availability-input"
-          placeholder="Rückflugdatum"
-          aria-label="Rückflugdatum"
-        />
+        <div className="availability-field">
+          <label htmlFor="from">Abflugdatum</label>
+          <input
+            id="from"
+            type="date"
+            value={from}
+            min={todayISO()}
+            onChange={e => setFrom(e.target.value)}
+            className="availability-input"
+            aria-label="Abflugdatum"
+          />
+        </div>
+        <div className="availability-field">
+          <label htmlFor="to">Rückflugdatum</label>
+          <input
+            id="to"
+            type="date"
+            value={to}
+            min={todayISO()}
+            onChange={e => setTo(e.target.value)}
+            className="availability-input"
+            aria-label="Rückflugdatum"
+          />
+        </div>
         <button
           onClick={handleCheck}
           className="availability-btn"
@@ -82,6 +87,17 @@ export default function AvailabilityChecker() {
           margin-left: auto;
           margin-right: auto;
         }
+        .availability-field {
+          display: flex;
+          flex-direction: column;
+        }
+        .availability-field label {
+          font-size: 1.08rem;
+          font-weight: 500;
+          color: #444;
+          margin-bottom: 0.32em;
+          margin-left: 0.1em;
+        }
         .availability-input {
           font-size: 1.07rem;
           padding: 1.18rem 1rem;
@@ -90,7 +106,6 @@ export default function AvailabilityChecker() {
           box-shadow: 0 1px 6px #0001;
           width: 210px;
           background: #fff;
-          max-width: 400px;
         }
         .availability-btn {
           background: #8fd642;
@@ -102,8 +117,6 @@ export default function AvailabilityChecker() {
           font-size: 1.12rem;
           cursor: pointer;
           transition: background .2s;
-          max-width: 400px;
-          width: 100%;
         }
         .availability-status {
           font-weight: 700;
@@ -123,22 +136,21 @@ export default function AvailabilityChecker() {
         @media (max-width: 640px) {
           .availability-checker {
             flex-direction: column;
-            align-items: center;
+            align-items: stretch;
             gap: 12px;
             padding: 1.1rem 0.5rem;
           }
-          .availability-input,
-          .availability-btn {
+          .availability-field {
+            width: 100%;
+          }
+          .availability-input {
             width: 100%;
             min-width: 0;
-            max-width: 400px;
             font-size: 1rem;
             padding: 0.95rem 0.8rem;
-            margin-left: auto;
-            margin-right: auto;
-            display: block;
           }
           .availability-btn {
+            width: 100%;
             padding: 1.1rem 0;
             font-size: 1.05rem;
           }
@@ -147,9 +159,6 @@ export default function AvailabilityChecker() {
             margin-left: 0;
             text-align: center;
             margin-top: 2px;
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
           }
         }
       `}</style>
