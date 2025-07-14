@@ -11,6 +11,11 @@ function isSoldOut(from, to) {
   );
 }
 
+// Hilfsfunktion für heutiges Datum im YYYY-MM-DD Format
+function todayISO() {
+  return new Date().toISOString().split("T")[0];
+}
+
 export default function AvailabilityChecker() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -34,16 +39,20 @@ export default function AvailabilityChecker() {
         <input
           type="date"
           value={from}
+          min={todayISO()}
           onChange={e => setFrom(e.target.value)}
           className="availability-input"
-          placeholder="Datum Hinflug"
+          placeholder="Abflugdatum"
+          aria-label="Abflugdatum"
         />
         <input
           type="date"
           value={to}
+          min={todayISO()}
           onChange={e => setTo(e.target.value)}
           className="availability-input"
-          placeholder="Datum Rückflug"
+          placeholder="Rückflugdatum"
+          aria-label="Rückflugdatum"
         />
         <button
           onClick={handleCheck}
@@ -81,6 +90,7 @@ export default function AvailabilityChecker() {
           box-shadow: 0 1px 6px #0001;
           width: 210px;
           background: #fff;
+          max-width: 400px;
         }
         .availability-btn {
           background: #8fd642;
@@ -92,6 +102,8 @@ export default function AvailabilityChecker() {
           font-size: 1.12rem;
           cursor: pointer;
           transition: background .2s;
+          max-width: 400px;
+          width: 100%;
         }
         .availability-status {
           font-weight: 700;
@@ -111,18 +123,22 @@ export default function AvailabilityChecker() {
         @media (max-width: 640px) {
           .availability-checker {
             flex-direction: column;
-            align-items: stretch;
+            align-items: center;
             gap: 12px;
             padding: 1.1rem 0.5rem;
           }
-          .availability-input {
-            width: 100%;
-            min-width: 0;
-            font-size: 1rem;
-            padding: 0.95rem 0.8rem;
-          }
+          .availability-input,
           .availability-btn {
             width: 100%;
+            min-width: 0;
+            max-width: 400px;
+            font-size: 1rem;
+            padding: 0.95rem 0.8rem;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+          }
+          .availability-btn {
             padding: 1.1rem 0;
             font-size: 1.05rem;
           }
@@ -131,6 +147,9 @@ export default function AvailabilityChecker() {
             margin-left: 0;
             text-align: center;
             margin-top: 2px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
           }
         }
       `}</style>
