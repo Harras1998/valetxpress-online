@@ -64,6 +64,22 @@ function HourMinuteSelect({ value, onChange, name, required = false }) {
 }
 // ----------- NEU ENDE -----------
 
+// --------- AUSGEBUCHT LOGIK ---------
+const soldOutDates = [
+  { from: "2025-07-10", to: "2025-07-23" },
+  // beliebig ergänzen!
+];
+
+function isSoldOut(from, to) {
+  if (!from || !to) return false;
+  const fromISO = typeof from === "string" ? from : from.toISOString().split("T")[0];
+  const toISO = typeof to === "string" ? to : to.toISOString().split("T")[0];
+  return soldOutDates.some(
+    period => (fromISO <= period.to && toISO >= period.from)
+  );
+}
+// ------------------------------------
+
 export default function Buchen() {
   const router = useRouter();
   const [type, setType] = useState("valet");
@@ -80,6 +96,9 @@ export default function Buchen() {
   // Fehler-States für Datumseingabe
   const [dateError, setDateError] = useState("");
   const [returnDateError, setReturnDateError] = useState("");
+  // NEU: Sold Out Status
+  const [soldOutStatus, setSoldOutStatus] = useState("");
+  const [lastAvailable, setLastAvailable] = useState({ start: "", end: "" });
 
   // Persönliche Daten
   const [form, setForm] = useState({
@@ -107,6 +126,39 @@ export default function Buchen() {
     agb: false,
     datenschutz: false,
   });
+
+  // ----------- NEU: Vorbelegung + Rücksetzen -----------
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const bookingInit = localStorage.getItem("valet_booking_init");
+      if (bookingInit) {
+        const { from, to } = JSON.parse(bookingInit);
+        setStart(from);
+        setEnd(to);
+        setForm(f => ({
+          ...f,
+          abflugdatum: from,
+          rueckflugdatum: to
+        }));
+        setLastAvailable({ start: from, end: to });
+      }
+    }
+  }, []);
+
+  // Merke letzten verfügbaren Zeitraum
+  useEffect(() => {
+    if (
+      start &&
+      end &&
+      !isSoldOut(start, end)
+    ) {
+      setLastAvailable({
+        start,
+        end
+      });
+    }
+  }, [start, end]);
+  // -----------------------------------------------------
 
   function syncAllBookingState() {
     if (typeof window !== "undefined") {
@@ -292,30 +344,53 @@ export default function Buchen() {
   function handleStartChange(e) {
     const val = e.target.value;
     const min = todayStr();
+    // Neu: SoldOut-Logik hier einbauen
+    let rueck = end;
+    if (!rueck || new Date(rueck) <= new Date(val)) {
+      const next = new Date(val);
+      next.setDate(next.getDate() + 1);
+      rueck = next.toISOString().split("T")[0];
+    }
+    if (isSoldOut(val, rueck)) {
+      setSoldOutStatus("Für den gewählten Zeitraum ist leider kein Parkplatz verfügbar! Zeitraum wurde zurückgesetzt.");
+      setStart(lastAvailable.start || min);
+      setEnd(lastAvailable.end || rueck);
+      setTimeout(() => setSoldOutStatus(""), 3500);
+      return;
+    }
     if (new Date(val) < new Date(min)) {
       setStart(min);
       setDateError("Das Abflugdatum darf nicht in der Vergangenheit liegen.");
       setTimeout(() => setDateError(""), 3500);
     } else {
       setStart(val);
+      setEnd(rueck);
       setDateError("");
+      setSoldOutStatus("");
     }
   }
 
   function handleEndChange(e) {
     const val = e.target.value;
     if (new Date(val) <= new Date(start)) {
-      // Setze Enddatum auf den nächstmöglichen Tag nach Start
       const next = new Date(start);
       next.setDate(next.getDate() + 1);
       const safe = next.toISOString().split("T")[0];
       setEnd(safe);
       setReturnDateError("Das Rückflugdatum muss nach dem Abflugdatum liegen.");
       setTimeout(() => setReturnDateError(""), 3500);
-    } else {
-      setEnd(val);
-      setReturnDateError("");
+      return;
     }
+    if (isSoldOut(start, val)) {
+      setSoldOutStatus("Für den gewählten Zeitraum ist leider kein Parkplatz verfügbar! Zeitraum wurde zurückgesetzt.");
+      setStart(lastAvailable.start || start);
+      setEnd(lastAvailable.end || val);
+      setTimeout(() => setSoldOutStatus(""), 3500);
+      return;
+    }
+    setEnd(val);
+    setReturnDateError("");
+    setSoldOutStatus("");
   }
 
   const minDate = todayStr();
@@ -408,6 +483,12 @@ export default function Buchen() {
                     </div>
                   )}
                 </div>
+                {/* AUSGEBUCHT Status-Hinweis */}
+                {soldOutStatus && (
+                  <div style={{color: "#e53935", fontWeight: "bold", marginTop: 10}}>
+                    {soldOutStatus}
+                  </div>
+                )}
               </div>
 
               {(type === "valet" && days > 0) &&

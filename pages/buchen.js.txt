@@ -23,6 +23,47 @@ function todayStr() {
   return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
 }
 
+// ----------- HIER NEU: ----------
+function HourMinuteSelect({ value, onChange, name, required = false }) {
+  let [h, m] = value ? value.split(":") : ["", ""];
+  h = h || "";
+  m = m || "";
+
+  function handleHourChange(e) {
+    const newH = e.target.value;
+    const newVal = newH && m ? `${newH}:${m}` : newH ? `${newH}:00` : "";
+    onChange({ target: { name, value: newVal } });
+  }
+  function handleMinuteChange(e) {
+    const newM = e.target.value;
+    const newVal = h && newM ? `${h}:${newM}` : "";
+    onChange({ target: { name, value: newVal } });
+  }
+
+  return (
+    <div style={{ display: "flex", gap: 6 }}>
+      <select value={h} onChange={handleHourChange} required={required} style={{ flex: 1 }}>
+        <option value="">--</option>
+        {Array.from({ length: 24 }, (_, i) => (
+          <option key={i} value={String(i).padStart(2, "0")}>
+            {String(i).padStart(2, "0")}
+          </option>
+        ))}
+      </select>
+      <span>:</span>
+      <select value={m} onChange={handleMinuteChange} required={required} style={{ flex: 1 }}>
+        <option value="">--</option>
+        {Array.from({ length: 12 }, (_, i) => (
+          <option key={i} value={String(i * 5).padStart(2, "0")}>
+            {String(i * 5).padStart(2, "0")}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+// ----------- NEU ENDE -----------
+
 export default function Buchen() {
   const router = useRouter();
   const [type, setType] = useState("valet");
@@ -36,6 +77,9 @@ export default function Buchen() {
   const [addLade, setAddLade] = useState(false);
   const [step, setStep] = useState(1);
 
+  // Fehler-States für Datumseingabe
+  const [dateError, setDateError] = useState("");
+  const [returnDateError, setReturnDateError] = useState("");
 
   // Persönliche Daten
   const [form, setForm] = useState({
@@ -48,10 +92,10 @@ export default function Buchen() {
     telefon: "",
     auto: "",
     kennzeichen: "",
-    abflug: "",
+    abflugdatum: "",
     abflugUhrzeit: "",
     ankunftUhrzeit: "",
-    rueckflug: "",
+    rueckflugdatum: "",
     rueckflugUhrzeit: "",
     reiseziel: "",
     fluggesellschaft: "",
@@ -63,50 +107,8 @@ export default function Buchen() {
     agb: false,
     datenschutz: false,
   });
-function syncAllBookingState() {
-  if (typeof window !== "undefined") {
-    const booking = localStorage.getItem("valet_booking");
-    if (booking) {
-      const b = JSON.parse(booking);
-      setForm(b.form || {
-        vorname: "",
-        nachname: "",
-        strasse: "",
-        plz: "",
-        ort: "",
-        email: "",
-        telefon: "",
-        auto: "",
-        kennzeichen: "",
-        abflug: "",
-        abflugUhrzeit: "",
-        ankunftUhrzeit: "",
-        rueckflug: "",
-        rueckflugUhrzeit: "",
-        reiseziel: "",
-        fluggesellschaft: "",
-        flugnummerHin: "",
-        flugnummerRueck: "",
-        terminal: "",
-        handgepaeck: false,
-        bemerkung: "",
-        agb: false,
-        datenschutz: false,
-      });
-      setType(b.type || "valet");
-      setStart(b.start || todayStr());
-      setEnd(b.end || "");
-      setDays(b.days || 0);
-      setPrice(b.price || 0);  // <- neu!
-      setAddOut(!!b.addOut);
-      setAddIn(!!b.addIn);
-      setAddTank(!!b.addTank);
-      setAddLade(!!b.addLade);
-    }
-  }
-}
 
-    useEffect(() => {
+  function syncAllBookingState() {
     if (typeof window !== "undefined") {
       const booking = localStorage.getItem("valet_booking");
       if (booking) {
@@ -121,10 +123,53 @@ function syncAllBookingState() {
           telefon: "",
           auto: "",
           kennzeichen: "",
-          abflug: "",
+          abflugdatum: "",
           abflugUhrzeit: "",
           ankunftUhrzeit: "",
-          rueckflug: "",
+          rueckflugdatum: "",
+          rueckflugUhrzeit: "",
+          reiseziel: "",
+          fluggesellschaft: "",
+          flugnummerHin: "",
+          flugnummerRueck: "",
+          terminal: "",
+          handgepaeck: false,
+          bemerkung: "",
+          agb: false,
+          datenschutz: false,
+        });
+        setType(b.type || "valet");
+        setStart(b.start || todayStr());
+        setEnd(b.end || "");
+        setDays(b.days || 0);
+        setPrice(b.price || 0);  // <- neu!
+        setAddOut(!!b.addOut);
+        setAddIn(!!b.addIn);
+        setAddTank(!!b.addTank);
+        setAddLade(!!b.addLade);
+      }
+    }
+  }
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const booking = localStorage.getItem("valet_booking");
+      if (booking) {
+        const b = JSON.parse(booking);
+        setForm(b.form || {
+          vorname: "",
+          nachname: "",
+          strasse: "",
+          plz: "",
+          ort: "",
+          email: "",
+          telefon: "",
+          auto: "",
+          kennzeichen: "",
+          abflugdatum: "",
+          abflugUhrzeit: "",
+          ankunftUhrzeit: "",
+          rueckflugdatum: "",
           rueckflugUhrzeit: "",
           reiseziel: "",
           fluggesellschaft: "",
@@ -154,7 +199,6 @@ function syncAllBookingState() {
     }
   }, []);
 
-  // Vorauswahl nach Query-Parameter beim ersten Laden
   useEffect(() => {
     if (!router.isReady) return;
     const qType = router.query.type;
@@ -173,7 +217,7 @@ function syncAllBookingState() {
     if (!start || !end || new Date(end) <= new Date(start)) {
       setDays(0); setPrice(0); return;
     }
-    const d = Math.ceil((new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24));
+    const d = Math.ceil((new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24)) + 1;
     setDays(d);
   }, [start, end]);
 
@@ -201,53 +245,89 @@ function syncAllBookingState() {
   }, [type]);
 
   useEffect(() => {
-  if (step === 2) {
-    syncAllBookingState();
+    if (step === 2) {
+      syncAllBookingState();
+    }
+  }, [step]);
+
+  function handleForm(e) {
+    const { name, value, type, checked } = e.target;
+    setForm({ 
+      ...form, 
+      [name]: type === "checkbox" ? checked : value 
+    });
   }
-}, [step]);
-
-function handleForm(e) {
-  const { name, value, type, checked } = e.target;
-  setForm({ 
-    ...form, 
-    [name]: type === "checkbox" ? checked : value 
-  });
-}
-
 
   function handleBookingSubmit(e) {
-  e.preventDefault();
+    e.preventDefault();
 
-  // Buchungsdaten in einer Variablen speichern
-  const bookingData = {
-    form,
-    type,
-    start,
-    end,
-    days,
-    price,
-    addOut,
-    addIn,
-    addTank,
-    addLade,
-  };
+    // Buchungsdaten in einer Variablen speichern
+    const bookingData = {
+      form: {
+      ...form,
+      abflugdatum: start,
+      rueckflugdatum: end,
+      },
+      type,
+      start,
+      end,
+      days,
+      price,
+      addOut,
+      addIn,
+      addTank,
+      addLade,
+    };
 
-  // In localStorage speichern (damit wir sie auf der nächsten Seite abrufen können)
-  if (typeof window !== "undefined") {
-    localStorage.setItem("valet_booking", JSON.stringify(bookingData));
+    // In localStorage speichern (damit wir sie auf der nächsten Seite abrufen können)
+    if (typeof window !== "undefined") {
+      localStorage.setItem("valet_booking", JSON.stringify(bookingData));
+    }
+
+    // Zur Zahlungsseite weiterleiten
+    router.push("/zahlung");
   }
 
-  // Zur Zahlungsseite weiterleiten
-  router.push("/zahlung");
-}
+  // Fehlergeprüfte Handler für Datumfelder:
+  function handleStartChange(e) {
+    const val = e.target.value;
+    const min = todayStr();
+    if (new Date(val) < new Date(min)) {
+      setStart(min);
+      setDateError("Das Abflugdatum darf nicht in der Vergangenheit liegen.");
+      setTimeout(() => setDateError(""), 3500);
+    } else {
+      setStart(val);
+      setDateError("");
+    }
+  }
 
+  function handleEndChange(e) {
+    const val = e.target.value;
+    if (new Date(val) <= new Date(start)) {
+      // Setze Enddatum auf den nächstmöglichen Tag nach Start
+      const next = new Date(start);
+      next.setDate(next.getDate() + 1);
+      const safe = next.toISOString().split("T")[0];
+      setEnd(safe);
+      setReturnDateError("Das Rückflugdatum muss nach dem Abflugdatum liegen.");
+      setTimeout(() => setReturnDateError(""), 3500);
+    } else {
+      setEnd(val);
+      setReturnDateError("");
+    }
+  }
 
   const minDate = todayStr();
 
   return (
     <>
       <Header />
-      <main style={{ minHeight: "80vh", background: "#e5e7eb", padding: "2rem 0" }}>
+      <main style={{
+        background: "#f5f7fa",
+        minHeight: "85vh",
+        padding: 0,
+      }}>
         <div style={{
           maxWidth: 700,
           margin: "2rem auto",
@@ -280,24 +360,31 @@ function handleForm(e) {
                     </select>
                   </label>
                 </div>
+                {/* ABFLUGDATUM mit Fehleranzeige */}
                 <div style={{marginBottom: 8}}>
-                  <label>Anreise:<br />
+                  <label>Abflugdatum:<br />
                     <input
                       type="date"
                       min={minDate}
                       value={start}
-                      onChange={e => setStart(e.target.value)}
+                      onChange={handleStartChange}
                       style={{
                         fontSize: "1rem",
                         borderRadius: 4,
-                        border: "1px solid #bbb",
+                        border: dateError ? "2px solid #e53935" : "1px solid #bbb",
                         padding: "2px 7px"
                       }}
                     />
                   </label>
+                  {dateError && (
+                    <div style={{color: "#e53935", fontSize: "0.97rem", marginTop: 4}}>
+                      {dateError}
+                    </div>
+                  )}
                 </div>
+                {/* RUECKFLUGDATUM mit Fehleranzeige */}
                 <div>
-                  <label>Abreise:<br />
+                  <label>Rückflugdatum:<br />
                     <input
                       type="date"
                       min={start ? (() => {
@@ -306,15 +393,20 @@ function handleForm(e) {
                         return next.toISOString().split("T")[0];
                       })() : minDate}
                       value={end}
-                      onChange={e => setEnd(e.target.value)}
+                      onChange={handleEndChange}
                       style={{
                         fontSize: "1rem",
                         borderRadius: 4,
-                        border: "1px solid #bbb",
+                        border: returnDateError ? "2px solid #e53935" : "1px solid #bbb",
                         padding: "2px 7px"
                       }}
                     />
                   </label>
+                  {returnDateError && (
+                    <div style={{color: "#e53935", fontSize: "0.97rem", marginTop: 4}}>
+                      {returnDateError}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -376,18 +468,18 @@ function handleForm(e) {
               {(type === "valet" || type === "allinclusive") && days > 0 && (
                 <>
                   <div
-                style={{
-                  background: "#e1fbe9",
-                  border: "1px solid #1db95444",
-                  borderRadius: 12,
-                  padding: "18px 18px 10px 18px",
-                  marginBottom: 20,
-                  fontWeight: "bold",
-                  fontSize: "1.25rem"
-                }}>
-                Fahrzeugübernahme bei Abflug am Flughafenterminal <br /><br />
-                Fahrzeugübergabe bei Rückflug am Flughafenterminal
-              </div>
+                    style={{
+                      background: "#e1fbe9",
+                      border: "1px solid #1db95444",
+                      borderRadius: 12,
+                      padding: "18px 18px 10px 18px",
+                      marginBottom: 20,
+                      fontWeight: "bold",
+                      fontSize: "1.25rem"
+                    }}>
+                    Fahrzeugübernahme bei Abflug am Flughafenterminal <br /><br />
+                    Fahrzeugübergabe bei Rückflug am Flughafenterminal
+                  </div>
 
                   <div style={{
                     background: "#e1fbe9",
@@ -420,23 +512,32 @@ function handleForm(e) {
                   marginTop: 0
                 }}
                 onClick={() => {
-               setStep(2);
-  const bookingData = {
-    form,
-    type,
-    start,
-    end,
-    days,
-    price,
-    addOut,
-    addIn,
-    addTank,
-    addLade,
-  };
-  if (typeof window !== "undefined") {
-    localStorage.setItem("valet_booking", JSON.stringify(bookingData));
-  }
-}}
+                  setStep(2);
+                  setForm(f => ({
+                    ...f,
+                    abflugdatum: start,
+                    rueckflugdatum: end,
+                  }));
+                  const bookingData = {
+                    form: {
+                    ...form,
+                    abflugdatum: start,
+                    rueckflugdatum: end,
+                    },
+                    type,
+                    start,
+                    end,
+                    days,
+                    price,
+                    addOut,
+                    addIn,
+                    addTank,
+                    addLade,
+                  };
+                  if (typeof window !== "undefined") {
+                    localStorage.setItem("valet_booking", JSON.stringify(bookingData));
+                  }
+                }}
               >
                 Jetzt buchen
               </button>
@@ -457,48 +558,47 @@ function handleForm(e) {
               </h2>
 
               {/* Box 1: Zusammenfassung */}
-            <div
-  style={{
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    background: "#e1fbe9",
-    border: "1px solid #1db95444",
-    borderRadius: 12,
-    padding: 18,
-    marginBottom: 20,
-    flexWrap: "wrap"
-  }}
->
-  <div style={{ fontSize: 20, minWidth: 180, flex: 1 }}>
-    <strong>Park-Modell:</strong> {type === "valet" ? "Valet-Parking" : "All-Inclusive‑Parking"}<br />
-    <strong>Anreise:</strong> {toDE(start)}<br />
-    <strong>Abreise:</strong> {toDE(end)}<br />
-    <strong>Aufenthaltsdauer:</strong> {days} {days === 1 ? "Tag" : "Tage"}<br />
-    {/* Zusatzleistungen */}
-    {(type === "valet" || type === "allinclusive") && (addOut || addIn || addTank || addLade) && (
-      <>
-        <strong>Gebuchte Zusatzleistungen:</strong>
-        <ul style={{ margin: "6px 0 0 18px", fontSize: 18, listStyle: "disc" }}>
-          {addOut && <li>Außenreinigung</li>}
-          {addIn && <li>Innenreinigung</li>}
-          {addTank && <li>Tankservice</li>}
-          {addLade && <li>Ladeservice für Elektrofahrzeuge exkl. Stromkosten</li>}
-        </ul>
-      </>
-    )}
-  </div>
-  <div style={{
-    minWidth: 120,
-    textAlign: "right",
-    fontSize: 38,
-    color: "#1db954",
-    fontWeight: "bold",
-    flex: 0.7
-  }}>
-    {price} €
-  </div>
-</div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  background: "#e1fbe9",
+                  border: "1px solid #1db95444",
+                  borderRadius: 12,
+                  padding: 18,
+                  marginBottom: 20,
+                  flexWrap: "wrap"
+                }}
+              >
+                <div style={{ fontSize: 20, minWidth: 180, flex: 1 }}>
+                  <strong>Park-Modell:</strong> {type === "valet" ? "Valet-Parking" : "All-Inclusive‑Parking"}<br />
+                  <strong>Abflugdatum:</strong> {toDE(start)}<br />
+                  <strong>Rückflugdatum:</strong> {toDE(end)}<br />
+                  <strong>Aufenthaltsdauer:</strong> {days} {days === 1 ? "Tag" : "Tage"}<br />
+                  {(type === "valet" || type === "allinclusive") && (addOut || addIn || addTank || addLade) && (
+                    <>
+                      <strong>Gebuchte Zusatzleistungen:</strong>
+                      <ul style={{ margin: "6px 0 0 18px", fontSize: 18, listStyle: "disc" }}>
+                        {addOut && <li>Außenreinigung</li>}
+                        {addIn && <li>Innenreinigung</li>}
+                        {addTank && <li>Tankservice</li>}
+                        {addLade && <li>Ladeservice für Elektrofahrzeuge exkl. Stromkosten</li>}
+                      </ul>
+                    </>
+                  )}
+                </div>
+                <div style={{
+                  minWidth: 120,
+                  textAlign: "right",
+                  fontSize: 38,
+                  color: "#1db954",
+                  fontWeight: "bold",
+                  flex: 0.7
+                }}>
+                  {price} €
+                </div>
+              </div>
 
               {/* Box 2: Terminal Hinweise */}
               <div
@@ -566,7 +666,7 @@ function handleForm(e) {
                   <input name="email" type="email" value={form.email} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
 
-                <label>Mobilnummer*: <br />
+                <label>Mobilfunk Nr./Telefon Nr.*: <br />
                   <input name="telefon" type="tel" value={form.telefon} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
 
@@ -574,44 +674,40 @@ function handleForm(e) {
                   <input name="auto" value={form.auto} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
 
-                <label>Kennzeichen*: <br />
+                <label>KFZ-Kennzeichen*: <br />
                   <input name="kennzeichen" value={form.kennzeichen} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
 
-                <label>Ankunft Uhrzeit am Flughafen*:<br />
-                  <input name="ankunftUhrzeit" type="time" value={form.ankunftUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
+                <label>Geplante Ankunftszeit am Treffpunkt (Flughafen) vor Abflug*:<br />
+                  <HourMinuteSelect name="ankunftUhrzeit" type="time" value={form.ankunftUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
 
                 <label>Abflugdatum*: <br />
                   <input
-                    name="abflug"
+                    name="abflugdatum"
                     type="date"
-                    min={minDate}
-                    value={form.abflug}
-                    onChange={handleForm}
-                    required
+                    value={start}
+                    disabled
                     style={{width:"100%"}}
                   />
                 </label><br /><br />
 
                 <label>Abflug-Uhrzeit*: <br />
-                  <input name="abflugUhrzeit" type="time" value={form.abflugUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
+                  <HourMinuteSelect name="abflugUhrzeit" type="time" value={form.abflugUhrzeit} onChange={handleForm} required  style={{width:"100%"}} />
                 </label><br /><br />
 
                 <label>Rückflugdatum*: <br />
                   <input
-                    name="rueckflug"
+                    name="rueckflugdatum"
                     type="date"
-                    min={minDate}
-                    value={form.rueckflug}
-                    onChange={handleForm}
-                    required
+                    value={end}
+                    disabled
                     style={{width:"100%"}}
                   />
                 </label><br /><br />
 
-                <label>Rückflug-Uhrzeit*: <br />
-                  <input name="rueckflugUhrzeit" type="time" value={form.rueckflugUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
+                <label>Rückflug-Uhrzeit (planmäßige Landung)*: <br />
+                  <HourMinuteSelect name="rueckflugUhrzeit" type="time" value={form.rueckflugUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
 
                 <label>Reiseziel*:<br />
@@ -672,6 +768,19 @@ function handleForm(e) {
                   Ich akzeptiere die <a href="/datenschutz" target="_blank">Datenschutzbestimmungen</a>*
                 </label><br /><br />
 
+{/* HIER Pflichtfeld-Hinweis einfügen */}
+<div style={{
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-start",
+  marginBottom: 14,
+  marginTop: -8
+}}>
+  <span style={{ color: "#888", fontSize: "0.97rem", lineHeight: 1 }}>
+    *Pflichtfelder
+  </span>
+</div>
+
                 <button
                   type="submit"
                   style={{
@@ -690,23 +799,27 @@ function handleForm(e) {
                 <button
                   type="button"
                   onClick={() => {
-        setStep(1);
-  const bookingData = {
-    form,
-    type,
-    start,
-    end,
-    days,
-    price,
-    addOut,
-    addIn,
-    addTank,
-    addLade,
-  };
-  if (typeof window !== "undefined") {
-    localStorage.setItem("valet_booking", JSON.stringify(bookingData));
-  }
-}}
+                    setStep(1);
+                    const bookingData = {
+                      form: {
+                    ...form,
+                    abflugdatum: start,
+                    rueckflugdatum: end,
+                    },
+                      type,
+                      start,
+                      end,
+                      days,
+                      price,
+                      addOut,
+                      addIn,
+                      addTank,
+                      addLade,
+                    };
+                    if (typeof window !== "undefined") {
+                      localStorage.setItem("valet_booking", JSON.stringify(bookingData));
+                    }
+                  }}
                   style={{
                     width: "100%",
                     padding: 8,
@@ -725,6 +838,18 @@ function handleForm(e) {
         </div>
       </main>
       <Footer />
+      <style jsx global>{`
+        html, body {
+          font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+          background: #f5f7fa;
+        }
+        @media (max-width: 700px) {
+          h1 { font-size: 2rem !important; }
+          h2 { font-size: 1.2rem !important; }
+          main > div { padding: 1.5rem 4vw; }
+          section { padding: 1.1rem !important; }
+        }
+      `}</style>
     </>
   );
 }
