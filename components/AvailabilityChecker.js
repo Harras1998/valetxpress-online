@@ -3,7 +3,6 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import de from "date-fns/locale/de";
 import "react-datepicker/dist/react-datepicker.css";
 
-// Deutsche Lokalisierung für react-datepicker registrieren
 registerLocale("de", de);
 
 const soldOutDates = [
@@ -26,7 +25,6 @@ function todayDate() {
   return now;
 }
 
-// +1 Tag Hilfsfunktion
 function addOneDay(date) {
   if (!date) return null;
   const newDate = new Date(date);
@@ -51,74 +49,85 @@ export default function AvailabilityChecker() {
     );
   };
 
-  // Rückflug mindestens 1 Tag nach Abflug
+  // Rückflugdatum mindestens 1 Tag nach Abflug
   const minToDate = from ? addOneDay(from) : todayDate();
 
   return (
     <>
       <div className="availability-checker">
-        <DatePicker
-          locale="de"
-          selected={from}
-          onChange={date => {
-            setFrom(date);
-            // Rückflugdatum zurücksetzen, wenn vor neuem Abflugdatum
-            if (to && date && to <= date) setTo(null);
-          }}
-          selectsStart
-          startDate={from}
-          endDate={to}
-          minDate={todayDate()}
-          placeholderText="Abflugdatum"
-          className="availability-input"
-          dateFormat="dd.MM.yyyy"
-          aria-label="Abflugdatum"
-          autoComplete="off"
-          showPopperArrow={false}
-        />
-        <DatePicker
-          locale="de"
-          selected={to}
-          onChange={date => setTo(date)}
-          selectsEnd
-          startDate={from}
-          endDate={to}
-          minDate={minToDate}
-          placeholderText="Rückflugdatum"
-          className="availability-input"
-          dateFormat="dd.MM.yyyy"
-          aria-label="Rückflugdatum"
-          autoComplete="off"
-          disabled={!from}
-          showPopperArrow={false}
-        />
-        <button
-          onClick={handleCheck}
-          className="availability-btn"
-        >
-          VERFÜGBARKEIT PRÜFEN
-        </button>
-        {status && (
-          <div className={`availability-status ${status === "AUSGEBUCHT" ? "soldout" : "available"}`}>
-            {status}
-          </div>
-        )}
+        <div className="availability-box">
+          <DatePicker
+            locale="de"
+            selected={from}
+            onChange={date => {
+              setFrom(date);
+              // Rückflugdatum zurücksetzen, wenn vor neuem Abflugdatum
+              if (to && date && to <= date) setTo(null);
+            }}
+            selectsStart
+            startDate={from}
+            endDate={to}
+            minDate={todayDate()}
+            placeholderText="Abflugdatum"
+            className="availability-input"
+            dateFormat="dd.MM.yyyy"
+            aria-label="Abflugdatum"
+            autoComplete="off"
+            showPopperArrow={false}
+          />
+          <DatePicker
+            locale="de"
+            selected={to}
+            onChange={date => setTo(date)}
+            selectsEnd
+            startDate={from}
+            endDate={to}
+            minDate={minToDate}
+            placeholderText="Rückflugdatum"
+            className="availability-input"
+            dateFormat="dd.MM.yyyy"
+            aria-label="Rückflugdatum"
+            autoComplete="off"
+            disabled={!from}
+            showPopperArrow={false}
+          />
+          <button
+            onClick={handleCheck}
+            className="availability-btn"
+          >
+            VERFÜGBARKEIT PRÜFEN
+          </button>
+          {status && (
+            <div className={`availability-status ${status === "AUSGEBUCHT" ? "soldout" : "available"}`}>
+              {status}
+            </div>
+          )}
+        </div>
       </div>
       <style jsx global>{`
         .availability-checker {
+          width: 100%;
           display: flex;
-          flex-wrap: wrap;
           justify-content: center;
-          align-items: center;
-          gap: 18px;
-          background: rgba(80,80,80,0.11);
-          padding: 2rem 1rem;
-          border-radius: 16px;
-          margin-bottom: 36px;
-          margin-top: 10px;
-          max-width: 900px;
-          margin-left: auto;
-          margin-right: auto;
+        }
+        .availability-box {
+          width: 100%;
+          max-width: 400px;
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          align-items: stretch;
+        }
+        .availability-input,
+        .availability-btn,
+        .availability-status {
+          width: 100% !important;
+          min-width: 0 !important;
+          max-width: 100% !important;
+          margin: 0;
+          display: block;
+          box-sizing: border-box;
         }
         .availability-input {
           font-size: 1.07rem !important;
@@ -126,7 +135,6 @@ export default function AvailabilityChecker() {
           border-radius: 8px !important;
           border: none !important;
           box-shadow: 0 1px 6px #0001 !important;
-          width: 210px !important;
           background: #fff !important;
         }
         .availability-btn {
@@ -139,13 +147,15 @@ export default function AvailabilityChecker() {
           font-size: 1.12rem;
           cursor: pointer;
           transition: background .2s;
+          margin-top: 4px;
         }
         .availability-status {
           font-weight: 700;
           font-size: 1.09rem;
           padding: 0.9rem 1.6rem;
           border-radius: 8px;
-          margin-left: 8px;
+          margin-top: 4px;
+          text-align: center;
         }
         .availability-status.soldout {
           color: #df1b1b;
@@ -155,43 +165,8 @@ export default function AvailabilityChecker() {
           color: #40b355;
           background: #ecffe6;
         }
-        @media (max-width: 640px) {
-  .availability-checker {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-    padding: 1.1rem 0.5rem;
-  }
-  .availability-input {
-    width: 100% !important;
-    max-width: 400px !important;
-    min-width: 0 !important;
-    font-size: 1rem !important;
-    padding: 0.95rem 0.8rem !important;
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
-  }
-  .availability-btn {
-    width: 100%;
-    max-width: 400px;
-    padding: 1.1rem 0;
-    font-size: 1.05rem;
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
-  }
-  .availability-status {
-    width: 100%;
-    max-width: 400px;
-    margin: 2px auto 0 auto;
-    text-align: center;
-    display: block;
-  }
-}
-        /* React-datepicker Anpassungen */
         .react-datepicker__input-container input {
-          width: 100%;
+          width: 100% !important;
           box-sizing: border-box;
         }
         .react-datepicker-popper {
