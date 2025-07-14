@@ -49,7 +49,6 @@ export default function AvailabilityChecker() {
     );
   };
 
-  // Rückflugdatum mindestens 1 Tag nach Abflug
   const minToDate = from ? addOneDay(from) : todayDate();
 
   return (
@@ -61,7 +60,6 @@ export default function AvailabilityChecker() {
             selected={from}
             onChange={date => {
               setFrom(date);
-              // Rückflugdatum zurücksetzen, wenn vor neuem Abflugdatum
               if (to && date && to <= date) setTo(null);
             }}
             selectsStart
@@ -112,22 +110,17 @@ export default function AvailabilityChecker() {
         }
         .availability-box {
           width: 100%;
-          max-width: 400px;
+          max-width: 900px;
           min-width: 0;
           display: flex;
-          flex-direction: column;
-          gap: 12px;
-          align-items: stretch;
-        }
-        .availability-input,
-        .availability-btn,
-        .availability-status {
-          width: 100% !important;
-          min-width: 0 !important;
-          max-width: 100% !important;
-          margin: 0;
-          display: block;
-          box-sizing: border-box;
+          flex-direction: row;
+          gap: 18px;
+          align-items: center;
+          background: rgba(80,80,80,0.11);
+          padding: 2rem 1rem;
+          border-radius: 16px;
+          margin-bottom: 36px;
+          margin-top: 10px;
         }
         .availability-input {
           font-size: 1.07rem !important;
@@ -136,6 +129,9 @@ export default function AvailabilityChecker() {
           border: none !important;
           box-shadow: 0 1px 6px #0001 !important;
           background: #fff !important;
+          width: 210px !important;
+          min-width: 0 !important;
+          max-width: 100% !important;
         }
         .availability-btn {
           background: #8fd642;
@@ -147,15 +143,24 @@ export default function AvailabilityChecker() {
           font-size: 1.12rem;
           cursor: pointer;
           transition: background .2s;
-          margin-top: 4px;
+          min-width: 210px;
+          max-width: 100%;
+          margin-top: 0;
+          height: 54px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
         .availability-status {
           font-weight: 700;
           font-size: 1.09rem;
           padding: 0.9rem 1.6rem;
           border-radius: 8px;
-          margin-top: 4px;
+          margin-left: 8px;
           text-align: center;
+          height: 54px;
+          display: flex;
+          align-items: center;
         }
         .availability-status.soldout {
           color: #df1b1b;
@@ -171,6 +176,28 @@ export default function AvailabilityChecker() {
         }
         .react-datepicker-popper {
           z-index: 10002;
+        }
+        @media (max-width: 640px) {
+          .availability-box {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+            padding: 1.1rem 0.5rem;
+            max-width: 400px;
+          }
+          .availability-input,
+          .availability-btn,
+          .availability-status {
+            width: 100% !important;
+            max-width: 400px !important;
+            margin: 0;
+            min-width: 0 !important;
+          }
+          .availability-status {
+            margin-top: 4px;
+            margin-left: 0;
+            height: auto;
+          }
         }
       `}</style>
     </>
