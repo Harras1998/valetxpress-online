@@ -32,7 +32,7 @@ function parseISO(d) {
   if (!d) return null;
   if (d instanceof Date) return d;
   const [year, month, day] = d.split("-").map(Number);
-  return new Date(year, month - 1, day);
+  return new Date(year, month - 1, day, 12, 0. 0);
 }
 
 // ----------- HIER NEU: ----------
