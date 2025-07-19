@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-
-// DatePicker wie auf der Startseite
 import DatePicker, { registerLocale } from "react-datepicker";
 import de from "date-fns/locale/de";
 import "react-datepicker/dist/react-datepicker.css";
@@ -28,10 +26,13 @@ function todayStr() {
   const t = new Date();
   return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
 }
+
+// WICHTIG: Korrigiert – erzeugt lokales Datum, KEIN UTC-Fehler!
 function parseISO(d) {
   if (!d) return null;
   if (d instanceof Date) return d;
-  return new Date(d + "T12:00:00");
+  const [year, month, day] = d.split("-").map(Number);
+  return new Date(year, month - 1, day);
 }
 
 // ----------- HIER NEU: ----------
@@ -93,7 +94,6 @@ function isSoldOut(from, to) {
 
 export default function Buchen() {
   const router = useRouter();
-  // STATT String: jetzt Date-Objekte für Picker
   const [start, setStart] = useState(null);
   const [end, setEnd] = useState(null);
 
@@ -106,7 +106,6 @@ export default function Buchen() {
   const [addLade, setAddLade] = useState(false);
   const [step, setStep] = useState(1);
 
-  // Fehler-States für Datumseingabe
   const [dateError, setDateError] = useState("");
   const [returnDateError, setReturnDateError] = useState("");
   const [soldOutStatus, setSoldOutStatus] = useState("");
@@ -158,7 +157,6 @@ export default function Buchen() {
     }
   }, []);
 
-  // Merke letzten verfügbaren Zeitraum
   useEffect(() => {
     if (
       start &&
@@ -223,8 +221,6 @@ export default function Buchen() {
 
   function handleBookingSubmit(e) {
     e.preventDefault();
-
-    // Abflug- und Rückflugdatum als YYYY-MM-DD speichern
     const bookingData = {
       form: {
         ...form,
@@ -249,7 +245,6 @@ export default function Buchen() {
     router.push("/zahlung");
   }
 
-  // FEHLERGEPRÜFT für DatePicker
   function handleStartChange(date) {
     let rueck = end;
     if (!rueck || (date && rueck <= date)) {
@@ -645,7 +640,7 @@ export default function Buchen() {
                   <input name="kennzeichen" value={form.kennzeichen} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
                 <label>Geplante Ankunftszeit am Treffpunkt (Flughafen) vor Abflug*:<br />
-                  <HourMinuteSelect name="ankunftUhrzeit" type="time" value={form.ankunftUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
+                  <HourMinuteSelect name="ankunftUhrzeit" value={form.ankunftUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
                 <label>Abflugdatum*: <br />
                   <DatePicker
@@ -665,7 +660,7 @@ export default function Buchen() {
                   />
                 </label><br /><br />
                 <label>Abflug-Uhrzeit*: <br />
-                  <HourMinuteSelect name="abflugUhrzeit" type="time" value={form.abflugUhrzeit} onChange={handleForm} required  style={{width:"100%"}} />
+                  <HourMinuteSelect name="abflugUhrzeit" value={form.abflugUhrzeit} onChange={handleForm} required  style={{width:"100%"}} />
                 </label><br /><br />
                 <label>Rückflugdatum*: <br />
                   <DatePicker
@@ -685,7 +680,7 @@ export default function Buchen() {
                   />
                 </label><br /><br />
                 <label>Rückflug-Uhrzeit (planmäßige Landung)*: <br />
-                  <HourMinuteSelect name="rueckflugUhrzeit" type="time" value={form.rueckflugUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
+                  <HourMinuteSelect name="rueckflugUhrzeit" value={form.rueckflugUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
                 <label>Reiseziel*:<br />
                   <input name="reiseziel" value={form.reiseziel} onChange={handleForm} required style={{width:"100%"}} />
