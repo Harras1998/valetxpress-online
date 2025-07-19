@@ -3,6 +3,12 @@ import { useRouter } from "next/router";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
+// DatePicker wie auf der Startseite
+import DatePicker, { registerLocale } from "react-datepicker";
+import de from "date-fns/locale/de";
+import "react-datepicker/dist/react-datepicker.css";
+registerLocale("de", de);
+
 // Hilfsfunktion für deutsches Datumsformat
 function toDE(dateStr) {
   if (!dateStr) return "";
@@ -21,6 +27,11 @@ function getValet(priceList, days) {
 function todayStr() {
   const t = new Date();
   return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
+}
+function parseISO(d) {
+  if (!d) return null;
+  if (d instanceof Date) return d;
+  return new Date(d + "T12:00:00");
 }
 
 // ----------- HIER NEU: ----------
@@ -82,9 +93,11 @@ function isSoldOut(from, to) {
 
 export default function Buchen() {
   const router = useRouter();
+  // STATT String: jetzt Date-Objekte für Picker
+  const [start, setStart] = useState(null);
+  const [end, setEnd] = useState(null);
+
   const [type, setType] = useState("valet");
-  const [start, setStart] = useState(todayStr());
-  const [end, setEnd] = useState("");
   const [days, setDays] = useState(0);
   const [price, setPrice] = useState(0);
   const [addOut, setAddOut] = useState(false);
@@ -96,11 +109,9 @@ export default function Buchen() {
   // Fehler-States für Datumseingabe
   const [dateError, setDateError] = useState("");
   const [returnDateError, setReturnDateError] = useState("");
-  // NEU: Sold Out Status
   const [soldOutStatus, setSoldOutStatus] = useState("");
-  const [lastAvailable, setLastAvailable] = useState({ start: "", end: "" });
+  const [lastAvailable, setLastAvailable] = useState({ start: null, end: null });
 
-  // Persönliche Daten
   const [form, setForm] = useState({
     vorname: "",
     nachname: "",
@@ -127,26 +138,25 @@ export default function Buchen() {
     datenschutz: false,
   });
 
-  // ----------- NEU: Vorbelegung + Rücksetzen -----------
+  // Vorbelegung mit localStorage, falls vorhanden
   useEffect(() => {
     if (typeof window !== "undefined") {
       const bookingInit = localStorage.getItem("valet_booking_init");
       if (bookingInit) {
         const { from, to } = JSON.parse(bookingInit);
         if (from && to) {
-          setStart(from);
-          setEnd(to);
+          setStart(parseISO(from));
+          setEnd(parseISO(to));
           setForm(f => ({
             ...f,
             abflugdatum: from,
             rueckflugdatum: to
           }));
-          setLastAvailable({ start: from, end: to });
+          setLastAvailable({ start: parseISO(from), end: parseISO(to) });
         }
       }
     }
   }, []);
-  // -----------------------------------------------------
 
   // Merke letzten verfügbaren Zeitraum
   useEffect(() => {
@@ -162,116 +172,21 @@ export default function Buchen() {
     }
   }, [start, end]);
 
-  function syncAllBookingState() {
-    if (typeof window !== "undefined") {
-      const booking = localStorage.getItem("valet_booking");
-      if (booking) {
-        const b = JSON.parse(booking);
-        setForm(b.form || {
-          vorname: "",
-          nachname: "",
-          strasse: "",
-          plz: "",
-          ort: "",
-          email: "",
-          telefon: "",
-          auto: "",
-          kennzeichen: "",
-          abflugdatum: "",
-          abflugUhrzeit: "",
-          ankunftUhrzeit: "",
-          rueckflugdatum: "",
-          rueckflugUhrzeit: "",
-          reiseziel: "",
-          fluggesellschaft: "",
-          flugnummerHin: "",
-          flugnummerRueck: "",
-          terminal: "",
-          handgepaeck: false,
-          bemerkung: "",
-          agb: false,
-          datenschutz: false,
-        });
-        setType(b.type || "valet");
-        setStart(b.start || todayStr());
-        setEnd(b.end || "");
-        setDays(b.days || 0);
-        setPrice(b.price || 0);  // <- neu!
-        setAddOut(!!b.addOut);
-        setAddIn(!!b.addIn);
-        setAddTank(!!b.addTank);
-        setAddLade(!!b.addLade);
+  useEffect(() => {
+    if (!end || (start && end <= start)) {
+      if (start) {
+        const next = new Date(start);
+        next.setDate(next.getDate() + 1);
+        setEnd(next);
       }
-    }
-  }
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const booking = localStorage.getItem("valet_booking");
-      if (booking) {
-        const b = JSON.parse(booking);
-        setForm(b.form || {
-          vorname: "",
-          nachname: "",
-          strasse: "",
-          plz: "",
-          ort: "",
-          email: "",
-          telefon: "",
-          auto: "",
-          kennzeichen: "",
-          abflugdatum: "",
-          abflugUhrzeit: "",
-          ankunftUhrzeit: "",
-          rueckflugdatum: "",
-          rueckflugUhrzeit: "",
-          reiseziel: "",
-          fluggesellschaft: "",
-          flugnummerHin: "",
-          flugnummerRueck: "",
-          terminal: "",
-          handgepaeck: false,
-          bemerkung: "",
-          agb: false,
-          datenschutz: false,
-        });
-        setType(b.type || "valet");
-        setStart(b.start || todayStr());
-        setEnd(b.end || "");
-        setDays(b.days || 0);
-        setAddOut(!!b.addOut);
-        setAddIn(!!b.addIn);
-        setAddTank(!!b.addTank);
-        setAddLade(!!b.addLade);
-
-        // Prüfe auf Schritt 2
-        const url = new URL(window.location.href);
-        if (url.searchParams.get("step") === "2") {
-          setStep(2);
-        }
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!router.isReady) return;
-    const qType = router.query.type;
-    if (qType === "allinclusive" || qType === "valet") setType(qType);
-  }, [router.isReady, router.query]);
-
-  useEffect(() => {
-    if (!end || new Date(end) <= new Date(start)) {
-      const next = new Date(start);
-      next.setDate(next.getDate() + 1);
-      setEnd(next.toISOString().split("T")[0]);
     }
   }, [start]);
 
   useEffect(() => {
-    if (!start || !end || new Date(end) <= new Date(start)) {
+    if (!start || !end || (start && end <= start)) {
       setDays(0); setPrice(0); return;
     }
-    const d = Math.ceil((new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24)) + 1;
+    const d = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
     setDays(d);
   }, [start, end]);
 
@@ -298,12 +213,6 @@ export default function Buchen() {
     }
   }, [type]);
 
-  useEffect(() => {
-    if (step === 2) {
-      syncAllBookingState();
-    }
-  }, [step]);
-
   function handleForm(e) {
     const { name, value, type, checked } = e.target;
     setForm({ 
@@ -315,16 +224,16 @@ export default function Buchen() {
   function handleBookingSubmit(e) {
     e.preventDefault();
 
-    // Buchungsdaten in einer Variablen speichern
+    // Abflug- und Rückflugdatum als YYYY-MM-DD speichern
     const bookingData = {
       form: {
-      ...form,
-      abflugdatum: start,
-      rueckflugdatum: end,
+        ...form,
+        abflugdatum: start ? start.toISOString().split("T")[0] : "",
+        rueckflugdatum: end ? end.toISOString().split("T")[0] : "",
       },
       type,
-      start,
-      end,
+      start: start ? start.toISOString().split("T")[0] : "",
+      end: end ? end.toISOString().split("T")[0] : "",
       days,
       price,
       addOut,
@@ -333,69 +242,61 @@ export default function Buchen() {
       addLade,
     };
 
-    // In localStorage speichern (damit wir sie auf der nächsten Seite abrufen können)
     if (typeof window !== "undefined") {
       localStorage.setItem("valet_booking", JSON.stringify(bookingData));
     }
 
-    // Zur Zahlungsseite weiterleiten
     router.push("/zahlung");
   }
 
-  // Fehlergeprüfte Handler für Datumfelder:
-  function handleStartChange(e) {
-    const val = e.target.value;
-    const min = todayStr();
-    // Neu: SoldOut-Logik hier einbauen
+  // FEHLERGEPRÜFT für DatePicker
+  function handleStartChange(date) {
     let rueck = end;
-    if (!rueck || new Date(rueck) <= new Date(val)) {
-      const next = new Date(val);
+    if (!rueck || (date && rueck <= date)) {
+      const next = new Date(date);
       next.setDate(next.getDate() + 1);
-      rueck = next.toISOString().split("T")[0];
+      rueck = next;
     }
-    if (isSoldOut(val, rueck)) {
+    if (isSoldOut(date, rueck)) {
       setSoldOutStatus("Für den gewählten Zeitraum ist leider kein Parkplatz verfügbar! Zeitraum wurde zurückgesetzt.");
-      setStart(lastAvailable.start || min);
+      setStart(lastAvailable.start || date);
       setEnd(lastAvailable.end || rueck);
       setTimeout(() => setSoldOutStatus(""), 3500);
       return;
     }
-    if (new Date(val) < new Date(min)) {
-      setStart(min);
+    if (date < new Date(new Date().toDateString())) {
+      setStart(new Date());
       setDateError("Das Abflugdatum darf nicht in der Vergangenheit liegen.");
       setTimeout(() => setDateError(""), 3500);
     } else {
-      setStart(val);
+      setStart(date);
       setEnd(rueck);
       setDateError("");
       setSoldOutStatus("");
     }
   }
-
-  function handleEndChange(e) {
-    const val = e.target.value;
-    if (new Date(val) <= new Date(start)) {
+  function handleEndChange(date) {
+    if (start && date <= start) {
       const next = new Date(start);
       next.setDate(next.getDate() + 1);
-      const safe = next.toISOString().split("T")[0];
-      setEnd(safe);
+      setEnd(next);
       setReturnDateError("Das Rückflugdatum muss nach dem Abflugdatum liegen.");
       setTimeout(() => setReturnDateError(""), 3500);
       return;
     }
-    if (isSoldOut(start, val)) {
+    if (isSoldOut(start, date)) {
       setSoldOutStatus("Für den gewählten Zeitraum ist leider kein Parkplatz verfügbar! Zeitraum wurde zurückgesetzt.");
       setStart(lastAvailable.start || start);
-      setEnd(lastAvailable.end || val);
+      setEnd(lastAvailable.end || date);
       setTimeout(() => setSoldOutStatus(""), 3500);
       return;
     }
-    setEnd(val);
+    setEnd(date);
     setReturnDateError("");
     setSoldOutStatus("");
   }
 
-  const minDate = todayStr();
+  const minDate = new Date();
 
   return (
     <>
@@ -437,20 +338,21 @@ export default function Buchen() {
                     </select>
                   </label>
                 </div>
-                {/* ABFLUGDATUM mit Fehleranzeige */}
+                {/* Abflugdatum DatePicker */}
                 <div style={{marginBottom: 8}}>
                   <label>Abflugdatum:<br />
-                    <input
-                      type="date"
-                      min={minDate}
-                      value={start}
+                    <DatePicker
+                      locale="de"
+                      dateFormat="dd.MM.yyyy"
+                      selected={start}
                       onChange={handleStartChange}
-                      style={{
-                        fontSize: "1rem",
-                        borderRadius: 4,
-                        border: dateError ? "2px solid #e53935" : "1px solid #bbb",
-                        padding: "2px 7px"
-                      }}
+                      minDate={minDate}
+                      placeholderText="Abflugdatum"
+                      selectsStart
+                      startDate={start}
+                      endDate={end}
+                      showPopperArrow={false}
+                      required
                     />
                   </label>
                   {dateError && (
@@ -459,24 +361,21 @@ export default function Buchen() {
                     </div>
                   )}
                 </div>
-                {/* RUECKFLUGDATUM mit Fehleranzeige */}
+                {/* Rückflugdatum DatePicker */}
                 <div>
                   <label>Rückflugdatum:<br />
-                    <input
-                      type="date"
-                      min={start ? (() => {
-                        const next = new Date(start);
-                        next.setDate(next.getDate() + 1);
-                        return next.toISOString().split("T")[0];
-                      })() : minDate}
-                      value={end}
+                    <DatePicker
+                      locale="de"
+                      dateFormat="dd.MM.yyyy"
+                      selected={end}
                       onChange={handleEndChange}
-                      style={{
-                        fontSize: "1rem",
-                        borderRadius: 4,
-                        border: returnDateError ? "2px solid #e53935" : "1px solid #bbb",
-                        padding: "2px 7px"
-                      }}
+                      minDate={start ? new Date(+start + 86400000) : minDate}
+                      placeholderText="Rückflugdatum"
+                      selectsEnd
+                      startDate={start}
+                      endDate={end}
+                      showPopperArrow={false}
+                      required
                     />
                   </label>
                   {returnDateError && (
@@ -492,7 +391,6 @@ export default function Buchen() {
                   </div>
                 )}
               </div>
-
               {(type === "valet" && days > 0) &&
                 <div style={{ margin: "0 auto 16px", maxWidth: 430 }}>
                   <label>
@@ -533,7 +431,6 @@ export default function Buchen() {
                   </label>
                 </div>
               }
-
               {days > 0 &&
                 <div style={{
                   background: "#1db954",
@@ -547,7 +444,6 @@ export default function Buchen() {
                   Aufenthalt: {days} Tag(e) • Gesamtpreis: {price} €
                 </div>
               }
-
               {(type === "valet" || type === "allinclusive") && days > 0 && (
                 <>
                   <div
@@ -563,7 +459,6 @@ export default function Buchen() {
                     Fahrzeugübernahme bei Abflug am Flughafenterminal <br /><br />
                     Fahrzeugübergabe bei Rückflug am Flughafenterminal
                   </div>
-
                   <div style={{
                     background: "#e1fbe9",
                     border: "1px solid #1db95444",
@@ -578,7 +473,6 @@ export default function Buchen() {
                   </div>
                 </>
               )}
-
               <button
                 disabled={days < 1}
                 style={{
@@ -598,18 +492,18 @@ export default function Buchen() {
                   setStep(2);
                   setForm(f => ({
                     ...f,
-                    abflugdatum: start,
-                    rueckflugdatum: end,
+                    abflugdatum: start ? start.toISOString().split("T")[0] : "",
+                    rueckflugdatum: end ? end.toISOString().split("T")[0] : "",
                   }));
                   const bookingData = {
                     form: {
-                    ...form,
-                    abflugdatum: start,
-                    rueckflugdatum: end,
+                      ...form,
+                      abflugdatum: start ? start.toISOString().split("T")[0] : "",
+                      rueckflugdatum: end ? end.toISOString().split("T")[0] : "",
                     },
                     type,
-                    start,
-                    end,
+                    start: start ? start.toISOString().split("T")[0] : "",
+                    end: end ? end.toISOString().split("T")[0] : "",
                     days,
                     price,
                     addOut,
@@ -639,7 +533,6 @@ export default function Buchen() {
               }}>
                 Persönliche Daten & Fluginformation
               </h2>
-
               {/* Box 1: Zusammenfassung */}
               <div
                 style={{
@@ -656,8 +549,8 @@ export default function Buchen() {
               >
                 <div style={{ fontSize: 20, minWidth: 180, flex: 1 }}>
                   <strong>Park-Modell:</strong> {type === "valet" ? "Valet-Parking" : "All-Inclusive‑Parking"}<br />
-                  <strong>Abflugdatum:</strong> {toDE(start)}<br />
-                  <strong>Rückflugdatum:</strong> {toDE(end)}<br />
+                  <strong>Abflugdatum:</strong> {start ? toDE(start.toISOString().split("T")[0]) : ""}<br />
+                  <strong>Rückflugdatum:</strong> {end ? toDE(end.toISOString().split("T")[0]) : ""}<br />
                   <strong>Aufenthaltsdauer:</strong> {days} {days === 1 ? "Tag" : "Tage"}<br />
                   {(type === "valet" || type === "allinclusive") && (addOut || addIn || addTank || addLade) && (
                     <>
@@ -682,7 +575,6 @@ export default function Buchen() {
                   {price} €
                 </div>
               </div>
-
               {/* Box 2: Terminal Hinweise */}
               <div
                 style={{
@@ -697,7 +589,6 @@ export default function Buchen() {
                 Fahrzeugübernahme bei Abflug am Flughafenterminal <br /><br />
                 Fahrzeugübergabe bei Rückflug am Flughafenterminal
               </div>
-
               {/* Box 3: Stornierung */}
               <div
                 style={{
@@ -712,7 +603,6 @@ export default function Buchen() {
                 }}>
                 Buchungen können kostenfrei geändert oder storniert werden.
               </div>
-
               {/* Formular */}
               <form onSubmit={handleBookingSubmit} autoComplete="off">
                 <div style={{display:"flex",gap:8}}>
@@ -727,11 +617,9 @@ export default function Buchen() {
                     </label>
                   </div>
                 </div><br />
-
                 <label>Straße / Hausnr.*:<br />
                   <input name="strasse" value={form.strasse} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
-
                 <div style={{display:"flex",gap:8}}>
                   <div style={{flex:1}}>
                     <label>PLZ*:<br />
@@ -744,75 +632,76 @@ export default function Buchen() {
                     </label>
                   </div>
                 </div><br />
-
                 <label>E-Mail-Adresse*: <br />
                   <input name="email" type="email" value={form.email} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
-
                 <label>Mobilfunk Nr./Telefon Nr.*: <br />
                   <input name="telefon" type="tel" value={form.telefon} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
-
                 <label>Fahrzeugtyp/Modell*: <br />
                   <input name="auto" value={form.auto} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
-
                 <label>KFZ-Kennzeichen*: <br />
                   <input name="kennzeichen" value={form.kennzeichen} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
-
                 <label>Geplante Ankunftszeit am Treffpunkt (Flughafen) vor Abflug*:<br />
                   <HourMinuteSelect name="ankunftUhrzeit" type="time" value={form.ankunftUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
-
                 <label>Abflugdatum*: <br />
-                  <input
-                    name="abflugdatum"
-                    type="date"
-                    value={start}
+                  <DatePicker
+                    locale="de"
+                    dateFormat="dd.MM.yyyy"
+                    selected={start}
+                    onChange={handleStartChange}
+                    minDate={minDate}
+                    placeholderText="Abflugdatum"
+                    selectsStart
+                    startDate={start}
+                    endDate={end}
+                    showPopperArrow={false}
+                    required
                     disabled
                     style={{width:"100%"}}
                   />
                 </label><br /><br />
-
                 <label>Abflug-Uhrzeit*: <br />
                   <HourMinuteSelect name="abflugUhrzeit" type="time" value={form.abflugUhrzeit} onChange={handleForm} required  style={{width:"100%"}} />
                 </label><br /><br />
-
                 <label>Rückflugdatum*: <br />
-                  <input
-                    name="rueckflugdatum"
-                    type="date"
-                    value={end}
+                  <DatePicker
+                    locale="de"
+                    dateFormat="dd.MM.yyyy"
+                    selected={end}
+                    onChange={handleEndChange}
+                    minDate={start ? new Date(+start + 86400000) : minDate}
+                    placeholderText="Rückflugdatum"
+                    selectsEnd
+                    startDate={start}
+                    endDate={end}
+                    showPopperArrow={false}
+                    required
                     disabled
                     style={{width:"100%"}}
                   />
                 </label><br /><br />
-
                 <label>Rückflug-Uhrzeit (planmäßige Landung)*: <br />
                   <HourMinuteSelect name="rueckflugUhrzeit" type="time" value={form.rueckflugUhrzeit} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
-
                 <label>Reiseziel*:<br />
                   <input name="reiseziel" value={form.reiseziel} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
-
                 <label>Fluggesellschaft*: <br />
                   <input name="fluggesellschaft" value={form.fluggesellschaft} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
-
                 <label>Flugnummer Hinflug*:<br />
                   <input name="flugnummerHin" value={form.flugnummerHin} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
-
                 <label>Flugnummer Rückflug*:<br />
                   <input name="flugnummerRueck" value={form.flugnummerRueck} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
-
                 <label>Terminal* (z.B. T1, T2): <br />
                   <input name="terminal" value={form.terminal} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
-
                 <label>
                   <input
                     type="checkbox"
@@ -823,11 +712,9 @@ export default function Buchen() {
                   />
                   Ich habe Handgepäck
                 </label><br /><br />
-
                 <label>Bemerkung (optional):<br />
                   <textarea name="bemerkung" value={form.bemerkung} onChange={handleForm} rows={2} style={{width:"100%"}} />
                 </label><br /><br />
-
                 <label>
                   <input
                     type="checkbox"
@@ -850,20 +737,17 @@ export default function Buchen() {
                   />
                   Ich akzeptiere die <a href="/datenschutz" target="_blank">Datenschutzbestimmungen</a>*
                 </label><br /><br />
-
-{/* HIER Pflichtfeld-Hinweis einfügen */}
-<div style={{
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "flex-start",
-  marginBottom: 14,
-  marginTop: -8
-}}>
-  <span style={{ color: "#888", fontSize: "0.97rem", lineHeight: 1 }}>
-    *Pflichtfelder
-  </span>
-</div>
-
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  marginBottom: 14,
+                  marginTop: -8
+                }}>
+                  <span style={{ color: "#888", fontSize: "0.97rem", lineHeight: 1 }}>
+                    *Pflichtfelder
+                  </span>
+                </div>
                 <button
                   type="submit"
                   style={{
@@ -885,13 +769,13 @@ export default function Buchen() {
                     setStep(1);
                     const bookingData = {
                       form: {
-                    ...form,
-                    abflugdatum: start,
-                    rueckflugdatum: end,
-                    },
+                        ...form,
+                        abflugdatum: start ? start.toISOString().split("T")[0] : "",
+                        rueckflugdatum: end ? end.toISOString().split("T")[0] : "",
+                      },
                       type,
-                      start,
-                      end,
+                      start: start ? start.toISOString().split("T")[0] : "",
+                      end: end ? end.toISOString().split("T")[0] : "",
                       days,
                       price,
                       addOut,
