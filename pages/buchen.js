@@ -27,11 +27,15 @@ function todayStr() {
   return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
 }
 
-// KORREKTES PARSING: KEIN UTC-VERSATZ!
-function parseISODateLocal(dateString) {
-  if (!dateString) return null;
-  const [year, month, day] = dateString.split('-').map(Number);
-  return new Date(year, month - 1, day);
+// DIESE ZWEI FUNKTIONEN LÖSEN DAS DATUMSPROBLEM FÜR IMMER!
+function fromInputString(s) {
+  if (!s) return null;
+  const [y, m, d] = s.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+function toInputString(date) {
+  if (!date) return "";
+  return date.toISOString().split("T")[0];
 }
 
 // ----------- HIER NEU: ----------
@@ -83,8 +87,8 @@ const soldOutDates = [
 
 function isSoldOut(from, to) {
   if (!from || !to) return false;
-  const fromISO = typeof from === "string" ? from : from.toISOString().split("T")[0];
-  const toISO = typeof to === "string" ? to : to.toISOString().split("T")[0];
+  const fromISO = typeof from === "string" ? from : toInputString(from);
+  const toISO = typeof to === "string" ? to : toInputString(to);
   return soldOutDates.some(
     period => (fromISO <= period.to && toISO >= period.from)
   );
@@ -143,14 +147,14 @@ export default function Buchen() {
       if (bookingInit) {
         const { from, to } = JSON.parse(bookingInit);
         if (from && to) {
-          setStart(parseISODateLocal(from));
-          setEnd(parseISODateLocal(to));
+          setStart(fromInputString(from));
+          setEnd(fromInputString(to));
           setForm(f => ({
             ...f,
             abflugdatum: from,
             rueckflugdatum: to
           }));
-          setLastAvailable({ start: parseISODateLocal(from), end: parseISODateLocal(to) });
+          setLastAvailable({ start: fromInputString(from), end: fromInputString(to) });
         }
       }
     }
@@ -223,12 +227,12 @@ export default function Buchen() {
     const bookingData = {
       form: {
         ...form,
-        abflugdatum: start ? start.toISOString().split("T")[0] : "",
-        rueckflugdatum: end ? end.toISOString().split("T")[0] : "",
+        abflugdatum: start ? toInputString(start) : "",
+        rueckflugdatum: end ? toInputString(end) : "",
       },
       type,
-      start: start ? start.toISOString().split("T")[0] : "",
-      end: end ? end.toISOString().split("T")[0] : "",
+      start: start ? toInputString(start) : "",
+      end: end ? toInputString(end) : "",
       days,
       price,
       addOut,
