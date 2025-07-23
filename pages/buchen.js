@@ -27,12 +27,11 @@ function todayStr() {
   return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
 }
 
-// WICHTIG: Korrigiert – erzeugt lokales Datum, KEIN UTC-Fehler!
-function parseISO(d) {
-  if (!d) return null;
-  if (d instanceof Date) return d;
-  const [year, month, day] = d.split("-").map(Number);
-  return new Date(year, month - 1, day, 12, 0, 0);
+// KORREKTES PARSING: KEIN UTC-VERSATZ!
+function parseISODateLocal(dateString) {
+  if (!dateString) return null;
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year, month - 1, day);
 }
 
 // ----------- HIER NEU: ----------
@@ -144,14 +143,14 @@ export default function Buchen() {
       if (bookingInit) {
         const { from, to } = JSON.parse(bookingInit);
         if (from && to) {
-          setStart(parseISO(from));
-          setEnd(parseISO(to));
+          setStart(parseISODateLocal(from));
+          setEnd(parseISODateLocal(to));
           setForm(f => ({
             ...f,
             abflugdatum: from,
             rueckflugdatum: to
           }));
-          setLastAvailable({ start: parseISO(from), end: parseISO(to) });
+          setLastAvailable({ start: parseISODateLocal(from), end: parseISODateLocal(to) });
         }
       }
     }
