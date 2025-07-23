@@ -338,6 +338,7 @@ export default function Buchen() {
                 </div>
                 {/* Abflugdatum DatePicker */}
                 <div style={{marginBottom: 8}}>
+{console.log("DatePicker Werte:", { start, end })}
                   <label>Abflugdatum:<br />
                     <DatePicker
                       locale="de"
