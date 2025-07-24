@@ -14,6 +14,14 @@ function toDE(dateStr) {
   return `${d}.${m}.${y}`;
 }
 
+// ----------- HIER: Fix gegen Tagesverschiebung -----------
+function parseISO(d) {
+  if (!d) return null;
+  if (d instanceof Date) return d;
+  return new Date(d.split("T")[0] + "T00:00:00");
+}
+// ---------------------------------------------------------
+
 const valetPrices = [95,97,99,110,116,117,119,120,126,128,131,136,139,143,148,149,150,154,157,161,166];
 const extra = { außen:19, innen:95, tank:15, lade:19 };
 
