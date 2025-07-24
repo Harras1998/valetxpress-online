@@ -39,7 +39,7 @@ function todayStr() {
 function fromInputString(s) {
   if (!s) return null;
   const [y, m, d] = s.split("-").map(Number);
-  return new Date(y, m - 1, d, 0, 0, 0); // <<< HIER FIX!
+  return new Date(y, m - 1, d, 12, 0, 0, 0); // <<< HIER FIX!
 }
 function toInputString(date) {
   if (!date) return "";
