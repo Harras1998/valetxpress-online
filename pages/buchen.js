@@ -27,11 +27,11 @@ function todayStr() {
   return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
 }
 
-// FINALER FIX: Die Uhrzeit auf 12 Uhr stellen!
+// FINALER FIX: Die Uhrzeit auf 0 Uhr stellen!
 function fromInputString(s) {
   if (!s) return null;
   const [y, m, d] = s.split("-").map(Number);
-  return new Date(y, m - 1, d, 12, 0, 0);
+  return new Date(y, m - 1, d, 0, 0, 0); // <<< HIER FIX!
 }
 function toInputString(date) {
   if (!date) return "";
