@@ -8,9 +8,12 @@ import "react-datepicker/dist/react-datepicker.css";
 registerLocale("de", de);
 
 // Hilfsfunktion für deutsches Datumsformat
-function toDE(dateStr) {
-  if (!dateStr) return "";
-  const [y, m, d] = dateStr.split("-");
+function toDE(dateObj) {
+  if (!dateObj) return "";
+  // Date zu dd.mm.yyyy
+  const y = dateObj.getFullYear();
+  const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const d = String(dateObj.getDate()).padStart(2, "0");
   return `${d}.${m}.${y}`;
 }
 
@@ -22,9 +25,10 @@ function getValet(priceList, days) {
   return priceList[priceList.length - 1] + (days - priceList.length) * 7;
 }
 
-function todayStr() {
+function todayDateObj() {
   const t = new Date();
-  return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
+  t.setHours(12, 0, 0, 0);
+  return t;
 }
 
 // ----------- Stunden:Minuten Picker -----------
@@ -76,17 +80,19 @@ const soldOutDates = [
 
 function isSoldOut(from, to) {
   if (!from || !to) return false;
+  const fromStr = from.toISOString().split("T")[0];
+  const toStr = to.toISOString().split("T")[0];
   return soldOutDates.some(
-    period => (from <= period.to && to >= period.from)
+    period => (fromStr <= period.to && toStr >= period.from)
   );
 }
 // ------------------------------------
 
 export default function Buchen() {
   const router = useRouter();
-  // *** Der große Unterschied: start und end sind Strings ***
-  const [start, setStart] = useState("");
-  const [end, setEnd] = useState("");
+  // *** ACHTUNG: start und end sind Date-Objekte ***
+  const [start, setStart] = useState(null);
+  const [end, setEnd] = useState(null);
 
   const [type, setType] = useState("valet");
   const [days, setDays] = useState(0);
@@ -100,7 +106,7 @@ export default function Buchen() {
   const [dateError, setDateError] = useState("");
   const [returnDateError, setReturnDateError] = useState("");
   const [soldOutStatus, setSoldOutStatus] = useState("");
-  const [lastAvailable, setLastAvailable] = useState({ start: "", end: "" });
+  const [lastAvailable, setLastAvailable] = useState({ start: null, end: null });
 
   const [form, setForm] = useState({
     vorname: "",
@@ -134,16 +140,17 @@ export default function Buchen() {
       const bookingInit = localStorage.getItem("valet_booking_init");
       if (bookingInit) {
         const { from, to } = JSON.parse(bookingInit);
-        if (from && to) {
-          setStart(from);
-          setEnd(to);
-          setForm(f => ({
-            ...f,
-            abflugdatum: from,
-            rueckflugdatum: to
-          }));
-          setLastAvailable({ start: from, end: to });
-        }
+        setStart(from ? new Date(from + "T12:00:00") : null);
+        setEnd(to ? new Date(to + "T12:00:00") : null);
+        setForm(f => ({
+          ...f,
+          abflugdatum: from,
+          rueckflugdatum: to
+        }));
+        setLastAvailable({
+          start: from ? new Date(from + "T12:00:00") : null,
+          end: to ? new Date(to + "T12:00:00") : null
+        });
       }
     }
   }, []);
@@ -164,9 +171,10 @@ export default function Buchen() {
   useEffect(() => {
     if (!end || (start && end <= start)) {
       if (start) {
-        const d = new Date(start + "T12:00:00");
+        const d = new Date(start);
         d.setDate(d.getDate() + 1);
-        setEnd(d.toISOString().split("T")[0]);
+        d.setHours(12, 0, 0, 0);
+        setEnd(d);
       }
     }
   }, [start]);
@@ -175,9 +183,7 @@ export default function Buchen() {
     if (!start || !end || (start && end <= start)) {
       setDays(0); setPrice(0); return;
     }
-    const dateStart = new Date(start + "T12:00:00");
-    const dateEnd = new Date(end + "T12:00:00");
-    const d = Math.ceil((dateEnd - dateStart) / (1000 * 60 * 60 * 24)) + 1;
+    const d = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
     setDays(d);
   }, [start, end]);
 
@@ -214,15 +220,17 @@ export default function Buchen() {
 
   function handleBookingSubmit(e) {
     e.preventDefault();
+    const fromString = start ? start.toISOString().split("T")[0] : "";
+    const toString = end ? end.toISOString().split("T")[0] : "";
     const bookingData = {
       form: {
         ...form,
-        abflugdatum: start,
-        rueckflugdatum: end,
+        abflugdatum: fromString,
+        rueckflugdatum: toString,
       },
       type,
-      start,
-      end,
+      start: fromString,
+      end: toString,
       days,
       price,
       addOut,
@@ -241,26 +249,25 @@ export default function Buchen() {
   function handleStartChange(date) {
     if (!date) return;
     let rueck = end;
-    const dateString = date.toISOString().split("T")[0];
-    if (!rueck || (dateString && rueck <= dateString)) {
-      const next = new Date(date);
-      next.setDate(next.getDate() + 1);
-      rueck = next.toISOString().split("T")[0];
+    if (!rueck || (date && rueck <= date)) {
+      rueck = new Date(date);
+      rueck.setDate(rueck.getDate() + 1);
+      rueck.setHours(12, 0, 0, 0);
     }
-    if (isSoldOut(dateString, rueck)) {
+    if (isSoldOut(date, rueck)) {
       setSoldOutStatus("Für den gewählten Zeitraum ist leider kein Parkplatz verfügbar! Zeitraum wurde zurückgesetzt.");
-      setStart(lastAvailable.start || dateString);
+      setStart(lastAvailable.start || date);
       setEnd(lastAvailable.end || rueck);
       setTimeout(() => setSoldOutStatus(""), 3500);
       return;
     }
-    if (date < new Date(new Date().toDateString())) {
-      const todayString = todayStr();
-      setStart(todayString);
+    if (date < todayDateObj()) {
+      const todayObj = todayDateObj();
+      setStart(todayObj);
       setDateError("Das Abflugdatum darf nicht in der Vergangenheit liegen.");
       setTimeout(() => setDateError(""), 3500);
     } else {
-      setStart(dateString);
+      setStart(date);
       setEnd(rueck);
       setDateError("");
       setSoldOutStatus("");
@@ -268,28 +275,28 @@ export default function Buchen() {
   }
   function handleEndChange(date) {
     if (!date) return;
-    const dateString = date.toISOString().split("T")[0];
-    if (start && dateString <= start) {
-      const next = new Date(start + "T12:00:00");
+    if (start && date <= start) {
+      const next = new Date(start);
       next.setDate(next.getDate() + 1);
-      setEnd(next.toISOString().split("T")[0]);
+      next.setHours(12, 0, 0, 0);
+      setEnd(next);
       setReturnDateError("Das Rückflugdatum muss nach dem Abflugdatum liegen.");
       setTimeout(() => setReturnDateError(""), 3500);
       return;
     }
-    if (isSoldOut(start, dateString)) {
+    if (isSoldOut(start, date)) {
       setSoldOutStatus("Für den gewählten Zeitraum ist leider kein Parkplatz verfügbar! Zeitraum wurde zurückgesetzt.");
       setStart(lastAvailable.start || start);
-      setEnd(lastAvailable.end || dateString);
+      setEnd(lastAvailable.end || date);
       setTimeout(() => setSoldOutStatus(""), 3500);
       return;
     }
-    setEnd(dateString);
+    setEnd(date);
     setReturnDateError("");
     setSoldOutStatus("");
   }
 
-  const minDate = new Date();
+  const minDate = todayDateObj();
 
   return (
     <>
@@ -337,13 +344,13 @@ export default function Buchen() {
                     <DatePicker
                       locale="de"
                       dateFormat="dd.MM.yyyy"
-                      selected={start ? new Date(start + "T12:00:00") : null}
+                      selected={start}
                       onChange={handleStartChange}
                       minDate={minDate}
                       placeholderText="Abflugdatum"
                       selectsStart
-                      startDate={start ? new Date(start + "T12:00:00") : null}
-                      endDate={end ? new Date(end + "T12:00:00") : null}
+                      startDate={start}
+                      endDate={end}
                       showPopperArrow={false}
                       required
                     />
@@ -360,13 +367,13 @@ export default function Buchen() {
                     <DatePicker
                       locale="de"
                       dateFormat="dd.MM.yyyy"
-                      selected={end ? new Date(end + "T12:00:00") : null}
+                      selected={end}
                       onChange={handleEndChange}
-                      minDate={start ? new Date(new Date(start + "T12:00:00").getTime() + 86400000) : minDate}
+                      minDate={start ? new Date(start.getTime() + 86400000) : minDate}
                       placeholderText="Rückflugdatum"
                       selectsEnd
-                      startDate={start ? new Date(start + "T12:00:00") : null}
-                      endDate={end ? new Date(end + "T12:00:00") : null}
+                      startDate={start}
+                      endDate={end}
                       showPopperArrow={false}
                       required
                     />
@@ -483,20 +490,22 @@ export default function Buchen() {
                 }}
                 onClick={() => {
                   setStep(2);
+                  const fromString = start ? start.toISOString().split("T")[0] : "";
+                  const toString = end ? end.toISOString().split("T")[0] : "";
                   setForm(f => ({
                     ...f,
-                    abflugdatum: start,
-                    rueckflugdatum: end,
+                    abflugdatum: fromString,
+                    rueckflugdatum: toString,
                   }));
                   const bookingData = {
                     form: {
                       ...form,
-                      abflugdatum: start,
-                      rueckflugdatum: end,
+                      abflugdatum: fromString,
+                      rueckflugdatum: toString,
                     },
                     type,
-                    start,
-                    end,
+                    start: fromString,
+                    end: toString,
                     days,
                     price,
                     addOut,
@@ -644,13 +653,13 @@ export default function Buchen() {
                   <DatePicker
                     locale="de"
                     dateFormat="dd.MM.yyyy"
-                    selected={start ? new Date(start + "T12:00:00") : null}
+                    selected={start}
                     onChange={handleStartChange}
                     minDate={minDate}
                     placeholderText="Abflugdatum"
                     selectsStart
-                    startDate={start ? new Date(start + "T12:00:00") : null}
-                    endDate={end ? new Date(end + "T12:00:00") : null}
+                    startDate={start}
+                    endDate={end}
                     showPopperArrow={false}
                     required
                     disabled
@@ -664,13 +673,13 @@ export default function Buchen() {
                   <DatePicker
                     locale="de"
                     dateFormat="dd.MM.yyyy"
-                    selected={end ? new Date(end + "T12:00:00") : null}
+                    selected={end}
                     onChange={handleEndChange}
-                    minDate={start ? new Date(new Date(start + "T12:00:00").getTime() + 86400000) : minDate}
+                    minDate={start ? new Date(start.getTime() + 86400000) : minDate}
                     placeholderText="Rückflugdatum"
                     selectsEnd
-                    startDate={start ? new Date(start + "T12:00:00") : null}
-                    endDate={end ? new Date(end + "T12:00:00") : null}
+                    startDate={start}
+                    endDate={end}
                     showPopperArrow={false}
                     required
                     disabled
@@ -760,15 +769,17 @@ export default function Buchen() {
                   type="button"
                   onClick={() => {
                     setStep(1);
+                    const fromString = start ? start.toISOString().split("T")[0] : "";
+                    const toString = end ? end.toISOString().split("T")[0] : "";
                     const bookingData = {
                       form: {
                         ...form,
-                        abflugdatum: start,
-                        rueckflugdatum: end,
+                        abflugdatum: fromString,
+                        rueckflugdatum: toString,
                       },
                       type,
-                      start,
-                      end,
+                      start: fromString,
+                      end: toString,
                       days,
                       price,
                       addOut,
