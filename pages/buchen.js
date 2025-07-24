@@ -17,6 +17,12 @@ function toDE(dateObj) {
   return `${d}.${m}.${y}`;
 }
 
+function parseISODateOnly(dateStr) {
+  if (!dateStr) return null;
+  const [year, month, day] = dateStr.split("-");
+  return new Date(Number(year), Number(month) - 1, Number(day));
+}
+
 const valetPrices = [95,97,99,110,116,117,119,120,126,128,131,136,139,143,148,149,150,154,157,161,166];
 const extra = { außen:19, innen:95, tank:15, lade:19 };
 
@@ -135,25 +141,27 @@ export default function Buchen() {
   });
 
   // Vorbelegung mit localStorage, falls vorhanden
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const bookingInit = localStorage.getItem("valet_booking_init");
-      if (bookingInit) {
-        const { from, to } = JSON.parse(bookingInit);
-        setStart(from ? new Date(from) : null);
-        setEnd(to ? new Date(to) : null);
-        setForm(f => ({
-          ...f,
-          abflugdatum: from,
-          rueckflugdatum: to
-        }));
-        setLastAvailable({
-          start: from ? new Date(from + "T12:00:00") : null,
-          end: to ? new Date(to + "T12:00:00") : null
-        });
-      }
-    }
-  }, []);
+useEffect(() => {
+  if (typeof window !== "undefined") {
+    let bookingInit = {};
+    try {
+      bookingInit = JSON.parse(localStorage.getItem("valet_booking_init")) || {};
+    } catch { bookingInit = {}; }
+    const startParsed = parseISODateOnly(bookingInit.from);
+    const endParsed = parseISODateOnly(bookingInit.to);
+    setStart(startParsed);
+    setEnd(endParsed);
+    setForm(f => ({
+      ...f,
+      abflugdatum: bookingInit.from || "",
+      rueckflugdatum: bookingInit.to || ""
+    }));
+    setLastAvailable({
+      start: startParsed,
+      end: endParsed
+    });
+  }
+}, []);
 
   useEffect(() => {
     if (
