@@ -57,8 +57,8 @@ export default function AvailabilityChecker() {
       localStorage.setItem(
         "valet_booking_init",
         JSON.stringify({
-          from: from.toISOString().split("T")[0] + "T12:00:00",
-          to: to.toISOString().split("T")[0] + "T12:00:00"
+          from: from.toISOString().split("T")[0] + "T00:00:00",
+          to: to.toISOString().split("T")[0] + "T00:00:00"
         })
       );
     }
