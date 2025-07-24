@@ -58,7 +58,7 @@ export default function AvailabilityChecker() {
         "valet_booking_init",
         JSON.stringify({
           from: from.toISOString().split("T")[0], + "T12:00:00",
-          to: to.toISOString().split("T")[0], + "T12:00:00"
+          to: to.toISOString().split("T")[0] + "T12:00:00"
         })
       );
     }
