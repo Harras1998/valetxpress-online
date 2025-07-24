@@ -140,8 +140,8 @@ export default function Buchen() {
       const bookingInit = localStorage.getItem("valet_booking_init");
       if (bookingInit) {
         const { from, to } = JSON.parse(bookingInit);
-        setStart(from ? new Date(from + "T12:00:00") : null);
-        setEnd(to ? new Date(to + "T12:00:00") : null);
+        setStart(from ? new Date(from) : null);
+        setEnd(to ? new Date(to) : null);
         setForm(f => ({
           ...f,
           abflugdatum: from,
