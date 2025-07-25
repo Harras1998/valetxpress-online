@@ -6,6 +6,14 @@ import "react-datepicker/dist/react-datepicker.css";
 
 registerLocale("de", de);
 
+function getDateString(date) {
+  if (!date) return "";
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 const soldOutDates = [
   { from: "2025-07-10", to: "2025-07-23" },
   // beliebig ergänzen!
@@ -53,15 +61,15 @@ export default function AvailabilityChecker() {
     }
     setStatus("VERFÜGBAR");
     // Daten merken für Buchen-Seite
-    if (typeof window !== "undefined") {
-      localStorage.setItem(
-        "valet_booking_init",
-        JSON.stringify({
-          from: from.toISOString().split("T")[0],
-          to: to.toISOString().split("T")[0]
-        })
-      );
-    }
+  if (typeof window !== "undefined") {
+    localStorage.setItem(
+      "valet_booking_init",
+      JSON.stringify({
+        from: getDateString(from),
+        to: getDateString(to)
+      })
+    );
+  }
     // Sofort weiterleiten
     router.push("/buchen");
   };
