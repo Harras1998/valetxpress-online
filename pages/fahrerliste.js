@@ -9,10 +9,10 @@ const mobileStyles = `
     margin: 0 !important;
     padding: 0 !important;
     overflow-x: hidden !important;
-    width: 100vw !important;
+    width: 100% !important;
   }
   #root, body > div:first-child {
-    width: 100vw !important;
+    width: 100% !important;
     min-width: unset !important;
     max-width: unset !important;
     transform: scale(0.78);
