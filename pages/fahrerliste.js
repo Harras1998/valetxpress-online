@@ -7,16 +7,21 @@ const mobileStyles = `
     background: #e2e2e2 !important;
     overflow-x: hidden !important;
     width: 100vw !important;
-    height: 100vh !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   .mobile-scale-wrapper {
-    width: 1440px !important;
-    min-width: 1440px !important;
-    max-width: 1440px !important;
-    transform: scale(0.222);
+    width: 1024px !important;
+    min-width: 1024px !important;
+    max-width: 1024px !important;
+    height: auto !important;
+    transform: scale(0.3125);
     transform-origin: top left;
     background: #e2e2e2;
-    height: auto !important;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
   }
 }
 `;
