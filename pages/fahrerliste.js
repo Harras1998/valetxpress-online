@@ -2,149 +2,22 @@
 import { useState, useEffect } from "react";
 
 // ======= Mobile Style-Injection für ParkXpress-Optik =======
-const mobileStyles = `
 @media (max-width: 500px) {
-  /* HEADER kompakt wie ParkXpress */
-  .PXHeader,
-  .ui-header,
-  .header-bar {
-    height: 22px !important;
-    min-height: 0 !important;
-    font-size: 11px !important;
-    padding: 0 2px !important;
-    background: linear-gradient(#222 85%, #eee 100%) !important;
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden !important;
+    width: 100vw !important;
+    /* Verhindert Scrollbalken */
   }
-
-  /* Header-Titel und Username */
-  .PXHeader > div,
-  .PXHeader > div > span,
-  .PXHeader span,
-  .ui-header > div,
-  .ui-header span,
-  .px-header-title,
-  .fahrerliste-label,
-  .px-header-username {
-    font-size: 12px !important;
-    line-height: 1.1 !important;
-    font-weight: bold !important;
-    padding: 0 1px !important;
-    letter-spacing: 0 !important;
+  #root, body > div:first-child {
+    width: 100vw !important;
+    min-width: unset !important;
+    max-width: unset !important;
+    transform: scale(0.78);      /* Wert ggf. anpassen */
+    transform-origin: top left;
+    /* Du kannst auch 0.75, 0.8, 0.85 nehmen – teste einfach im Browser! */
   }
-
-  /* Logout-Button (Power Icon) */
-  [title="Abmelden"] {
-    font-size: 16px !important;
-    padding-right: 2px !important;
-  }
-
-  /* Logo/Brand */
-  img[alt="ValetXpress"], img[alt="PARKXPRESS"] {
-    height: 16px !important;
-    margin-left: 2px !important;
-    margin-right: 2px !important;
-  }
-
-  /* Tabs/Buttons */
-  button {
-    font-size: 11px !important;
-    padding: 2px 10px !important;
-    border-radius: 8px !important;
-    height: 22px !important;
-    min-width: 35px !important;
-    margin-right: 1px !important;
-  }
-  button:nth-child(2) {
-    white-space: nowrap !important;
-    font-size: 11px !important;
-    padding: 2px 6px !important;
-  }
-
-  /* Input und Select */
-  input[type="text"] {
-    font-size: 11px !important;
-    padding: 3px 6px !important;
-    border-radius: 6px !important;
-    margin-left: 2px !important;
-    margin-right: 2px !important;
-    height: 22px !important;
-    min-width: 60px !important;
-  }
-  select {
-    font-size: 11px !important;
-    padding: 2px 5px !important;
-    min-width: 40px !important;
-    height: 22px !important;
-  }
-
-  /* "Anzahl Fahrten" */
-  .anzahl-fahrten {
-    font-size: 11px !important;
-    padding: 3px 0 3px 2px !important;
-    margin-left: 1px !important;
-  }
-
-  /* FAHRTENKARTEN SEHR KOMPAKT */
-  .fahrer-card-title {
-    font-size: 8px !important;
-    font-weight: bold !important;
-    line-height: 1.1 !important;
-  }
-  .fahrer-card {
-    font-size: 7px !important;
-    padding: 1px 0px 1px 1px !important;
-    border-radius: 0 !important;
-    margin-bottom: 0 !important;
-    background: #fff !important;
-    box-shadow: none !important;
-    border-bottom: 1px solid #ccc !important;
-    display: block !important;
-    overflow-x: auto !important;
-  }
-  .fahrer-card .info-zeile {
-    font-size: 7px !important;
-    margin: 0 !important;
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    gap: 0 !important;
-  }
-  .fahrer-card .actions {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 2px !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    min-width: 0 !important;
-    margin: 1px 1px 0 0 !important;
-    font-size: 8px !important;
-  }
-  .fahrer-card a {
-    font-size: 7px !important;
-    word-break: break-all !important;
-  }
-  .fahrer-card span,
-  .fahrer-card b {
-    font-size: 7px !important;
-  }
-  .fahrer-card .notiz-label {
-    font-size: 7px !important;
-  }
-  .fahrer-card .telefon-link {
-    font-size: 7px !important;
-    color: #001cff !important;
-    font-weight: 600 !important;
-    text-decoration: underline !important;
-    word-break: break-all !important;
-  }
-}
-`;
-
-
-if (typeof document !== "undefined" && !document.getElementById("mobile-fahrerlist-style")) {
-  const style = document.createElement("style");
-  style.id = "mobile-fahrerlist-style";
-  style.innerHTML = mobileStyles;
-  document.head.appendChild(style);
 }
 // ============================================================
 
