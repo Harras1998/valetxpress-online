@@ -84,6 +84,11 @@ const soldOutDates = [
   // beliebig ergänzen!
 ];
 
+const excludedIntervals = soldOutDates.map(period => ({
+  start: parseISODateOnly(period.from),
+  end: parseISODateOnly(period.to)
+}));
+
 function isSoldOut(from, to) {
   if (!from || !to) return false;
   const fromStr = from.toISOString().split("T")[0];
@@ -361,6 +366,7 @@ useEffect(() => {
                       endDate={end}
                       showPopperArrow={false}
                       required
+excludeDateIntervals={excludedIntervals}   // ← NEU HIER!
                     />
                   </label>
                   {dateError && (
@@ -384,6 +390,7 @@ useEffect(() => {
                       endDate={end}
                       showPopperArrow={false}
                       required
+excludeDateIntervals={excludedIntervals}   // ← NEU HIER!
                     />
                   </label>
                   {returnDateError && (
