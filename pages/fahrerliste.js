@@ -1,23 +1,31 @@
 // fahrerliste.js
 import { useState, useEffect } from "react";
 
-// ======= Mobile Style-Injection für ParkXpress-Optik =======
+// ======= Mobile Style-Injection für ParkXpress-Optik + Scaling =======
+const mobileStyles = `
 @media (max-width: 500px) {
+  /* ... DEIN CSS ... */
   html, body {
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
     overflow-x: hidden !important;
     width: 100vw !important;
-    /* Verhindert Scrollbalken */
   }
   #root, body > div:first-child {
     width: 100vw !important;
     min-width: unset !important;
     max-width: unset !important;
-    transform: scale(0.78);      /* Wert ggf. anpassen */
+    transform: scale(0.78);
     transform-origin: top left;
-    /* Du kannst auch 0.75, 0.8, 0.85 nehmen – teste einfach im Browser! */
   }
+}
+`;
+
+if (typeof document !== "undefined" && !document.getElementById("mobile-fahrerlist-style")) {
+  const style = document.createElement("style");
+  style.id = "mobile-fahrerlist-style";
+  style.innerHTML = mobileStyles;
+  document.head.appendChild(style);
 }
 // ============================================================
 
