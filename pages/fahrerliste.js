@@ -8,16 +8,15 @@ const mobileStyles = `
     overflow-x: auto !important;
   }
   .mobile-zoom-wrapper {
-    width: 1440px !important;
-    min-width: 1440px !important;
-    max-width: 1440px !important;
-    transform: scale(0.222);      /* 320/1024 ≈ 0.3125 (für iPhone SE & kleine Handys) */
-    transform-origin: top left;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    /* transform: scale(0.222);   ENTFERNEN für echtes Responsive! */
+    /* transform-origin: top left; */
     background: #e2e2e2;
   }
 }
 `;
-
 if (typeof document !== "undefined" && !document.getElementById("mobile-fahrerlist-style")) {
   const style = document.createElement("style");
   style.id = "mobile-fahrerlist-style";
