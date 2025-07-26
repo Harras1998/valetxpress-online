@@ -2,18 +2,30 @@ import { useState, useEffect } from "react";
 
 // ======= Mobile Style-Injection für ParkXpress-Optik + SCALING für GANZE SEITE =======
 const mobileStyles = `
-@media (max-width: 500px) {
-  body {
+@media (max-width: 600px) {
+  html, body, #root, .mobile-zoom-wrapper {
+    min-height: 0 !important;
+    height: auto !important;
     background: #e2e2e2 !important;
-    overflow-x: auto !important;
   }
-  .mobile-zoom-wrapper {
+  .mobile-zoom-wrapper, #root {
     width: 100% !important;
     min-width: 0 !important;
     max-width: 100vw !important;
-    /* transform: scale(0.222);   ENTFERNEN für echtes Responsive! */
-    /* transform-origin: top left; */
-    background: #e2e2e2;
+    background: #fff;
+    margin: 0 auto !important;
+    box-sizing: border-box;
+  }
+  .fahrer-card {
+    flex-direction: column !important;
+    font-size: 1.08rem !important;
+    padding: 12px 0 8px 0 !important;
+    min-width: 0 !important;
+  }
+  .actions {
+    min-width: 0 !important;
+    margin-right: 4px !important;
+    gap: 14px !important;
   }
 }
 `;
