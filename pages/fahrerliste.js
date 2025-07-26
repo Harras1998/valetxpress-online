@@ -15,7 +15,7 @@ const mobileStyles = `
     width: 100% !important;
     min-width: unset !important;
     max-width: unset !important;
-    transform: scale(0.78);
+    transform: scale(0.5);
     transform-origin: top left;
   }
 }
