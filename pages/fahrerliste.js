@@ -469,7 +469,7 @@ export default function FahrerListe() {
               }}
             >
               <div style={{ flex: 1, marginLeft: 18 }}>
-                <div className="fahrer-card-title" style={{ fontWeight: "bold", marginBottom: 0 }}>
+                <div className="fahrer-card-title" style={{ fontWeight: "bold", marginBottom: 0, fontSize: "16px" }}>
                   {row.abflugUhrzeit} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
                   ? "All"
                   : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
