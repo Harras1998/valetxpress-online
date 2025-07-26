@@ -250,15 +250,15 @@ export default function FahrerListe() {
 
   return (
     <>
-      {/* NUR auf dieser Seite für parkxpress-like Verhalten auf Mobil */}
+      {/* Nur auf dieser Seite für parkxpress-like Verhalten auf Mobil */}
       <Head>
-        <meta name="viewport" content="width=1024, user-scalable=no" />
+        <meta name="viewport" content="width=1440, user-scalable=no" />
       </Head>
       {!auth ? (
         <div
           style={{
-            maxWidth: 1024,
-            minWidth: 1024,
+            maxWidth: 1440,
+            minWidth: 1440,
             background: "#fff",
             borderRadius: 12,
             padding: 32,
@@ -278,8 +278,8 @@ export default function FahrerListe() {
       ) : (
         <div
           style={{
-            maxWidth: 1024,
-            minWidth: 1024,
+            maxWidth: 1440,
+            minWidth: 1440,
             background: "#fff",
             fontFamily: "Arial",
             margin: "0 auto",
