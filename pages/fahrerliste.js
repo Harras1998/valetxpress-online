@@ -8,10 +8,10 @@ const mobileStyles = `
     overflow-x: auto !important;
   }
   .mobile-zoom-wrapper {
-    width: 1024px !important;
-    min-width: 1024px !important;
-    max-width: 1024px !important;
-    transform: scale(0.3125);      /* 320/1024 ≈ 0.3125 (für iPhone SE & kleine Handys) */
+    width: 1440px !important;
+    min-width: 1440px !important;
+    max-width: 1440px !important;
+    transform: scale(0.222);      /* 320/1024 ≈ 0.3125 (für iPhone SE & kleine Handys) */
     transform-origin: top left;
     background: #e2e2e2;
   }
