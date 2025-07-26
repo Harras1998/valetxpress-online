@@ -2,39 +2,24 @@ import { useState, useEffect } from "react";
 
 // ======= Mobile Style-Injection für ParkXpress-Optik + SCALING für GANZE SEITE =======
 const mobileStyles = `
-@media (max-width: 600px) {
-  html, body, #root, .mobile-zoom-wrapper {
-    min-height: 0 !important;
-    height: auto !important;
+@media (max-width: 500px) {
+  html, body {
     background: #e2e2e2 !important;
+    overflow-x: hidden !important;
+    width: 100vw !important;
+    height: 100vh !important;
   }
-  .mobile-zoom-wrapper, #root {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100vw !important;
-    background: #fff;
-    margin: 0 auto !important;
-    box-sizing: border-box;
-  }
-  .fahrer-card {
-    flex-direction: column !important;
-    font-size: 1.08rem !important;
-    padding: 12px 0 8px 0 !important;
-    min-width: 0 !important;
-  }
-  .actions {
-    min-width: 0 !important;
-    margin-right: 4px !important;
-    gap: 14px !important;
+  .mobile-scale-wrapper {
+    width: 1440px !important;
+    min-width: 1440px !important;
+    max-width: 1440px !important;
+    transform: scale(0.222);
+    transform-origin: top left;
+    background: #e2e2e2;
+    height: auto !important;
   }
 }
 `;
-if (typeof document !== "undefined" && !document.getElementById("mobile-fahrerlist-style")) {
-  const style = document.createElement("style");
-  style.id = "mobile-fahrerlist-style";
-  style.innerHTML = mobileStyles;
-  document.head.appendChild(style);
-}
 // ============================================================
 
 // Header-Komponente wie gehabt
