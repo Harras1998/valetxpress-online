@@ -8,7 +8,7 @@ const mobileStyles = `
   .PXHeader,
   .ui-header,
   .header-bar {
-    height: 32px !important;
+    height: 22px !important;
     min-height: 0 !important;
     font-size: 11px !important;
     padding: 0 2px !important;
@@ -33,13 +33,13 @@ const mobileStyles = `
 
   /* Logout-Button (Power Icon) */
   [title="Abmelden"] {
-    font-size: 18px !important;
-    padding-right: 4px !important;
+    font-size: 16px !important;
+    padding-right: 2px !important;
   }
 
   /* Logo/Brand */
   img[alt="ValetXpress"], img[alt="PARKXPRESS"] {
-    height: 20px !important;
+    height: 16px !important;
     margin-left: 2px !important;
     margin-right: 2px !important;
   }
@@ -49,8 +49,8 @@ const mobileStyles = `
     font-size: 11px !important;
     padding: 2px 10px !important;
     border-radius: 8px !important;
-    height: 24px !important;
-    min-width: 38px !important;
+    height: 22px !important;
+    min-width: 35px !important;
     margin-right: 1px !important;
   }
   button:nth-child(2) {
@@ -79,7 +79,7 @@ const mobileStyles = `
   /* "Anzahl Fahrten" */
   .anzahl-fahrten {
     font-size: 11px !important;
-    padding: 5px 0 5px 2px !important;
+    padding: 3px 0 3px 2px !important;
     margin-left: 1px !important;
   }
 
