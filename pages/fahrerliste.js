@@ -382,7 +382,7 @@ export default function FahrerListe() {
                   justifyContent: "flex-end",
                   marginRight: 30
                 }}>
-                    <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Bearbeiten"✏️</span>
+                  <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Bearbeiten">✏️           </span>
 <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
 <a href={`tel:${row.telefon}`}>
   <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Anrufen">📞</span>
