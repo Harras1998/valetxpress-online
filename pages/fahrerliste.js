@@ -1,33 +1,6 @@
 import { useState, useEffect } from "react";
+import Head from "next/head";
 
-// ======= Mobile Style-Injection für ParkXpress-Optik + SCALING für GANZE SEITE =======
-const mobileStyles = `
-@media (max-width: 500px) {
-  html, body {
-    background: #e2e2e2 !important;
-    overflow-x: hidden !important;
-    width: 100vw !important;
-    min-height: 100vh !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-  .mobile-scale-wrapper {
-    width: 1024px !important;
-    min-width: 1024px !important;
-    max-width: 1024px !important;
-    height: auto !important;
-    transform: scale(0.3125);
-    transform-origin: top left;
-    background: #e2e2e2;
-    margin: 0;
-    padding: 0;
-    box-shadow: none;
-  }
-}
-`;
-// ============================================================
-
-// Header-Komponente wie gehabt
 function PXHeader({
   username,
   tab,
@@ -275,125 +248,133 @@ export default function FahrerListe() {
     return "#e0e0e0";
   }
 
-  if (!auth)
-    return (
-      <div className="mobile-zoom-wrapper" style={{
-        maxWidth: 1024,
-        minWidth: 1024,
-        background: "#fff",
-        borderRadius: 12,
-        padding: 32,
-        boxShadow: "0 2px 12px #0002",
-        fontFamily: "Arial",
-        overflowX: "hidden"
-      }}>
-        <h2>Fahrer-Login</h2>
-        <form onSubmit={handleLogin}>
-          <input type="text" placeholder="Benutzername" value={login.user} onChange={e => setLogin({ ...login, user: e.target.value })} required style={{ width: "100%", marginBottom: 8 }} />
-          <input type="password" placeholder="Passwort" value={login.pass} onChange={e => setLogin({ ...login, pass: e.target.value })} required style={{ width: "100%", marginBottom: 16 }} />
-          <button type="submit" style={{ width: "100%", padding: "10px 0", background: "#1db954", color: "#fff", border: "none", borderRadius: 8, fontWeight: "bold" }}>Login</button>
-        </form>
-        {error && <div style={{ color: "red", marginTop: 10 }}>{error}</div>}
-      </div>
-    );
-
   return (
-    <div className="mobile-zoom-wrapper">
-      <div style={{
-        width: "100%",
-        minHeight: "100vh",
-        background: "#e2e2e2",
-        fontFamily: "Arial",
-        overflowX: "hidden"
-      }}>
-        <PXHeader
-          username={username}
-          tab={tab}
-          setTab={setTab}
-          suchtext={suchtext}
-          setSuchtext={setSuchtext}
-          sort={sort}
-          setSort={setSort}
-          onLogout={handleLogout}
-        />
-        <div style={{
-          maxWidth: "100%",
-          margin: "auto",
-          marginTop: 30,
-          overflowX: "hidden"
-        }}>
-          <div style={{ padding: 12, color: "#777", fontSize: 18, marginLeft: 10 }}>
-            {loading ? "Lade Daten..." : ""}
-            <b> Anzahl Fahrten: {filtered.length}</b>
-          </div>
-          <div>
-            {filtered.length === 0 && (
-              <div style={{ margin: 30, color: '#888', fontSize: 28 }}>Keine Fahrten gefunden.</div>
-            )}
-            {filtered.map(row => (
-              <div
-                key={row.id}
-                className="fahrer-card"
-                style={{
-                  marginBottom: 0,
-                  borderRadius: 0,
-                  background: cardColor(row),
-                  padding: "16px 0 8px 0",
-                  boxShadow: "none",
-                  border: "none",
-                  borderBottom: "2px solid #ccc",
-                  display: "flex",
-                  alignItems: "flex-start",
-                  fontSize: "32px",
-                  fontFamily: "Arial, Helvetica, sans-serif"
-                }}
-              >
-                <div style={{ flex: 1, marginLeft: 18 }}>
-                  <div className="fahrer-card-title" style={{ fontWeight: "bold", marginBottom: 0, fontSize: "20px" }}>
-                    {row.abflugUhrzeit} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
-                    ? "All"
-                    : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
-                    <a className="telefon-link" href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
+    <>
+      {/* NUR auf dieser Seite für parkxpress-like Verhalten auf Mobil */}
+      <Head>
+        <meta name="viewport" content="width=1024, user-scalable=no" />
+      </Head>
+      {!auth ? (
+        <div
+          style={{
+            maxWidth: 1024,
+            minWidth: 1024,
+            background: "#fff",
+            borderRadius: 12,
+            padding: 32,
+            boxShadow: "0 2px 12px #0002",
+            fontFamily: "Arial",
+            overflowX: "hidden",
+            margin: "0 auto"
+          }}>
+          <h2>Fahrer-Login</h2>
+          <form onSubmit={handleLogin}>
+            <input type="text" placeholder="Benutzername" value={login.user} onChange={e => setLogin({ ...login, user: e.target.value })} required style={{ width: "100%", marginBottom: 8 }} />
+            <input type="password" placeholder="Passwort" value={login.pass} onChange={e => setLogin({ ...login, pass: e.target.value })} required style={{ width: "100%", marginBottom: 16 }} />
+            <button type="submit" style={{ width: "100%", padding: "10px 0", background: "#1db954", color: "#fff", border: "none", borderRadius: 8, fontWeight: "bold" }}>Login</button>
+          </form>
+          {error && <div style={{ color: "red", marginTop: 10 }}>{error}</div>}
+        </div>
+      ) : (
+        <div
+          style={{
+            maxWidth: 1024,
+            minWidth: 1024,
+            background: "#fff",
+            fontFamily: "Arial",
+            margin: "0 auto",
+            minHeight: "100vh",
+            overflowX: "hidden"
+          }}>
+          <PXHeader
+            username={username}
+            tab={tab}
+            setTab={setTab}
+            suchtext={suchtext}
+            setSuchtext={setSuchtext}
+            sort={sort}
+            setSort={setSort}
+            onLogout={handleLogout}
+          />
+          <div style={{
+            maxWidth: "100%",
+            margin: "auto",
+            marginTop: 30,
+            overflowX: "hidden"
+          }}>
+            <div style={{ padding: 12, color: "#777", fontSize: 18, marginLeft: 10 }}>
+              {loading ? "Lade Daten..." : ""}
+              <b> Anzahl Fahrten: {filtered.length}</b>
+            </div>
+            <div>
+              {filtered.length === 0 && (
+                <div style={{ margin: 30, color: '#888', fontSize: 28 }}>Keine Fahrten gefunden.</div>
+              )}
+              {filtered.map(row => (
+                <div
+                  key={row.id}
+                  className="fahrer-card"
+                  style={{
+                    marginBottom: 0,
+                    borderRadius: 0,
+                    background: cardColor(row),
+                    padding: "16px 0 8px 0",
+                    boxShadow: "none",
+                    border: "none",
+                    borderBottom: "2px solid #ccc",
+                    display: "flex",
+                    alignItems: "flex-start",
+                    fontSize: "32px",
+                    fontFamily: "Arial, Helvetica, sans-serif"
+                  }}
+                >
+                  <div style={{ flex: 1, marginLeft: 18 }}>
+                    <div className="fahrer-card-title" style={{ fontWeight: "bold", marginBottom: 0, fontSize: "20px" }}>
+                      {row.abflugUhrzeit} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
+                        ? "All"
+                        : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
+                      <a className="telefon-link" href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
+                    </div>
+                    <div className="info-zeile" style={{
+                      fontSize: 17, margin: "12px 0 0 0", color: "#444", display: "flex", alignItems: "center", fontWeight: 700
+                    }}>
+                      <span>{formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin}</span>
+                      <span style={{ margin: "0 5px", fontWeight: 500 }}>|</span>
+                      <span className="notiz-label"><b>Notizen:</b> {row.bemerkung}</span>
+                    </div>
+                    <div className="info-zeile" style={{
+                      display: "flex", alignItems: "center", gap: 0, fontSize: 17, marginTop: 0, fontWeight: 700
+                    }}>
+                      <span style={{ color: "#16b000" }}>
+                        {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
+                      </span>
+                      <span style={{ color: "#888", margin: "0 5px" }}>|</span>
+                      <span style={{ color: "#111" }}>{row.kennzeichen}</span>
+                      <span style={{ color: "#888", margin: "0 5px" }}>|</span>
+                      <span style={{ color: "red" }}>{priceDisplay(row)}</span>
+                    </div>
                   </div>
-                  <div className="info-zeile" style={{
-                    fontSize: 17, margin: "12px 0 0 0", color: "#444", display: "flex", alignItems: "center", fontWeight: 700
+                  <div className="actions" style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    gap: 38,
+                    alignItems: "center",
+                    minWidth: 270,
+                    justifyContent: "flex-end",
+                    marginRight: 30
                   }}>
-                    <span>{formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin}</span>
-                    <span style={{ margin: "0 5px", fontWeight: 500 }}>|</span>
-                    <span className="notiz-label"><b>Notizen:</b> {row.bemerkung}</span>
-                  </div>
-                  <div className="info-zeile" style={{
-                    display: "flex", alignItems: "center", gap: 0, fontSize: 17, marginTop: 0, fontWeight: 700
-                  }}>
-                    <span style={{ color: "#16b000" }}>
-                      {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
-                    </span>
-                    <span style={{ color: "#888", margin: "0 5px" }}>|</span>
-                    <span style={{ color: "#111" }}>{row.kennzeichen}</span>
-                    <span style={{ color: "#888", margin: "0 5px" }}>|</span>
-                    <span style={{ color: "red" }}>{priceDisplay(row)}</span>
+                    <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Bearbeiten"✏️</span>
+                    <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
+                    <a href={`tel:${row.telefon}`}>
+                      <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Anrufen">📞</span>
+                    </a>
                   </div>
                 </div>
-                <div className="actions" style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  gap: 38,
-                  alignItems: "center",
-                  minWidth: 270,
-                  justifyContent: "flex-end",
-                  marginRight: 30
-                }}>
-                  <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Bearbeiten">✏️           </span>
-<span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
-<a href={`tel:${row.telefon}`}>
-  <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Anrufen">📞</span>
-</a>
-</div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 }
