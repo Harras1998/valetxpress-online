@@ -23,13 +23,6 @@ function parseISODateOnly(dateStr) {
   return new Date(Number(year), Number(month) - 1, Number(day));
 }
 
-function addOneDay(date) {
-  if (!date) return null;
-  const result = new Date(date);
-  result.setDate(result.getDate() + 1);
-  return result;
-}
-
 const valetPrices = [95,97,99,110,116,117,119,120,126,128,131,136,139,143,148,149,150,154,157,161,166];
 const extra = { außen:19, innen:95, tank:15, lade:19 };
 
@@ -90,13 +83,6 @@ const soldOutDates = [
   { from: "2025-07-25", to: "2025-07-28" },
   // beliebig ergänzen!
 ];
-
-const excludedIntervals = soldOutDates.map(period => ({
-  start: parseISODateOnly(period.from),
-  end: addOneDay(parseISODateOnly(period.to)), // hier das Enddatum +1 Tag!
-}));
-
-console.log("EXCLUDED INTERVALS", excludedIntervals);
 
 function isSoldOut(from, to) {
   if (!from || !to) return false;
