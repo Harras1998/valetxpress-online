@@ -80,7 +80,7 @@ function HourMinuteSelect({ value, onChange, name, required = false }) {
 
 // --------- AUSGEBUCHT LOGIK ---------
 const soldOutDates = [
-  { from: "2025-07-10", to: "2025-07-23" },
+  { from: "2025-07-25", to: "2025-07-28" },
   // beliebig ergänzen!
 ];
 
