@@ -86,7 +86,7 @@ const soldOutDates = [
 
 const excludedIntervals = soldOutDates.map(period => ({
   start: parseISODateOnly(period.from),
-  end: parseISODateOnly(period.to)
+  end: addOneDay(parseISODateOnly(period.to)), // hier das Enddatum +1 Tag!
 }));
 
 console.log("EXCLUDED INTERVALS", excludedIntervals);
