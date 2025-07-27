@@ -89,6 +89,8 @@ const excludedIntervals = soldOutDates.map(period => ({
   end: parseISODateOnly(period.to)
 }));
 
+console.log("EXCLUDED INTERVALS", excludedIntervals);
+
 function isSoldOut(from, to) {
   if (!from || !to) return false;
   const fromStr = from.toISOString().split("T")[0];
