@@ -361,7 +361,6 @@ useEffect(() => {
                       endDate={end}
                       showPopperArrow={false}
                       required
-excludeDateIntervals={excludedIntervals}   // ← NEU HIER!
                     />
                   </label>
                   {dateError && (
@@ -385,7 +384,6 @@ excludeDateIntervals={excludedIntervals}   // ← NEU HIER!
                       endDate={end}
                       showPopperArrow={false}
                       required
-excludeDateIntervals={excludedIntervals}   // ← NEU HIER!
                     />
                   </label>
                   {returnDateError && (
