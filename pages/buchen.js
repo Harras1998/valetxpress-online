@@ -115,6 +115,7 @@ export default function Buchen() {
   const [lastAvailable, setLastAvailable] = useState({ start: null, end: null });
 
   const [form, setForm] = useState({
+    firma: "",    
     vorname: "",
     nachname: "",
     strasse: "",
@@ -134,6 +135,7 @@ export default function Buchen() {
     flugnummerHin: "",
     flugnummerRueck: "",
     terminal: "",
+    anzahl_personen: "",    
     handgepaeck: false,
     bemerkung: "",
     agb: false,
@@ -617,7 +619,10 @@ useEffect(() => {
               <form onSubmit={handleBookingSubmit} autoComplete="off">
                 <div style={{display:"flex",gap:8}}>
                   <div style={{flex:1}}>
-                    <label>Vorname*: <br />
+<label>Firma (optional):<br />
+  <input name="firma" value={form.firma} onChange={handleForm} style={{width:"100%"}} />
+</label><br />
+<label>Vorname*: <br />
                       <input name="vorname" value={form.vorname} onChange={handleForm} required style={{width:"100%"}} />
                     </label>
                   </div>
@@ -712,6 +717,18 @@ useEffect(() => {
                 <label>Terminal* (z.B. T1, T2): <br />
                   <input name="terminal" value={form.terminal} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
+<label>Anzahl der Personen*:<br />
+  <input
+    name="anzahl_personen"
+    type="number"
+    min="1"
+    max="10"
+    required
+    value={form.anzahl_personen}
+    onChange={handleForm}
+    style={{width:"100%"}}
+  />
+</label><br /><br />
                 <label>
                   <input
                     type="checkbox"
