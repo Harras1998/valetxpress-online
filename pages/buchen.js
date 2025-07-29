@@ -617,22 +617,24 @@ useEffect(() => {
               </div>
               {/* Formular */}
               <form onSubmit={handleBookingSubmit} autoComplete="off">
-                <div style={{display:"flex",gap:8}}>
-                  <div style={{flex:1}}>
-<label>Firma (optional):<br />
+                <label>Firma (optional):<br />
   <input name="firma" value={form.firma} onChange={handleForm} style={{width:"100%"}} />
-</label><br />
-<label>Vorname*: <br />
-                      <input name="vorname" value={form.vorname} onChange={handleForm} required style={{width:"100%"}} />
-                    </label>
-                  </div>
-                  <div style={{flex:2}}>
-                    <label>Nachname*: <br />
-                      <input name="nachname" value={form.nachname} onChange={handleForm} required style={{width:"100%"}} />
-                    </label>
-                  </div>
-                </div><br />
-                <label>Straße / Hausnr.*:<br />
+</label>
+<br />
+<div style={{display:"flex",gap:8}}>
+  <div style={{flex:1}}>
+    <label>Vorname*: <br />
+      <input name="vorname" value={form.vorname} onChange={handleForm} required style={{width:"100%"}} />
+    </label>
+  </div>
+  <div style={{flex:2}}>
+    <label>Nachname*: <br />
+      <input name="nachname" value={form.nachname} onChange={handleForm} required style={{width:"100%"}} />
+    </label>
+  </div>
+</div>
+<br />
+<label>Straße / Hausnr.*:<br />
                   <input name="strasse" value={form.strasse} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
                 <div style={{display:"flex",gap:8}}>
