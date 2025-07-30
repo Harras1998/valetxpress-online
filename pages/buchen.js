@@ -655,8 +655,8 @@ useEffect(() => {
                 <label>Mobilfunk Nr./Telefon Nr.*: <br />
                   <input name="telefon" type="tel" value={form.telefon} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
-                <label>Fahrzeugtyp/Modell*: <br />
-                  <input name="auto" value={form.auto} onChange={handleForm} required style={{width:"100%"}} />
+                <label>Fahrzeugtyp/Modell: <br />
+                  <input name="auto" value={form.auto} onChange={handleForm} style={{width:"100%"}} />
                 </label><br /><br />
                 <label>KFZ-Kennzeichen*: <br />
                   <input name="kennzeichen" value={form.kennzeichen} onChange={handleForm} required style={{width:"100%"}} />
@@ -707,8 +707,8 @@ useEffect(() => {
                 <label>Reiseziel*:<br />
                   <input name="reiseziel" value={form.reiseziel} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
-                <label>Fluggesellschaft*: <br />
-                  <input name="fluggesellschaft" value={form.fluggesellschaft} onChange={handleForm} required style={{width:"100%"}} />
+                <label>Fluggesellschaft: <br />
+                  <input name="fluggesellschaft" value={form.fluggesellschaft} onChange={handleForm} style={{width:"100%"}} />
                 </label><br /><br />
                 <label>Flugnummer Hinflug*:<br />
                   <input name="flugnummerHin" value={form.flugnummerHin} onChange={handleForm} required style={{width:"100%"}} />
@@ -716,8 +716,8 @@ useEffect(() => {
                 <label>Flugnummer Rückflug*:<br />
                   <input name="flugnummerRueck" value={form.flugnummerRueck} onChange={handleForm} required style={{width:"100%"}} />
                 </label><br /><br />
-                <label>Terminal* (z.B. T1, T2): <br />
-                  <input name="terminal" value={form.terminal} onChange={handleForm} required style={{width:"100%"}} />
+                <label>Terminal (z.B. T1, T2): <br />
+                  <input name="terminal" value={form.terminal} onChange={handleForm} style={{width:"100%"}} />
                 </label><br /><br />
 <label>Anzahl der Personen*:<br />
   <input
