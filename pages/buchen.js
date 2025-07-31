@@ -109,6 +109,14 @@ export default function Buchen() {
   const [addLade, setAddLade] = useState(false);
   const [step, setStep] = useState(1);
 
+// <-- HIER EINBAUEN
+  useEffect(() => {
+    if (router.isReady) {
+      const s = router.query.step;
+      if (s === "2") setStep(2);
+    }
+  }, [router.isReady, router.query.step]);
+
   const [dateError, setDateError] = useState("");
   const [returnDateError, setReturnDateError] = useState("");
   const [soldOutStatus, setSoldOutStatus] = useState("");
