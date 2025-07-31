@@ -109,13 +109,39 @@ export default function Buchen() {
   const [addLade, setAddLade] = useState(false);
   const [step, setStep] = useState(1);
 
-// <-- HIER EINBAUEN
-  useEffect(() => {
-    if (router.isReady) {
-      const s = router.query.step;
-      if (s === "2") setStep(2);
+// <-- HIER EINBAUEN (anstelle des alten Blocks)
+useEffect(() => {
+  if (router.isReady) {
+    const s = router.query.step;
+    if (s === "2") {
+      setStep(2);
+
+      // Daten aus localStorage wiederherstellen
+      if (typeof window !== "undefined") {
+        const bookingString = localStorage.getItem("valet_booking");
+        if (bookingString) {
+          try {
+            const booking = JSON.parse(bookingString);
+
+            // Form-Felder und weitere States übernehmen
+            if (booking.form) setForm(booking.form);
+            if (booking.start) setStart(new Date(booking.start));
+            if (booking.end) setEnd(new Date(booking.end));
+            if (booking.type) setType(booking.type);
+            if (booking.days) setDays(booking.days);
+            if (booking.price) setPrice(booking.price);
+            if (typeof booking.addOut !== "undefined") setAddOut(booking.addOut);
+            if (typeof booking.addIn !== "undefined") setAddIn(booking.addIn);
+            if (typeof booking.addTank !== "undefined") setAddTank(booking.addTank);
+            if (typeof booking.addLade !== "undefined") setAddLade(booking.addLade);
+          } catch (e) {
+            // Ignoriere Fehler beim Parsen
+          }
+        }
+      }
     }
-  }, [router.isReady, router.query.step]);
+  }
+}, [router.isReady, router.query.step]);
 
   const [dateError, setDateError] = useState("");
   const [returnDateError, setReturnDateError] = useState("");
