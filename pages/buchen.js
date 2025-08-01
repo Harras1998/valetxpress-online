@@ -125,8 +125,8 @@ useEffect(() => {
 
             // Form-Felder und weitere States übernehmen
             if (booking.form) setForm(booking.form);
-            if (booking.start) setStart(new Date(booking.start));
-            if (booking.end) setEnd(new Date(booking.end));
+            if (booking.start) setStart(parseISODateOnly(booking.start));
+if (booking.end) setEnd(parseISODateOnly(booking.end));
             if (booking.type) setType(booking.type);
             if (booking.days) setDays(booking.days);
             if (booking.price) setPrice(booking.price);
