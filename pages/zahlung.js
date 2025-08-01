@@ -4,11 +4,20 @@ import Footer from "../components/Footer";
 // Falls noch nicht installiert: npm install @paypal/react-paypal-js
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
-// Hilfsfunktion für deutsches Datumsformat
-function toDE(dateStr) {
-  if (!dateStr) return "";
-  const [y, m, d] = dateStr.split("-");
+// Hilfsfunktion: Date-Objekt → dd.mm.yyyy
+function toDE(dateObj) {
+  if (!dateObj) return "";
+  const y = dateObj.getFullYear();
+  const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const d = String(dateObj.getDate()).padStart(2, "0");
   return `${d}.${m}.${y}`;
+}
+
+// Hilfsfunktion: "YYYY-MM-DD" → Date-Objekt
+function parseISODateOnly(dateStr) {
+  if (!dateStr) return null;
+  const [year, month, day] = dateStr.split("-");
+  return new Date(Number(year), Number(month) - 1, Number(day));
 }
 
 const paymentOptions = [
@@ -137,7 +146,8 @@ export default function Zahlung() {
             <div style={{ margin: "8px 0" }}>
               <b>Park-Modell:</b> {type === "valet" ? "Valet-Parking" : "All-Inclusive‑Parking"}<br />
               <b>Name:</b> {form.vorname} {form.nachname}<br />
-              <b>Abflugdatum:</b> {toDE(form.abflugdatum || start)}, <b>Rückflugdatum:</b> {toDE(form.rueckflugdatum || end)}<br />
+              <b>Abflugdatum:</b> {toDE(parseISODateOnly(form.abflugdatum || start))}, <b>Rückflugdatum:</b> {toDE(parseISODateOnly(form.rueckflugdatum || end))}
+<br />
               <b>Aufenthaltsdauer:</b> {days} {days === 1 ? "Tag" : "Tage"}<br />
               {form.auto && (<><b>Fahrzeug:</b> {form.auto}, <b>KFZ-Kennzeichen:</b> {form.kennzeichen}<br /></>)}
               <b>Gesamtpreis:</b> <span style={{ color: "#1db954", fontWeight: "bold", fontSize: 22 }}>{price} €</span><br />
