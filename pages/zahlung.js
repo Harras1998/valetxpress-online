@@ -4,22 +4,6 @@ import Footer from "../components/Footer";
 // Falls noch nicht installiert: npm install @paypal/react-paypal-js
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
-// Hilfsfunktion: Date-Objekt → dd.mm.yyyy
-//function toDE(dateObj) {
-  if (!dateObj) return "";
-  const y = dateObj.getFullYear();
-  const m = String(dateObj.getMonth() + 1).padStart(2, "0");
-  const d = String(dateObj.getDate()).padStart(2, "0");
-  return `${d}.${m}.${y}`;
-}
-
-// Hilfsfunktion: "YYYY-MM-DD" → Date-Objekt
-//function parseISODateOnly(dateStr) {
-  if (!dateStr) return null;
-  const [year, month, day] = dateStr.split("-");
-  return new Date(Number(year), Number(month) - 1, Number(day));
-}
-
 // Gibt aus "2025-08-14" -> "14.08.2025" zurück (ohne Zeitzonen-Probleme)
 function dateDE(dateStr) {
   if (!dateStr) return "";
