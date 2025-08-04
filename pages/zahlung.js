@@ -5,7 +5,7 @@ import Footer from "../components/Footer";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 // Hilfsfunktion: Date-Objekt → dd.mm.yyyy
-function toDE(dateObj) {
+//function toDE(dateObj) {
   if (!dateObj) return "";
   const y = dateObj.getFullYear();
   const m = String(dateObj.getMonth() + 1).padStart(2, "0");
@@ -14,10 +14,18 @@ function toDE(dateObj) {
 }
 
 // Hilfsfunktion: "YYYY-MM-DD" → Date-Objekt
-function parseISODateOnly(dateStr) {
+//function parseISODateOnly(dateStr) {
   if (!dateStr) return null;
   const [year, month, day] = dateStr.split("-");
   return new Date(Number(year), Number(month) - 1, Number(day));
+}
+
+// Gibt aus "2025-08-14" -> "14.08.2025" zurück (ohne Zeitzonen-Probleme)
+function dateDE(dateStr) {
+  if (!dateStr) return "";
+  const parts = dateStr.split("-");
+  if (parts.length === 3) return `${parts[2]}.${parts[1]}.${parts[0]}`;
+  return dateStr;
 }
 
 const paymentOptions = [
@@ -146,7 +154,7 @@ export default function Zahlung() {
             <div style={{ margin: "8px 0" }}>
               <b>Park-Modell:</b> {type === "valet" ? "Valet-Parking" : "All-Inclusive‑Parking"}<br />
               <b>Name:</b> {form.vorname} {form.nachname}<br />
-              <b>Abflugdatum:</b> {toDE(parseISODateOnly(form.abflugdatum || start))}, <b>Rückflugdatum:</b> {toDE(parseISODateOnly(form.rueckflugdatum || end))}
+              <b>Abflugdatum:</b> {dateDE(form.abflugdatum || start)}, <b>Rückflugdatum:</b> {dateDE(form.rueckflugdatum || end)}
 <br />
               <b>Aufenthaltsdauer:</b> {days} {days === 1 ? "Tag" : "Tage"}<br />
               {form.auto && (<><b>Fahrzeug:</b> {form.auto}, <b>KFZ-Kennzeichen:</b> {form.kennzeichen}<br /></>)}
