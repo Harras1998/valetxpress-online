@@ -23,6 +23,17 @@ function parseISODateOnly(dateStr) {
   return new Date(Number(year), Number(month) - 1, Number(day));
 }
 
+function toISODateOnly(dateObj) {
+  if (!dateObj) return "";
+  return (
+    dateObj.getFullYear() +
+    "-" +
+    String(dateObj.getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(dateObj.getDate()).padStart(2, "0")
+  );
+}
+
 const valetPrices = [95,97,99,110,116,117,119,120,126,128,131,136,139,143,148,149,150,154,157,161,166];
 const extra = { außen:19, innen:95, tank:15, lade:19 };
 
@@ -830,8 +841,8 @@ useEffect(() => {
                   type="button"
                   onClick={() => {
                     setStep(1);
-                    const fromString = start ? start.toISOString().split("T")[0] : "";
-                    const toString = end ? end.toISOString().split("T")[0] : "";
+                    const fromString = start ? toISODateOnly(start) : "";
+                    const toString = end ? toISODateOnly(end) : "";
                     const bookingData = {
                       form: {
                         ...form,
