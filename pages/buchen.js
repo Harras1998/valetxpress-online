@@ -275,8 +275,8 @@ useEffect(() => {
 
   function handleBookingSubmit(e) {
     e.preventDefault();
-    const fromString = start ? start.toISOString().split("T")[0] : "";
-    const toString = end ? end.toISOString().split("T")[0] : "";
+    const fromString = start ? toISODateOnly(start) : "";
+    const toString = end ? toISODateOnly(end) : "";
     const bookingData = {
       form: {
         ...form,
@@ -545,8 +545,8 @@ useEffect(() => {
                 }}
                 onClick={() => {
                   setStep(2);
-                  const fromString = start ? start.toISOString().split("T")[0] : "";
-                  const toString = end ? end.toISOString().split("T")[0] : "";
+                  const fromString = start ? toISODateOnly(start) : "";
+                  const toString = end ? toISODateOnly(end) : "";
                   setForm(f => ({
                     ...f,
                     abflugdatum: fromString,
