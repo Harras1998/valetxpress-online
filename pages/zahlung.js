@@ -86,6 +86,9 @@ export default function Zahlung() {
     form, type, start, end, days, price, addOut, addIn, addTank, addLade
   } = booking;
 
+// <-- HIER EINZUFÜGEN
+  console.log("form.abflugdatum:", form.abflugdatum, "form.rueckflugdatum:", form.rueckflugdatum);
+
   // Handle Bezahlung
   async function handlePay(e) {
     e.preventDefault();
