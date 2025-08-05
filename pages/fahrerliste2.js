@@ -1,34 +1,40 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
-// Tabs, Labels, IDs wie im Original
+/**
+ * Fahrerliste-Komponente
+ * 100% jQuery-Mobile-Style, alle Features, Edit-Dialog, Popups, etc.
+ * Du kannst sie z.B. in /pages/fahrerliste.js einbinden!
+ */
 const TABS = [
   { id: "Ansicht_0", label: "Heute" },
   { id: "Ansicht_1", label: "2-Tage" },
-  { id: "Ansicht_2", label: "Alle" },
+  { id: "Ansicht_2", label: "Alle" }
 ];
 
 export default function Fahrerliste() {
-  // State für alle Popups und Formulare
+  // Main State
   const [view, setView] = useState("Ansicht_0");
   const [buchungen, setBuchungen] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
-  const [sortTick, setSortTick] = useState(0); // Für manuelles Sortieren
+  const [msg, setMsg] = useState("");
+  const [sortTick, setSortTick] = useState(0);
 
-  // Detail/Overlay-States (wie Masken im Original)
+  // Edit-Dialog State
   const [showEdit, setShowEdit] = useState(false);
-  const [editData, setEditData] = useState(null);
+  const [editData, setEditData] = useState({});
 
+  // Uhrzeit-Popup State
   const [showHourPopup, setShowHourPopup] = useState(false);
-  const [hourPopup, setHourPopup] = useState({ bid: null, hr: "", min: "", rue: false });
+  const [hourPopup, setHourPopup] = useState({ bid: null, hr: "", min: "" });
 
+  // Terminal-Popup State
   const [showTerminalPopup, setShowTerminalPopup] = useState(false);
   const [terminalPopup, setTerminalPopup] = useState({ bid: null, term: "" });
 
+  // Report-Popup State
   const [showReport, setShowReport] = useState(false);
   const [reportPopup, setReportPopup] = useState({ bid: null, n: "", note: "" });
-
-  const [msg, setMsg] = useState("");
 
   // === BUCHUNGEN LADEN ===
   useEffect(() => { loadBuchungen(); }, [view, sortTick, search]);
@@ -43,7 +49,7 @@ export default function Fahrerliste() {
     setLoading(false);
   }
 
-  // === TIMER/REFRESH ===
+  // === TIMER/REFRESH (Blink & Countdown) ===
   useEffect(() => {
     const interval = setInterval(() => setSortTick(t => t + 1), 1000);
     const refresh = setInterval(() => loadBuchungen(), 60000);
@@ -58,7 +64,7 @@ export default function Fahrerliste() {
   function sortList() { setSortTick(t => t + 1); }
   function logoReload() { loadBuchungen(); }
 
-  // === BUTTON-AKTIONEN wie original ===
+  // === BUTTON-AKTIONEN ===
   async function startTimer(id) {
     await fetch("/api/fahrerliste/anruf", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
     loadBuchungen();
@@ -72,39 +78,44 @@ export default function Fahrerliste() {
     loadBuchungen();
   }
 
-  // === DETAIL-OVERLAY (Bearbeiten wie original) ===
-  async function openEditMask(bid, n, typ) {
-    setLoading(true);
-    // Im Original: getdetails.php/getfahrerdetails.php je nach Typ
-    const url = typ === "bu" ? `/api/getdetails?bid=${bid}&a=m&n=${n}` : `/api/getfahrerdetails?bid=${bid}&a=m&n=${n}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    setEditData(data);
+  // === EDIT-Dialog ===
+  async function openEditMask(buchung) {
+    setEditData(buchung);
     setShowEdit(true);
-    setLoading(false);
+    setMsg("");
+  }
+  function handleEditChange(e) {
+    const { name, value, type, checked } = e.target;
+    setEditData({
+      ...editData,
+      [name]: type === "checkbox" ? checked : value
+    });
   }
   async function submitEditForm(e) {
     e.preventDefault();
-    setLoading(true);
-    const form = new FormData(e.target);
-    const res = await fetch("/api/moddetail", { method: "POST", body: form });
+    setMsg("");
+    const res = await fetch("/api/moddetail", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(editData)
+    });
     const data = await res.json();
-    setMsg(data.msg);
-    setTimeout(() => setShowEdit(false), 800);
+    setMsg(data.msg || "Gespeichert!");
+    setTimeout(() => setShowEdit(false), 1000);
     setTimeout(() => loadBuchungen(), 1200);
-    setLoading(false);
   }
 
   // === QUITTUNG ===
-  async function sendQuittung(senddata) {
-    const res = await fetch("/api/rechnung", { method: "POST", body: JSON.stringify({ id: senddata }) });
+  async function sendQuittung(id) {
+    const res = await fetch("/api/rechnung", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
     const data = await res.text();
     setMsg(data + " verschickt und von Server gelöscht");
   }
 
   // === UHRZEIT POPUP ===
-  function openHourPopup(bid, rue, hr, min) {
-    setHourPopup({ bid, hr, min, rue });
+  function openHourPopup(bid, akzeit = "") {
+    const [hr, min] = akzeit.split(":");
+    setHourPopup({ bid, hr: hr || "", min: min || "" });
     setShowHourPopup(true);
   }
   async function submitHourChange() {
@@ -112,8 +123,9 @@ export default function Fahrerliste() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        bid: hourPopup.bid, d: hourPopup.rue ? "rue" : "ak",
-        hr: hourPopup.hr, min: hourPopup.min
+        bid: hourPopup.bid,
+        hr: hourPopup.hr,
+        min: hourPopup.min
       })
     });
     setShowHourPopup(false);
@@ -122,7 +134,7 @@ export default function Fahrerliste() {
 
   // === TERMINAL POPUP ===
   function openTerminalPopup(bid, term) {
-    setTerminalPopup({ bid, term });
+    setTerminalPopup({ bid, term: term || "" });
     setShowTerminalPopup(true);
   }
   async function submitTerminalChange() {
@@ -162,7 +174,6 @@ export default function Fahrerliste() {
     return `${m}:${s}`;
   }
 
-  // === UI START ===
   return (
     <div id="page" data-role="page" style={{ minHeight: "100vh" }}>
       {/* Header */}
@@ -260,7 +271,7 @@ export default function Fahrerliste() {
                   }}>
                   <div style={{ flex: 3 }}>
                     <b>{b.vorname} {b.nachname}</b> ({b.kennzeichen})<br />
-                    Ankunft: <b onClick={() => openHourPopup(b.id, false, b.ankunftUhrzeit.split(":")[0], b.ankunftUhrzeit.split(":")[1])}
+                    Ankunft: <b onClick={() => openHourPopup(b.id, b.ankunftUhrzeit)}
                       className="ankft" style={{ cursor: "pointer", textDecoration: "underline" }}>{b.ankunftUhrzeit}</b>
                     {b.timer_start && !b.abgeschlossen && (
                       <span className={"clock" + (blink ? " blink" : "")}
@@ -307,7 +318,7 @@ export default function Fahrerliste() {
                     )}
                     {/* Edit-Button */}
                     <button className="editbtn"
-                      onClick={() => openEditMask(b.id, b.n, "bu")}
+                      onClick={() => openEditMask(b)}
                       style={{
                         background: "#eee", color: "#222", border: "1px solid #bbb", borderRadius: 6,
                         marginLeft: 5, fontWeight: 500, cursor: "pointer"
@@ -348,7 +359,7 @@ export default function Fahrerliste() {
         <h4 style={{ margin: 0, fontWeight: "bold", letterSpacing: 1 }}>PXP Fahrerliste</h4>
       </div>
 
-      {/* Popups und Overlays */}
+      {/* Edit-Dialog */}
       {showEdit && (
         <div className="detform" style={{
           position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999,
@@ -356,14 +367,162 @@ export default function Fahrerliste() {
         }}>
           <h2>Buchung bearbeiten</h2>
           <form id="detailmod" onSubmit={submitEditForm}>
-            {/* Felder: Passe je nach Datenstruktur an */}
-            <input type="text" name="vorname" value={editData?.vorname || ""} onChange={...} />
-            {/* ... alle weiteren Felder */}
-            <button id="formsub" type="submit">Speichern</button>
-            <button id="zur" type="button" onClick={() => setShowEdit(false)}>Zurück</button>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+              <label style={{ flex: "1 1 240px" }}>
+                Vorname<br />
+                <input
+                  type="text"
+                  name="vorname"
+                  value={editData?.vorname || ""}
+                  onChange={handleEditChange}
+                />
+              </label>
+              <label style={{ flex: "1 1 240px" }}>
+                Nachname<br />
+                <input
+                  type="text"
+                  name="nachname"
+                  value={editData?.nachname || ""}
+                  onChange={handleEditChange}
+                />
+              </label>
+              <label style={{ flex: "1 1 240px" }}>
+                E-Mail<br />
+                <input
+                  type="email"
+                  name="email"
+                  value={editData?.email || ""}
+                  onChange={handleEditChange}
+                />
+              </label>
+              <label style={{ flex: "1 1 240px" }}>
+                Telefon<br />
+                <input
+                  type="text"
+                  name="telefon"
+                  value={editData?.telefon || ""}
+                  onChange={handleEditChange}
+                />
+              </label>
+              <label style={{ flex: "1 1 240px" }}>
+                Auto/Modell<br />
+                <input
+                  type="text"
+                  name="auto"
+                  value={editData?.auto || ""}
+                  onChange={handleEditChange}
+                />
+              </label>
+              <label style={{ flex: "1 1 240px" }}>
+                Kennzeichen<br />
+                <input
+                  type="text"
+                  name="kennzeichen"
+                  value={editData?.kennzeichen || ""}
+                  onChange={handleEditChange}
+                />
+              </label>
+              <label style={{ flex: "1 1 140px" }}>
+                Abflugdatum<br />
+                <input
+                  type="date"
+                  name="abflugdatum"
+                  value={editData?.abflugdatum || ""}
+                  onChange={handleEditChange}
+                />
+              </label>
+              <label style={{ flex: "1 1 140px" }}>
+                Abflugzeit<br />
+                <input
+                  type="time"
+                  name="abflugUhrzeit"
+                  value={editData?.abflugUhrzeit || ""}
+                  onChange={handleEditChange}
+                />
+              </label>
+              <label style={{ flex: "1 1 140px" }}>
+                Rückflugdatum<br />
+                <input
+                  type="date"
+                  name="rueckflugdatum"
+                  value={editData?.rueckflugdatum || ""}
+                  onChange={handleEditChange}
+                />
+              </label>
+              <label style={{ flex: "1 1 140px" }}>
+                Rückflugzeit<br />
+                <input
+                  type="time"
+                  name="rueckflugUhrzeit"
+                  value={editData?.rueckflugUhrzeit || ""}
+                  onChange={handleEditChange}
+                />
+              </label>
+              <label style={{ flex: "1 1 240px" }}>
+                Flugnummer Hin<br />
+                <input
+                  type="text"
+                  name="flugnummerHin"
+                  value={editData?.flugnummerHin || ""}
+                  onChange={handleEditChange}
+                />
+              </label>
+              <label style={{ flex: "1 1 240px" }}>
+                Flugnummer Rück<br />
+                <input
+                  type="text"
+                  name="flugnummerRueck"
+                  value={editData?.flugnummerRueck || ""}
+                  onChange={handleEditChange}
+                />
+              </label>
+              <label style={{ flex: "1 1 140px" }}>
+                Terminal<br />
+                <input
+                  type="text"
+                  name="terminal"
+                  value={editData?.terminal || ""}
+                  onChange={handleEditChange}
+                />
+              </label>
+              <label style={{ flex: "1 1 140px" }}>
+                Personen<br />
+                <input
+                  type="number"
+                  name="anzahl_personen"
+                  value={editData?.anzahl_personen || ""}
+                  onChange={handleEditChange}
+                />
+              </label>
+              <label style={{ flex: "1 1 140px" }}>
+                Handgepäck
+                <input
+                  type="checkbox"
+                  name="handgepaeck"
+                  checked={!!editData?.handgepaeck}
+                  onChange={handleEditChange}
+                />
+              </label>
+              <label style={{ flex: "1 1 280px" }}>
+                Bemerkung<br />
+                <textarea
+                  name="bemerkung"
+                  value={editData?.bemerkung || ""}
+                  onChange={handleEditChange}
+                  rows={2}
+                />
+              </label>
+            </div>
+            <div style={{ marginTop: 18, display: "flex", gap: 16 }}>
+              <button id="formsub" type="submit">Speichern</button>
+              <button id="zur" type="button" onClick={() => setShowEdit(false)}>Zurück</button>
+            </div>
+            <div id="msg" style={{ color: "#0a8", fontWeight: "bold", marginTop: 10 }}>{msg}</div>
           </form>
         </div>
       )}
+
+      {/* Uhrzeit-Popup */}
       {showHourPopup && (
         <div className="hour-popup" style={{
           position: "fixed", top: "18%", left: "50%", transform: "translate(-50%, 0)",
@@ -375,6 +534,8 @@ export default function Fahrerliste() {
           <button id="closehr" onClick={() => setShowHourPopup(false)}>Schließen</button>
         </div>
       )}
+
+      {/* Terminal-Popup */}
       {showTerminalPopup && (
         <div className="terminal-popup" style={{
           position: "fixed", top: "18%", left: "50%", transform: "translate(-50%, 0)",
@@ -385,6 +546,8 @@ export default function Fahrerliste() {
           <button id="closetr" onClick={() => setShowTerminalPopup(false)}>Schließen</button>
         </div>
       )}
+
+      {/* Report-Popup */}
       {showReport && (
         <div className="report-popup" style={{
           position: "fixed", top: "18%", left: "50%", transform: "translate(-50%, 0)",
