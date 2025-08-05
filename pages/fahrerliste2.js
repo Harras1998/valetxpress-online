@@ -1,300 +1,408 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
-// --- Hilfsfunktionen wie im Original ---
-function pad(n) { return String(n).padStart(2, "0"); }
-function timeStr(secs) {
-  let m = Math.floor(secs / 60), s = secs % 60;
-  return pad(m) + ":" + pad(s);
-}
-
-const ANSICHTEN = [
-  { id: "Ansicht_0", label: "Heute", value: "heute" },
-  { id: "Ansicht_1", label: "2-Tage", value: "zwei" },
-  { id: "Ansicht_2", label: "Alle", value: "alle" },
+// Tabs, Labels, IDs wie im Original
+const TABS = [
+  { id: "Ansicht_0", label: "Heute" },
+  { id: "Ansicht_1", label: "2-Tage" },
+  { id: "Ansicht_2", label: "Alle" },
 ];
 
 export default function Fahrerliste() {
-  const [tab, setTab] = useState("heute");
+  // State für alle Popups und Formulare
+  const [view, setView] = useState("Ansicht_0");
   const [buchungen, setBuchungen] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
-  const [tick, setTick] = useState(0);
+  const [sortTick, setSortTick] = useState(0); // Für manuelles Sortieren
 
-  // --- DATA LOADING ---
-  async function fetchList() {
+  // Detail/Overlay-States (wie Masken im Original)
+  const [showEdit, setShowEdit] = useState(false);
+  const [editData, setEditData] = useState(null);
+
+  const [showHourPopup, setShowHourPopup] = useState(false);
+  const [hourPopup, setHourPopup] = useState({ bid: null, hr: "", min: "", rue: false });
+
+  const [showTerminalPopup, setShowTerminalPopup] = useState(false);
+  const [terminalPopup, setTerminalPopup] = useState({ bid: null, term: "" });
+
+  const [showReport, setShowReport] = useState(false);
+  const [reportPopup, setReportPopup] = useState({ bid: null, n: "", note: "" });
+
+  const [msg, setMsg] = useState("");
+
+  // === BUCHUNGEN LADEN ===
+  useEffect(() => { loadBuchungen(); }, [view, sortTick, search]);
+
+  async function loadBuchungen() {
     setLoading(true);
-    let url = `/api/admin/fahrerliste?ansicht=${tab}`;
-    if (search) url += `&search=${encodeURIComponent(search)}`;
+    let url = `/api/fahrerliste?view=${view}`;
+    if (search) url += `&kennzeichen=${encodeURIComponent(search)}`;
     const res = await fetch(url);
     const data = await res.json();
     setBuchungen(Array.isArray(data.buchungen) ? data.buchungen : []);
     setLoading(false);
   }
 
-  // --- On tab/search change ---
-  useEffect(() => { fetchList(); }, [tab, search]);
-
-  // --- Auto-reload alle 60s ---
+  // === TIMER/REFRESH ===
   useEffect(() => {
-    const interval = setInterval(fetchList, 60000);
-    return () => clearInterval(interval);
+    const interval = setInterval(() => setSortTick(t => t + 1), 1000);
+    const refresh = setInterval(() => loadBuchungen(), 60000);
+    return () => { clearInterval(interval); clearInterval(refresh); };
   }, []);
 
-  // --- Timer "tickt" jede Sekunde für Animationen/Farben ---
-  useEffect(() => {
-    const interval = setInterval(() => setTick(t => t + 1), 1000);
-    return () => clearInterval(interval);
-  }, []);
+  // === LOGOUT ===
+  function logout() { window.location.reload(); }
 
-  // --- Logo Reload ---
-  function reloadAll() { fetchList(); }
+  // === TABS/SORT/LOGO ===
+  function handleTabChange(id) { setView(id); }
+  function sortList() { setSortTick(t => t + 1); }
+  function logoReload() { loadBuchungen(); }
 
-  // --- Timer Start (Anruf bekommen) ---
+  // === BUTTON-AKTIONEN wie original ===
   async function startTimer(id) {
-    await fetch("/api/admin/fahrerliste/anruf", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id })
-    });
-    fetchList();
+    await fetch("/api/fahrerliste/anruf", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    loadBuchungen();
   }
-
-  // --- Buchung abschließen ---
   async function finish(id) {
-    await fetch("/api/admin/fahrerliste/abgeschlossen", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id })
-    });
-    fetchList();
+    await fetch("/api/fahrerliste/abgeschlossen", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    loadBuchungen();
   }
-
-  // --- Reaktivieren ---
   async function reactivate(id) {
-    await fetch("/api/admin/fahrerliste/reaktivieren", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id })
-    });
-    fetchList();
+    await fetch("/api/fahrerliste/reaktivieren", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    loadBuchungen();
   }
 
-  // --- Sortieren nach Uhrzeit/Order (wie im Original) ---
-  function sortieren() {
-    setBuchungen(arr =>
-      [...arr].sort((a, b) => {
-        // Nutze "ankunftUhrzeit" oder order (passe Feldnamen ggf. an)
-        if (a.abflugUhrzeit && b.abflugUhrzeit) {
-          return a.abflugUhrzeit.localeCompare(b.abflugUhrzeit);
-        }
-        return (a.order || 0) - (b.order || 0);
+  // === DETAIL-OVERLAY (Bearbeiten wie original) ===
+  async function openEditMask(bid, n, typ) {
+    setLoading(true);
+    // Im Original: getdetails.php/getfahrerdetails.php je nach Typ
+    const url = typ === "bu" ? `/api/getdetails?bid=${bid}&a=m&n=${n}` : `/api/getfahrerdetails?bid=${bid}&a=m&n=${n}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    setEditData(data);
+    setShowEdit(true);
+    setLoading(false);
+  }
+  async function submitEditForm(e) {
+    e.preventDefault();
+    setLoading(true);
+    const form = new FormData(e.target);
+    const res = await fetch("/api/moddetail", { method: "POST", body: form });
+    const data = await res.json();
+    setMsg(data.msg);
+    setTimeout(() => setShowEdit(false), 800);
+    setTimeout(() => loadBuchungen(), 1200);
+    setLoading(false);
+  }
+
+  // === QUITTUNG ===
+  async function sendQuittung(senddata) {
+    const res = await fetch("/api/rechnung", { method: "POST", body: JSON.stringify({ id: senddata }) });
+    const data = await res.text();
+    setMsg(data + " verschickt und von Server gelöscht");
+  }
+
+  // === UHRZEIT POPUP ===
+  function openHourPopup(bid, rue, hr, min) {
+    setHourPopup({ bid, hr, min, rue });
+    setShowHourPopup(true);
+  }
+  async function submitHourChange() {
+    await fetch("/api/modhour", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        bid: hourPopup.bid, d: hourPopup.rue ? "rue" : "ak",
+        hr: hourPopup.hr, min: hourPopup.min
       })
-    );
+    });
+    setShowHourPopup(false);
+    setTimeout(() => loadBuchungen(), 300);
   }
 
-  // --- Timer Farbe/Animation wie im Original ---
-  function timerStyle(start) {
-    if (!start) return {};
-    const diff = Math.floor((Date.now() - new Date(start)) / 1000);
-    let color = "#333";
-    let blink = false;
-    if (diff >= 10 * 60) { color = "#f50"; blink = true; }
-    else if (diff >= 5 * 60) { color = "#e6b800"; }
-    return {
-      color,
-      textDecoration: blink ? "blink" : undefined,
-      fontWeight: "bold",
-      fontVariantNumeric: "tabular-nums",
-      fontSize: "1.18em"
-    };
+  // === TERMINAL POPUP ===
+  function openTerminalPopup(bid, term) {
+    setTerminalPopup({ bid, term });
+    setShowTerminalPopup(true);
+  }
+  async function submitTerminalChange() {
+    await fetch("/api/modterm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bid: terminalPopup.bid, tr: terminalPopup.term })
+    });
+    setShowTerminalPopup(false);
+    setTimeout(() => loadBuchungen(), 300);
   }
 
+  // === REPORT POPUP ===
+  function openReportPopup(bid, n) {
+    setReportPopup({ bid, n, note: "" });
+    setShowReport(true);
+  }
+  async function submitReport() {
+    await fetch("/api/report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        bid: reportPopup.bid, n: reportPopup.n,
+        a: "rep", notiz: reportPopup.note
+      })
+    });
+    setShowReport(false);
+    setMsg("Report gesendet!");
+  }
+
+  // === TIMER-Logik ===
+  function timerDisplay(start) {
+    if (!start) return "";
+    const secs = Math.floor((Date.now() - new Date(start)) / 1000);
+    const m = String(Math.floor(secs / 60)).padStart(2, "0");
+    const s = String(secs % 60).padStart(2, "0");
+    return `${m}:${s}`;
+  }
+
+  // === UI START ===
   return (
-    <div id="page" style={{
-      background: "#f8f8f8", minHeight: "100vh", fontFamily: "system-ui, Arial, sans-serif"
-    }}>
+    <div id="page" data-role="page" style={{ minHeight: "100vh" }}>
       {/* Header */}
-      <div style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        background: "#0a8", padding: "14px 10px 16px 22px", borderBottom: "2px solid #cfc"
+      <div data-role="header" className="ui-bar-a" style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between", padding: 10
       }}>
         <h1 style={{
-          fontSize: "2.1rem", fontWeight: "bold", textAlign: "center", margin: 0, color: "#fff", flex: 1
-        }}>
-          ParkXpress iPAD-Liste 
-        </h1>
-        <button
-          title="Logout"
-          onClick={() => { /* Hier Logout-Logik! */ }}
-          style={{
-            background: "none", border: "none", cursor: "pointer", marginLeft: 16
-          }}>
-          <img src="/images/logout.png" alt="Ausloggen" width={34} height={34} />
-        </button>
+          fontSize: "1.5em", fontWeight: "bold", textAlign: "center", margin: 0, flex: 1
+        }}>ParkXpress iPAD-Liste </h1>
+        <div className="logout" style={{ cursor: "pointer" }} onClick={logout}>
+          <img src="/images/logout.png" alt="Ausloggen" style={{ width: 34 }} />
+        </div>
       </div>
 
-      {/* Tabs, Sort, Logo */}
-      <div id="radiolist" style={{
-        background: "#e8f9f0", padding: "18px 0 12px 0", boxShadow: "0 2px 7px #0001"
+      {/* Tabs */}
+      <div id="radiolist" data-role="fieldcontain" style={{
+        background: "#eee", padding: "15px 0 7px 0", borderBottom: "1px solid #ccc"
       }}>
-        <fieldset style={{
-          display: "flex", flexDirection: "row", gap: 12, justifyContent: "center", alignItems: "center", border: "none"
+        <fieldset data-role="controlgroup" data-type="horizontal" style={{
+          display: "flex", gap: 18, justifyContent: "center", alignItems: "center", border: 0
         }}>
-          {ANSICHTEN.map(tabItem => (
-            <label key={tabItem.id} htmlFor={tabItem.id}
-              style={{
-                display: "flex", alignItems: "center", fontWeight: 600, color: "#0a5", fontSize: "1.11rem", cursor: "pointer"
-              }}>
-              <input type="radio" name="Ansicht" id={tabItem.id}
-                checked={tab === tabItem.value}
-                onChange={() => setTab(tabItem.value)}
-                style={{ marginRight: 5, accentColor: "#0a8" }}
+          {TABS.map(tab => (
+            <span key={tab.id}>
+              <input
+                name="Ansicht"
+                type="radio"
+                id={tab.id}
+                value={tab.label}
+                checked={view === tab.id}
+                onChange={() => handleTabChange(tab.id)}
+                style={{ accentColor: "#0a8", marginRight: 5 }}
               />
-              {tabItem.label}
-            </label>
+              <label htmlFor={tab.id}>{tab.label}</label>
+            </span>
           ))}
         </fieldset>
-        <div style={{
-          display: "flex", justifyContent: "center", gap: 30, alignItems: "center", marginTop: 14
-        }}>
-          <a href="#" onClick={e => { e.preventDefault(); sortieren(); }}
-            style={{
-              fontSize: "1rem", color: "#099", textDecoration: "underline", cursor: "pointer", fontWeight: "bold"
-            }}
-            id="sort"
-          >Sortieren</a>
-          <span className="pxplogo" style={{ display: "inline-block", cursor: "pointer" }}
-            onClick={reloadAll}
-          >
-            <img src="/images/pxp-logo300x81.png" alt="Parkxpress Logo"
-              style={{ height: 44, width: "auto", verticalAlign: "middle" }}
-            />
-          </span>
-        </div>
-        {/* Suche */}
-        <form
-          onSubmit={e => { e.preventDefault(); fetchList(); }}
-          style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
-          <input
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Kennzeichen suchen"
-            style={{
-              border: "1px solid #bbb", borderRadius: 6, padding: "4px 10px", minWidth: 180
-            }}
-          />
-          <button type="submit" style={{
-            marginLeft: 10, background: "#0a8", color: "#fff", border: "none", borderRadius: 7, fontWeight: "bold", padding: "5px 17px"
-          }}>Suchen</button>
-        </form>
+        <a href="#" title="Buchungen neu sortieren" id="sort"
+          style={{
+            marginLeft: 12, color: "#07b", textDecoration: "underline",
+            cursor: "pointer", fontWeight: "bold"
+          }}
+          onClick={e => { e.preventDefault(); sortList(); }}
+        >
+          Sortieren
+        </a>
+        <span className="pxplogo" style={{ marginLeft: 20, cursor: "pointer" }} onClick={logoReload}>
+          <img src="/images/pxp-logo300x81.png" alt="Parkxpress Logo" style={{ height: 40, verticalAlign: "middle" }} />
+        </span>
       </div>
 
-      {/* Listeninhalt */}
-      <div id="role-content" style={{ margin: "0 auto", maxWidth: 900 }}>
+      {/* Suchfeld */}
+      <div style={{ textAlign: "center", margin: "13px 0" }}>
+        <input
+          type="text"
+          id="kennz"
+          placeholder="Kennzeichen suchen"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ padding: "6px 14px", border: "1px solid #bbb", borderRadius: 6 }}
+        />
+      </div>
+
+      {/* Buchungsliste */}
+      <div id="role-content">
         {loading ? (
-          <div style={{ textAlign: "center", padding: 28 }}>Lade Buchungen...</div>
+          <div style={{ textAlign: "center", padding: 30 }}>Lade Buchungen…</div>
         ) : (
-          <ul style={{ listStyle: "none", padding: 0, margin: "22px 0 65px 0" }}>
-            {buchungen.length === 0 ? (
-              <li style={{ textAlign: "center", color: "#666" }}>Keine Buchungen gefunden.</li>
-            ) : (
-              buchungen.map(b => {
-                // Timer-Berechnung wie im Original
-                let timerSec = 0;
-                if (b.timer_start) {
-                  timerSec = Math.floor((Date.now() - new Date(b.timer_start)) / 1000);
-                }
-
-                // Zeilenfarbe
-                let rowBg = "#fff";
-                if (b.status === "done" || b.abgeschlossen) rowBg = "#ddd";
-                else if (b.status === "active" && timerSec >= 10 * 60) rowBg = "#ffeaea";
-                else if (b.status === "active") rowBg = "#e5ffe7";
-
-                return (
-                  <li key={b.id}
-                    className={
-                      (b.status === "done" ? "grey" : "") +
-                      (b.status === "active" && timerSec >= 10 * 60 ? " blink" : "")
-                    }
-                    style={{
-                      background: rowBg,
-                      margin: "8px 0", borderRadius: 14, padding: 18,
-                      display: "flex", alignItems: "center", gap: 18, boxShadow: "0 2px 7px #0001"
-                    }}>
-                    <div style={{ flex: 2 }}>
-                      <b>{b.vorname} {b.nachname}</b> – {b.kennzeichen}
-                      <div>
-                        Ankunft: <b>{b.ankunftUhrzeit || "-"}</b>
-                        {b.timer_start && b.status === "active" && (
-                          <span style={{ marginLeft: 12, ...timerStyle(b.timer_start) }}>
-                            ⏰ {timeStr(timerSec)}
-                          </span>
-                        )}
-                      </div>
-                      <div style={{ fontSize: 15, color: "#222" }}>
-                        Terminal: {b.terminal || "-"} | Tel: {b.telefon || "-"}
-                      </div>
-                    </div>
-                    <div style={{
-                      flex: 1, display: "flex", gap: 10, justifyContent: "flex-end"
-                    }}>
-                      {(!b.timer_start && !b.abgeschlossen) && (
-                        <button onClick={() => startTimer(b.id)}
-                          style={btnStyle("#ffd600", "#1a1a1a")}>
-                          <img src="/images/phone.png" alt="Anruf" style={{ height: 19, marginRight: 8 }} />Anruf bekommen
-                        </button>
-                      )}
-                      {(b.timer_start && !b.abgeschlossen) && (
-                        <button onClick={() => finish(b.id)}
-                          style={btnStyle("#1db954", "#fff")}>
-                          Abgeschlossen
-                        </button>
-                      )}
-                      {(b.abgeschlossen) && (
-                        <button onClick={() => reactivate(b.id)}
-                          style={btnStyle("#aaa", "#222")}>
-                          Reaktivieren
-                        </button>
-                      )}
-                    </div>
-                  </li>
-                );
-              })
+          <ul data-role="listview" className="ui-listview" style={{
+            listStyle: "none", padding: 0, margin: "18px 0 62px 0"
+          }}>
+            {buchungen.length === 0 && (
+              <li style={{ textAlign: "center", color: "#999", padding: 30 }}>Keine Buchungen gefunden.</li>
             )}
+            {buchungen.map(b => {
+              let timer = "";
+              let blink = false;
+              let bg = "";
+              if (b.timer_start && !b.abgeschlossen) {
+                const sec = Math.floor((Date.now() - new Date(b.timer_start)) / 1000);
+                timer = timerDisplay(b.timer_start);
+                if (sec >= 600) { blink = true; bg = "#fee"; }
+                else if (sec >= 300) { bg = "#ffe"; }
+              }
+              if (b.abgeschlossen) bg = "#ccc";
+              return (
+                <li key={b.id}
+                  data-order={b.data_order}
+                  className={
+                    (b.abgeschlossen ? "grey" : "") + (blink ? " blink" : "")
+                  }
+                  style={{
+                    background: bg || "#fff",
+                    margin: "7px 0", borderRadius: 13, padding: 15,
+                    border: "1px solid #eee", display: "flex", alignItems: "center", gap: 16
+                  }}>
+                  <div style={{ flex: 3 }}>
+                    <b>{b.vorname} {b.nachname}</b> ({b.kennzeichen})<br />
+                    Ankunft: <b onClick={() => openHourPopup(b.id, false, b.ankunftUhrzeit.split(":")[0], b.ankunftUhrzeit.split(":")[1])}
+                      className="ankft" style={{ cursor: "pointer", textDecoration: "underline" }}>{b.ankunftUhrzeit}</b>
+                    {b.timer_start && !b.abgeschlossen && (
+                      <span className={"clock" + (blink ? " blink" : "")}
+                        style={{
+                          marginLeft: 12, color: blink ? "#f50" : "#090",
+                          fontWeight: "bold", fontVariantNumeric: "tabular-nums"
+                        }}
+                      >⏰ {timer}</span>
+                    )}
+                    <div style={{ fontSize: 15, color: "#222" }}>
+                      Terminal: <span className="terminal" style={{ textDecoration: "underline", cursor: "pointer" }}
+                        onClick={() => openTerminalPopup(b.id, b.terminal)}>{b.terminal || "-"}</span> | Tel: {b.telefon || "-"}
+                    </div>
+                  </div>
+                  <div style={{
+                    flex: 1, display: "flex", gap: 7, justifyContent: "flex-end"
+                  }}>
+                    {(!b.timer_start && !b.abgeschlossen) && (
+                      <button className="phone"
+                        style={{
+                          background: "#ffd600", color: "#000", border: 0, borderRadius: 7,
+                          padding: "6px 11px", fontWeight: "bold", cursor: "pointer"
+                        }}
+                        onClick={() => startTimer(b.id)}
+                      >Anruf bekommen</button>
+                    )}
+                    {(b.timer_start && !b.abgeschlossen) && (
+                      <button
+                        style={{
+                          background: "#07b", color: "#fff", border: 0, borderRadius: 7,
+                          padding: "6px 11px", fontWeight: "bold", cursor: "pointer"
+                        }}
+                        onClick={() => finish(b.id)}
+                      >Abgeschlossen</button>
+                    )}
+                    {b.abgeschlossen && (
+                      <button
+                        style={{
+                          background: "#bbb", color: "#222", border: 0, borderRadius: 7,
+                          padding: "6px 11px", fontWeight: "bold", cursor: "pointer"
+                        }}
+                        onClick={() => reactivate(b.id)}
+                      >Reaktivieren</button>
+                    )}
+                    {/* Edit-Button */}
+                    <button className="editbtn"
+                      onClick={() => openEditMask(b.id, b.n, "bu")}
+                      style={{
+                        background: "#eee", color: "#222", border: "1px solid #bbb", borderRadius: 6,
+                        marginLeft: 5, fontWeight: 500, cursor: "pointer"
+                      }}>
+                      Bearbeiten
+                    </button>
+                    {/* Quittung */}
+                    <button className="quittung"
+                      onClick={() => sendQuittung(b.id)}
+                      style={{
+                        background: "#fafafa", color: "#07b", border: "1px solid #07b", borderRadius: 6,
+                        marginLeft: 5, fontWeight: 500, cursor: "pointer"
+                      }}>
+                      Quittung
+                    </button>
+                    {/* Report */}
+                    <button className="rep"
+                      onClick={() => openReportPopup(b.id, b.n)}
+                      style={{
+                        background: "#fafafa", color: "#b33", border: "1px solid #b33", borderRadius: 6,
+                        marginLeft: 5, fontWeight: 500, cursor: "pointer"
+                      }}>
+                      Report
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
 
       {/* Footer */}
-      <div style={{
-        background: "#e8f9f0", textAlign: "center", padding: "10px 0",
-        position: "fixed", bottom: 0, width: "100vw"
+      <div data-role="footer" className="ui-bar-a" style={{
+        background: "#222", color: "#fff", textAlign: "center", padding: "11px 0",
+        position: "fixed", width: "100vw", left: 0, bottom: 0, zIndex: 99
       }}>
-        <h4 style={{
-          color: "#0a8", fontWeight: "bold", margin: 0
-        }}>PXP Fahrerliste</h4>
+        <h4 style={{ margin: 0, fontWeight: "bold", letterSpacing: 1 }}>PXP Fahrerliste</h4>
       </div>
+
+      {/* Popups und Overlays */}
+      {showEdit && (
+        <div className="detform" style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999,
+          background: "#fff", boxShadow: "0 0 22px #0005", padding: 22, overflowY: "auto"
+        }}>
+          <h2>Buchung bearbeiten</h2>
+          <form id="detailmod" onSubmit={submitEditForm}>
+            {/* Felder: Passe je nach Datenstruktur an */}
+            <input type="text" name="vorname" value={editData?.vorname || ""} onChange={...} />
+            {/* ... alle weiteren Felder */}
+            <button id="formsub" type="submit">Speichern</button>
+            <button id="zur" type="button" onClick={() => setShowEdit(false)}>Zurück</button>
+          </form>
+        </div>
+      )}
+      {showHourPopup && (
+        <div className="hour-popup" style={{
+          position: "fixed", top: "18%", left: "50%", transform: "translate(-50%, 0)",
+          background: "#fff", padding: 16, borderRadius: 10, boxShadow: "0 6px 33px #0003"
+        }}>
+          <label>Stunde: <input type="number" id="hr" value={hourPopup.hr} onChange={e => setHourPopup(p => ({ ...p, hr: e.target.value }))} /></label>
+          <label>Minute: <input type="number" id="min" value={hourPopup.min} onChange={e => setHourPopup(p => ({ ...p, min: e.target.value }))} /></label>
+          <button id="modhr" onClick={submitHourChange}>Uhrzeit ändern</button>
+          <button id="closehr" onClick={() => setShowHourPopup(false)}>Schließen</button>
+        </div>
+      )}
+      {showTerminalPopup && (
+        <div className="terminal-popup" style={{
+          position: "fixed", top: "18%", left: "50%", transform: "translate(-50%, 0)",
+          background: "#fff", padding: 16, borderRadius: 10, boxShadow: "0 6px 33px #0003"
+        }}>
+          <label>Terminal: <input type="text" id="termt" value={terminalPopup.term} onChange={e => setTerminalPopup(p => ({ ...p, term: e.target.value }))} /></label>
+          <button id="modtr" onClick={submitTerminalChange}>Terminal ändern</button>
+          <button id="closetr" onClick={() => setShowTerminalPopup(false)}>Schließen</button>
+        </div>
+      )}
+      {showReport && (
+        <div className="report-popup" style={{
+          position: "fixed", top: "18%", left: "50%", transform: "translate(-50%, 0)",
+          background: "#fff", padding: 16, borderRadius: 10, boxShadow: "0 6px 33px #0003"
+        }}>
+          <h3>Report senden</h3>
+          <textarea id="rep_not" value={reportPopup.note} onChange={e => setReportPopup(p => ({ ...p, note: e.target.value }))} style={{ width: "100%", minHeight: 60 }} />
+          <button id="sendrep" onClick={submitReport}>Senden</button>
+          <button id="closerep" onClick={() => setShowReport(false)}>Schließen</button>
+        </div>
+      )}
+
+      {/* Blinken via CSS */}
       <style jsx>{`
-        .blink {
-          animation: blink 1s steps(2, start) infinite;
-        }
-        @keyframes blink {
-          to { visibility: hidden; }
-        }
-        .grey { background: #ddd !important; }
+        .blink { animation: blink 1s linear infinite; }
+        @keyframes blink { 50% { opacity: 0.4; } }
+        .grey { background: #666 !important; }
       `}</style>
     </div>
   );
-}
-
-function btnStyle(bg, color) {
-  return {
-    background: bg,
-    color,
-    border: "none",
-    borderRadius: 8,
-    padding: "7px 14px",
-    fontWeight: 600,
-    cursor: "pointer",
-    fontSize: "1em"
-  };
 }
