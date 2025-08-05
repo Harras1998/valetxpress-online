@@ -1,25 +1,15 @@
 import React, { useState, useEffect } from "react";
 import Head from 'next/head';
 
-export default function FahrerlistePage() {
-  return (
-    <>
-      <Head>
-        <link rel="stylesheet" href="/jquery-mobile/jquery.mobile-1.0a3.min.css" />
-      </Head>
-/**
- * Fahrerliste-Komponente
- * 100% jQuery-Mobile-Style, alle Features, Edit-Dialog, Popups, etc.
- * Du kannst sie z.B. in /pages/fahrerliste.js einbinden!
- */
+// --- HILFSKONSTANTEN ---
 const TABS = [
   { id: "Ansicht_0", label: "Heute" },
   { id: "Ansicht_1", label: "2-Tage" },
   { id: "Ansicht_2", label: "Alle" }
 ];
 
-export default function Fahrerliste() {
-  // Main State
+export default function FahrerlistePage() {
+  // STATES
   const [view, setView] = useState("Ansicht_0");
   const [buchungen, setBuchungen] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -182,397 +172,403 @@ export default function Fahrerliste() {
   }
 
   return (
-    <div id="page" data-role="page" style={{ minHeight: "100vh" }}>
-      {/* Header */}
-      <div data-role="header" className="ui-bar-a" style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between", padding: 10
-      }}>
-        <h1 style={{
-          fontSize: "1.5em", fontWeight: "bold", textAlign: "center", margin: 0, flex: 1
-        }}>ParkXpress iPAD-Liste </h1>
-        <div className="logout" style={{ cursor: "pointer" }} onClick={logout}>
-          <img src="/images/logout.png" alt="Ausloggen" style={{ width: 34 }} />
-        </div>
-      </div>
+    <>
+      <Head>
+        <link rel="stylesheet" href="/jquery-mobile/jquery.mobile-1.0a3.min.css" />
+      </Head>
 
-      {/* Tabs */}
-      <div id="radiolist" data-role="fieldcontain" style={{
-        background: "#eee", padding: "15px 0 7px 0", borderBottom: "1px solid #ccc"
-      }}>
-        <fieldset data-role="controlgroup" data-type="horizontal" style={{
-          display: "flex", gap: 18, justifyContent: "center", alignItems: "center", border: 0
+      <div id="page" data-role="page" style={{ minHeight: "100vh" }}>
+        {/* Header */}
+        <div data-role="header" className="ui-bar-a" style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between", padding: 10
         }}>
-          {TABS.map(tab => (
-            <span key={tab.id}>
-              <input
-                name="Ansicht"
-                type="radio"
-                id={tab.id}
-                value={tab.label}
-                checked={view === tab.id}
-                onChange={() => handleTabChange(tab.id)}
-                style={{ accentColor: "#0a8", marginRight: 5 }}
-              />
-              <label htmlFor={tab.id}>{tab.label}</label>
-            </span>
-          ))}
-        </fieldset>
-        <a href="#" title="Buchungen neu sortieren" id="sort"
-          style={{
-            marginLeft: 12, color: "#07b", textDecoration: "underline",
-            cursor: "pointer", fontWeight: "bold"
-          }}
-          onClick={e => { e.preventDefault(); sortList(); }}
-        >
-          Sortieren
-        </a>
-        <span className="pxplogo" style={{ marginLeft: 20, cursor: "pointer" }} onClick={logoReload}>
-          <img src="/images/pxp-logo300x81.png" alt="Parkxpress Logo" style={{ height: 40, verticalAlign: "middle" }} />
-        </span>
-      </div>
+          <h1 style={{
+            fontSize: "1.5em", fontWeight: "bold", textAlign: "center", margin: 0, flex: 1
+          }}>ParkXpress iPAD-Liste </h1>
+          <div className="logout" style={{ cursor: "pointer" }} onClick={logout}>
+            <img src="/images/logout.png" alt="Ausloggen" style={{ width: 34 }} />
+          </div>
+        </div>
 
-      {/* Suchfeld */}
-      <div style={{ textAlign: "center", margin: "13px 0" }}>
-        <input
-          type="text"
-          id="kennz"
-          placeholder="Kennzeichen suchen"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{ padding: "6px 14px", border: "1px solid #bbb", borderRadius: 6 }}
-        />
-      </div>
-
-      {/* Buchungsliste */}
-      <div id="role-content">
-        {loading ? (
-          <div style={{ textAlign: "center", padding: 30 }}>Lade Buchungen…</div>
-        ) : (
-          <ul data-role="listview" className="ui-listview" style={{
-            listStyle: "none", padding: 0, margin: "18px 0 62px 0"
+        {/* Tabs */}
+        <div id="radiolist" data-role="fieldcontain" style={{
+          background: "#eee", padding: "15px 0 7px 0", borderBottom: "1px solid #ccc"
+        }}>
+          <fieldset data-role="controlgroup" data-type="horizontal" style={{
+            display: "flex", gap: 18, justifyContent: "center", alignItems: "center", border: 0
           }}>
-            {buchungen.length === 0 && (
-              <li style={{ textAlign: "center", color: "#999", padding: 30 }}>Keine Buchungen gefunden.</li>
-            )}
-            {buchungen.map(b => {
-              let timer = "";
-              let blink = false;
-              let bg = "";
-              if (b.timer_start && !b.abgeschlossen) {
-                const sec = Math.floor((Date.now() - new Date(b.timer_start)) / 1000);
-                timer = timerDisplay(b.timer_start);
-                if (sec >= 600) { blink = true; bg = "#fee"; }
-                else if (sec >= 300) { bg = "#ffe"; }
-              }
-              if (b.abgeschlossen) bg = "#ccc";
-              return (
-                <li key={b.id}
-                  data-order={b.data_order}
-                  className={
-                    (b.abgeschlossen ? "grey" : "") + (blink ? " blink" : "")
-                  }
-                  style={{
-                    background: bg || "#fff",
-                    margin: "7px 0", borderRadius: 13, padding: 15,
-                    border: "1px solid #eee", display: "flex", alignItems: "center", gap: 16
-                  }}>
-                  <div style={{ flex: 3 }}>
-                    <b>{b.vorname} {b.nachname}</b> ({b.kennzeichen})<br />
-                    Ankunft: <b onClick={() => openHourPopup(b.id, b.ankunftUhrzeit)}
-                      className="ankft" style={{ cursor: "pointer", textDecoration: "underline" }}>{b.ankunftUhrzeit}</b>
-                    {b.timer_start && !b.abgeschlossen && (
-                      <span className={"clock" + (blink ? " blink" : "")}
-                        style={{
-                          marginLeft: 12, color: blink ? "#f50" : "#090",
-                          fontWeight: "bold", fontVariantNumeric: "tabular-nums"
-                        }}
-                      >⏰ {timer}</span>
-                    )}
-                    <div style={{ fontSize: 15, color: "#222" }}>
-                      Terminal: <span className="terminal" style={{ textDecoration: "underline", cursor: "pointer" }}
-                        onClick={() => openTerminalPopup(b.id, b.terminal)}>{b.terminal || "-"}</span> | Tel: {b.telefon || "-"}
+            {TABS.map(tab => (
+              <span key={tab.id}>
+                <input
+                  name="Ansicht"
+                  type="radio"
+                  id={tab.id}
+                  value={tab.label}
+                  checked={view === tab.id}
+                  onChange={() => handleTabChange(tab.id)}
+                  style={{ accentColor: "#0a8", marginRight: 5 }}
+                />
+                <label htmlFor={tab.id}>{tab.label}</label>
+              </span>
+            ))}
+          </fieldset>
+          <a href="#" title="Buchungen neu sortieren" id="sort"
+            style={{
+              marginLeft: 12, color: "#07b", textDecoration: "underline",
+              cursor: "pointer", fontWeight: "bold"
+            }}
+            onClick={e => { e.preventDefault(); sortList(); }}
+          >
+            Sortieren
+          </a>
+          <span className="pxplogo" style={{ marginLeft: 20, cursor: "pointer" }} onClick={logoReload}>
+            <img src="/images/pxp-logo300x81.png" alt="Parkxpress Logo" style={{ height: 40, verticalAlign: "middle" }} />
+          </span>
+        </div>
+
+        {/* Suchfeld */}
+        <div style={{ textAlign: "center", margin: "13px 0" }}>
+          <input
+            type="text"
+            id="kennz"
+            placeholder="Kennzeichen suchen"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{ padding: "6px 14px", border: "1px solid #bbb", borderRadius: 6 }}
+          />
+        </div>
+
+        {/* Buchungsliste */}
+        <div id="role-content">
+          {loading ? (
+            <div style={{ textAlign: "center", padding: 30 }}>Lade Buchungen…</div>
+          ) : (
+            <ul data-role="listview" className="ui-listview" style={{
+              listStyle: "none", padding: 0, margin: "18px 0 62px 0"
+            }}>
+              {buchungen.length === 0 && (
+                <li style={{ textAlign: "center", color: "#999", padding: 30 }}>Keine Buchungen gefunden.</li>
+              )}
+              {buchungen.map(b => {
+                let timer = "";
+                let blink = false;
+                let bg = "";
+                if (b.timer_start && !b.abgeschlossen) {
+                  const sec = Math.floor((Date.now() - new Date(b.timer_start)) / 1000);
+                  timer = timerDisplay(b.timer_start);
+                  if (sec >= 600) { blink = true; bg = "#fee"; }
+                  else if (sec >= 300) { bg = "#ffe"; }
+                }
+                if (b.abgeschlossen) bg = "#ccc";
+                return (
+                  <li key={b.id}
+                    data-order={b.data_order}
+                    className={
+                      (b.abgeschlossen ? "grey" : "") + (blink ? " blink" : "")
+                    }
+                    style={{
+                      background: bg || "#fff",
+                      margin: "7px 0", borderRadius: 13, padding: 15,
+                      border: "1px solid #eee", display: "flex", alignItems: "center", gap: 16
+                    }}>
+                    <div style={{ flex: 3 }}>
+                      <b>{b.vorname} {b.nachname}</b> ({b.kennzeichen})<br />
+                      Ankunft: <b onClick={() => openHourPopup(b.id, b.ankunftUhrzeit)}
+                        className="ankft" style={{ cursor: "pointer", textDecoration: "underline" }}>{b.ankunftUhrzeit}</b>
+                      {b.timer_start && !b.abgeschlossen && (
+                        <span className={"clock" + (blink ? " blink" : "")}
+                          style={{
+                            marginLeft: 12, color: blink ? "#f50" : "#090",
+                            fontWeight: "bold", fontVariantNumeric: "tabular-nums"
+                          }}
+                        >⏰ {timer}</span>
+                      )}
+                      <div style={{ fontSize: 15, color: "#222" }}>
+                        Terminal: <span className="terminal" style={{ textDecoration: "underline", cursor: "pointer" }}
+                          onClick={() => openTerminalPopup(b.id, b.terminal)}>{b.terminal || "-"}</span> | Tel: {b.telefon || "-"}
+                      </div>
                     </div>
-                  </div>
-                  <div style={{
-                    flex: 1, display: "flex", gap: 7, justifyContent: "flex-end"
-                  }}>
-                    {(!b.timer_start && !b.abgeschlossen) && (
-                      <button className="phone"
+                    <div style={{
+                      flex: 1, display: "flex", gap: 7, justifyContent: "flex-end"
+                    }}>
+                      {(!b.timer_start && !b.abgeschlossen) && (
+                        <button className="phone"
+                          style={{
+                            background: "#ffd600", color: "#000", border: 0, borderRadius: 7,
+                            padding: "6px 11px", fontWeight: "bold", cursor: "pointer"
+                          }}
+                          onClick={() => startTimer(b.id)}
+                        >Anruf bekommen</button>
+                      )}
+                      {(b.timer_start && !b.abgeschlossen) && (
+                        <button
+                          style={{
+                            background: "#07b", color: "#fff", border: 0, borderRadius: 7,
+                            padding: "6px 11px", fontWeight: "bold", cursor: "pointer"
+                          }}
+                          onClick={() => finish(b.id)}
+                        >Abgeschlossen</button>
+                      )}
+                      {b.abgeschlossen && (
+                        <button
+                          style={{
+                            background: "#bbb", color: "#222", border: 0, borderRadius: 7,
+                            padding: "6px 11px", fontWeight: "bold", cursor: "pointer"
+                          }}
+                          onClick={() => reactivate(b.id)}
+                        >Reaktivieren</button>
+                      )}
+                      {/* Edit-Button */}
+                      <button className="editbtn"
+                        onClick={() => openEditMask(b)}
                         style={{
-                          background: "#ffd600", color: "#000", border: 0, borderRadius: 7,
-                          padding: "6px 11px", fontWeight: "bold", cursor: "pointer"
-                        }}
-                        onClick={() => startTimer(b.id)}
-                      >Anruf bekommen</button>
-                    )}
-                    {(b.timer_start && !b.abgeschlossen) && (
-                      <button
+                          background: "#eee", color: "#222", border: "1px solid #bbb", borderRadius: 6,
+                          marginLeft: 5, fontWeight: 500, cursor: "pointer"
+                        }}>
+                        Bearbeiten
+                      </button>
+                      {/* Quittung */}
+                      <button className="quittung"
+                        onClick={() => sendQuittung(b.id)}
                         style={{
-                          background: "#07b", color: "#fff", border: 0, borderRadius: 7,
-                          padding: "6px 11px", fontWeight: "bold", cursor: "pointer"
-                        }}
-                        onClick={() => finish(b.id)}
-                      >Abgeschlossen</button>
-                    )}
-                    {b.abgeschlossen && (
-                      <button
+                          background: "#fafafa", color: "#07b", border: "1px solid #07b", borderRadius: 6,
+                          marginLeft: 5, fontWeight: 500, cursor: "pointer"
+                        }}>
+                        Quittung
+                      </button>
+                      {/* Report */}
+                      <button className="rep"
+                        onClick={() => openReportPopup(b.id, b.n)}
                         style={{
-                          background: "#bbb", color: "#222", border: 0, borderRadius: 7,
-                          padding: "6px 11px", fontWeight: "bold", cursor: "pointer"
-                        }}
-                        onClick={() => reactivate(b.id)}
-                      >Reaktivieren</button>
-                    )}
-                    {/* Edit-Button */}
-                    <button className="editbtn"
-                      onClick={() => openEditMask(b)}
-                      style={{
-                        background: "#eee", color: "#222", border: "1px solid #bbb", borderRadius: 6,
-                        marginLeft: 5, fontWeight: 500, cursor: "pointer"
-                      }}>
-                      Bearbeiten
-                    </button>
-                    {/* Quittung */}
-                    <button className="quittung"
-                      onClick={() => sendQuittung(b.id)}
-                      style={{
-                        background: "#fafafa", color: "#07b", border: "1px solid #07b", borderRadius: 6,
-                        marginLeft: 5, fontWeight: 500, cursor: "pointer"
-                      }}>
-                      Quittung
-                    </button>
-                    {/* Report */}
-                    <button className="rep"
-                      onClick={() => openReportPopup(b.id, b.n)}
-                      style={{
-                        background: "#fafafa", color: "#b33", border: "1px solid #b33", borderRadius: 6,
-                        marginLeft: 5, fontWeight: 500, cursor: "pointer"
-                      }}>
-                      Report
-                    </button>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+                          background: "#fafafa", color: "#b33", border: "1px solid #b33", borderRadius: 6,
+                          marginLeft: 5, fontWeight: 500, cursor: "pointer"
+                        }}>
+                        Report
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div data-role="footer" className="ui-bar-a" style={{
+          background: "#222", color: "#fff", textAlign: "center", padding: "11px 0",
+          position: "fixed", width: "100vw", left: 0, bottom: 0, zIndex: 99
+        }}>
+          <h4 style={{ margin: 0, fontWeight: "bold", letterSpacing: 1 }}>PXP Fahrerliste</h4>
+        </div>
+
+        {/* Edit-Dialog */}
+        {showEdit && (
+          <div className="detform" style={{
+            position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999,
+            background: "#fff", boxShadow: "0 0 22px #0005", padding: 22, overflowY: "auto"
+          }}>
+            <h2>Buchung bearbeiten</h2>
+            <form id="detailmod" onSubmit={submitEditForm}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+                <label style={{ flex: "1 1 240px" }}>
+                  Vorname<br />
+                  <input
+                    type="text"
+                    name="vorname"
+                    value={editData?.vorname || ""}
+                    onChange={handleEditChange}
+                  />
+                </label>
+                <label style={{ flex: "1 1 240px" }}>
+                  Nachname<br />
+                  <input
+                    type="text"
+                    name="nachname"
+                    value={editData?.nachname || ""}
+                    onChange={handleEditChange}
+                  />
+                </label>
+                <label style={{ flex: "1 1 240px" }}>
+                  E-Mail<br />
+                  <input
+                    type="email"
+                    name="email"
+                    value={editData?.email || ""}
+                    onChange={handleEditChange}
+                  />
+                </label>
+                <label style={{ flex: "1 1 240px" }}>
+                  Telefon<br />
+                  <input
+                    type="text"
+                    name="telefon"
+                    value={editData?.telefon || ""}
+                    onChange={handleEditChange}
+                  />
+                </label>
+                <label style={{ flex: "1 1 240px" }}>
+                  Auto/Modell<br />
+                  <input
+                    type="text"
+                    name="auto"
+                    value={editData?.auto || ""}
+                    onChange={handleEditChange}
+                  />
+                </label>
+                <label style={{ flex: "1 1 240px" }}>
+                  Kennzeichen<br />
+                  <input
+                    type="text"
+                    name="kennzeichen"
+                    value={editData?.kennzeichen || ""}
+                    onChange={handleEditChange}
+                  />
+                </label>
+                <label style={{ flex: "1 1 140px" }}>
+                  Abflugdatum<br />
+                  <input
+                    type="date"
+                    name="abflugdatum"
+                    value={editData?.abflugdatum || ""}
+                    onChange={handleEditChange}
+                  />
+                </label>
+                <label style={{ flex: "1 1 140px" }}>
+                  Abflugzeit<br />
+                  <input
+                    type="time"
+                    name="abflugUhrzeit"
+                    value={editData?.abflugUhrzeit || ""}
+                    onChange={handleEditChange}
+                  />
+                </label>
+                <label style={{ flex: "1 1 140px" }}>
+                  Rückflugdatum<br />
+                  <input
+                    type="date"
+                    name="rueckflugdatum"
+                    value={editData?.rueckflugdatum || ""}
+                    onChange={handleEditChange}
+                  />
+                </label>
+                <label style={{ flex: "1 1 140px" }}>
+                  Rückflugzeit<br />
+                  <input
+                    type="time"
+                    name="rueckflugUhrzeit"
+                    value={editData?.rueckflugUhrzeit || ""}
+                    onChange={handleEditChange}
+                  />
+                </label>
+                <label style={{ flex: "1 1 240px" }}>
+                  Flugnummer Hin<br />
+                  <input
+                    type="text"
+                    name="flugnummerHin"
+                    value={editData?.flugnummerHin || ""}
+                    onChange={handleEditChange}
+                  />
+                </label>
+                <label style={{ flex: "1 1 240px" }}>
+                  Flugnummer Rück<br />
+                  <input
+                    type="text"
+                    name="flugnummerRueck"
+                    value={editData?.flugnummerRueck || ""}
+                    onChange={handleEditChange}
+                  />
+                </label>
+                <label style={{ flex: "1 1 140px" }}>
+                  Terminal<br />
+                  <input
+                    type="text"
+                    name="terminal"
+                    value={editData?.terminal || ""}
+                    onChange={handleEditChange}
+                  />
+                </label>
+                <label style={{ flex: "1 1 140px" }}>
+                  Personen<br />
+                  <input
+                    type="number"
+                    name="anzahl_personen"
+                    value={editData?.anzahl_personen || ""}
+                    onChange={handleEditChange}
+                  />
+                </label>
+                <label style={{ flex: "1 1 140px" }}>
+                  Handgepäck
+                  <input
+                    type="checkbox"
+                    name="handgepaeck"
+                    checked={!!editData?.handgepaeck}
+                    onChange={handleEditChange}
+                  />
+                </label>
+                <label style={{ flex: "1 1 280px" }}>
+                  Bemerkung<br />
+                  <textarea
+                    name="bemerkung"
+                    value={editData?.bemerkung || ""}
+                    onChange={handleEditChange}
+                    rows={2}
+                  />
+                </label>
+              </div>
+              <div style={{ marginTop: 18, display: "flex", gap: 16 }}>
+                <button id="formsub" type="submit">Speichern</button>
+                <button id="zur" type="button" onClick={() => setShowEdit(false)}>Zurück</button>
+              </div>
+              <div id="msg" style={{ color: "#0a8", fontWeight: "bold", marginTop: 10 }}>{msg}</div>
+            </form>
+          </div>
         )}
+
+        {/* Uhrzeit-Popup */}
+        {showHourPopup && (
+          <div className="hour-popup" style={{
+            position: "fixed", top: "18%", left: "50%", transform: "translate(-50%, 0)",
+            background: "#fff", padding: 16, borderRadius: 10, boxShadow: "0 6px 33px #0003"
+          }}>
+            <label>Stunde: <input type="number" id="hr" value={hourPopup.hr} onChange={e => setHourPopup(p => ({ ...p, hr: e.target.value }))} /></label>
+            <label>Minute: <input type="number" id="min" value={hourPopup.min} onChange={e => setHourPopup(p => ({ ...p, min: e.target.value }))} /></label>
+            <button id="modhr" onClick={submitHourChange}>Uhrzeit ändern</button>
+            <button id="closehr" onClick={() => setShowHourPopup(false)}>Schließen</button>
+          </div>
+        )}
+
+        {/* Terminal-Popup */}
+        {showTerminalPopup && (
+          <div className="terminal-popup" style={{
+            position: "fixed", top: "18%", left: "50%", transform: "translate(-50%, 0)",
+            background: "#fff", padding: 16, borderRadius: 10, boxShadow: "0 6px 33px #0003"
+          }}>
+            <label>Terminal: <input type="text" id="termt" value={terminalPopup.term} onChange={e => setTerminalPopup(p => ({ ...p, term: e.target.value }))} /></label>
+            <button id="modtr" onClick={submitTerminalChange}>Terminal ändern</button>
+            <button id="closetr" onClick={() => setShowTerminalPopup(false)}>Schließen</button>
+          </div>
+        )}
+
+        {/* Report-Popup */}
+        {showReport && (
+          <div className="report-popup" style={{
+            position: "fixed", top: "18%", left: "50%", transform: "translate(-50%, 0)",
+            background: "#fff", padding: 16, borderRadius: 10, boxShadow: "0 6px 33px #0003"
+          }}>
+            <h3>Report senden</h3>
+            <textarea id="rep_not" value={reportPopup.note} onChange={e => setReportPopup(p => ({ ...p, note: e.target.value }))} style={{ width: "100%", minHeight: 60 }} />
+            <button id="sendrep" onClick={submitReport}>Senden</button>
+            <button id="closerep" onClick={() => setShowReport(false)}>Schließen</button>
+          </div>
+        )}
+
+        {/* Blinken via CSS */}
+        <style jsx>{`
+          .blink { animation: blink 1s linear infinite; }
+          @keyframes blink { 50% { opacity: 0.4; } }
+          .grey { background: #666 !important; }
+        `}</style>
       </div>
-
-      {/* Footer */}
-      <div data-role="footer" className="ui-bar-a" style={{
-        background: "#222", color: "#fff", textAlign: "center", padding: "11px 0",
-        position: "fixed", width: "100vw", left: 0, bottom: 0, zIndex: 99
-      }}>
-        <h4 style={{ margin: 0, fontWeight: "bold", letterSpacing: 1 }}>PXP Fahrerliste</h4>
-      </div>
-
-      {/* Edit-Dialog */}
-      {showEdit && (
-        <div className="detform" style={{
-          position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999,
-          background: "#fff", boxShadow: "0 0 22px #0005", padding: 22, overflowY: "auto"
-        }}>
-          <h2>Buchung bearbeiten</h2>
-          <form id="detailmod" onSubmit={submitEditForm}>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-              <label style={{ flex: "1 1 240px" }}>
-                Vorname<br />
-                <input
-                  type="text"
-                  name="vorname"
-                  value={editData?.vorname || ""}
-                  onChange={handleEditChange}
-                />
-              </label>
-              <label style={{ flex: "1 1 240px" }}>
-                Nachname<br />
-                <input
-                  type="text"
-                  name="nachname"
-                  value={editData?.nachname || ""}
-                  onChange={handleEditChange}
-                />
-              </label>
-              <label style={{ flex: "1 1 240px" }}>
-                E-Mail<br />
-                <input
-                  type="email"
-                  name="email"
-                  value={editData?.email || ""}
-                  onChange={handleEditChange}
-                />
-              </label>
-              <label style={{ flex: "1 1 240px" }}>
-                Telefon<br />
-                <input
-                  type="text"
-                  name="telefon"
-                  value={editData?.telefon || ""}
-                  onChange={handleEditChange}
-                />
-              </label>
-              <label style={{ flex: "1 1 240px" }}>
-                Auto/Modell<br />
-                <input
-                  type="text"
-                  name="auto"
-                  value={editData?.auto || ""}
-                  onChange={handleEditChange}
-                />
-              </label>
-              <label style={{ flex: "1 1 240px" }}>
-                Kennzeichen<br />
-                <input
-                  type="text"
-                  name="kennzeichen"
-                  value={editData?.kennzeichen || ""}
-                  onChange={handleEditChange}
-                />
-              </label>
-              <label style={{ flex: "1 1 140px" }}>
-                Abflugdatum<br />
-                <input
-                  type="date"
-                  name="abflugdatum"
-                  value={editData?.abflugdatum || ""}
-                  onChange={handleEditChange}
-                />
-              </label>
-              <label style={{ flex: "1 1 140px" }}>
-                Abflugzeit<br />
-                <input
-                  type="time"
-                  name="abflugUhrzeit"
-                  value={editData?.abflugUhrzeit || ""}
-                  onChange={handleEditChange}
-                />
-              </label>
-              <label style={{ flex: "1 1 140px" }}>
-                Rückflugdatum<br />
-                <input
-                  type="date"
-                  name="rueckflugdatum"
-                  value={editData?.rueckflugdatum || ""}
-                  onChange={handleEditChange}
-                />
-              </label>
-              <label style={{ flex: "1 1 140px" }}>
-                Rückflugzeit<br />
-                <input
-                  type="time"
-                  name="rueckflugUhrzeit"
-                  value={editData?.rueckflugUhrzeit || ""}
-                  onChange={handleEditChange}
-                />
-              </label>
-              <label style={{ flex: "1 1 240px" }}>
-                Flugnummer Hin<br />
-                <input
-                  type="text"
-                  name="flugnummerHin"
-                  value={editData?.flugnummerHin || ""}
-                  onChange={handleEditChange}
-                />
-              </label>
-              <label style={{ flex: "1 1 240px" }}>
-                Flugnummer Rück<br />
-                <input
-                  type="text"
-                  name="flugnummerRueck"
-                  value={editData?.flugnummerRueck || ""}
-                  onChange={handleEditChange}
-                />
-              </label>
-              <label style={{ flex: "1 1 140px" }}>
-                Terminal<br />
-                <input
-                  type="text"
-                  name="terminal"
-                  value={editData?.terminal || ""}
-                  onChange={handleEditChange}
-                />
-              </label>
-              <label style={{ flex: "1 1 140px" }}>
-                Personen<br />
-                <input
-                  type="number"
-                  name="anzahl_personen"
-                  value={editData?.anzahl_personen || ""}
-                  onChange={handleEditChange}
-                />
-              </label>
-              <label style={{ flex: "1 1 140px" }}>
-                Handgepäck
-                <input
-                  type="checkbox"
-                  name="handgepaeck"
-                  checked={!!editData?.handgepaeck}
-                  onChange={handleEditChange}
-                />
-              </label>
-              <label style={{ flex: "1 1 280px" }}>
-                Bemerkung<br />
-                <textarea
-                  name="bemerkung"
-                  value={editData?.bemerkung || ""}
-                  onChange={handleEditChange}
-                  rows={2}
-                />
-              </label>
-            </div>
-            <div style={{ marginTop: 18, display: "flex", gap: 16 }}>
-              <button id="formsub" type="submit">Speichern</button>
-              <button id="zur" type="button" onClick={() => setShowEdit(false)}>Zurück</button>
-            </div>
-            <div id="msg" style={{ color: "#0a8", fontWeight: "bold", marginTop: 10 }}>{msg}</div>
-          </form>
-        </div>
-      )}
-
-      {/* Uhrzeit-Popup */}
-      {showHourPopup && (
-        <div className="hour-popup" style={{
-          position: "fixed", top: "18%", left: "50%", transform: "translate(-50%, 0)",
-          background: "#fff", padding: 16, borderRadius: 10, boxShadow: "0 6px 33px #0003"
-        }}>
-          <label>Stunde: <input type="number" id="hr" value={hourPopup.hr} onChange={e => setHourPopup(p => ({ ...p, hr: e.target.value }))} /></label>
-          <label>Minute: <input type="number" id="min" value={hourPopup.min} onChange={e => setHourPopup(p => ({ ...p, min: e.target.value }))} /></label>
-          <button id="modhr" onClick={submitHourChange}>Uhrzeit ändern</button>
-          <button id="closehr" onClick={() => setShowHourPopup(false)}>Schließen</button>
-        </div>
-      )}
-
-      {/* Terminal-Popup */}
-      {showTerminalPopup && (
-        <div className="terminal-popup" style={{
-          position: "fixed", top: "18%", left: "50%", transform: "translate(-50%, 0)",
-          background: "#fff", padding: 16, borderRadius: 10, boxShadow: "0 6px 33px #0003"
-        }}>
-          <label>Terminal: <input type="text" id="termt" value={terminalPopup.term} onChange={e => setTerminalPopup(p => ({ ...p, term: e.target.value }))} /></label>
-          <button id="modtr" onClick={submitTerminalChange}>Terminal ändern</button>
-          <button id="closetr" onClick={() => setShowTerminalPopup(false)}>Schließen</button>
-        </div>
-      )}
-
-      {/* Report-Popup */}
-      {showReport && (
-        <div className="report-popup" style={{
-          position: "fixed", top: "18%", left: "50%", transform: "translate(-50%, 0)",
-          background: "#fff", padding: 16, borderRadius: 10, boxShadow: "0 6px 33px #0003"
-        }}>
-          <h3>Report senden</h3>
-          <textarea id="rep_not" value={reportPopup.note} onChange={e => setReportPopup(p => ({ ...p, note: e.target.value }))} style={{ width: "100%", minHeight: 60 }} />
-          <button id="sendrep" onClick={submitReport}>Senden</button>
-          <button id="closerep" onClick={() => setShowReport(false)}>Schließen</button>
-        </div>
-      )}
-
-      {/* Blinken via CSS */}
-      <style jsx>{`
-        .blink { animation: blink 1s linear infinite; }
-        @keyframes blink { 50% { opacity: 0.4; } }
-        .grey { background: #666 !important; }
-      `}</style>
-    </div>
+    </>
   );
 }
