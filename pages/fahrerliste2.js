@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
+import Head from 'next/head';
 
+export default function FahrerlistePage() {
+  return (
+    <>
+      <Head>
+        <link rel="stylesheet" href="/jquery-mobile/jquery.mobile-1.0a3.min.css" />
+      </Head>
 /**
  * Fahrerliste-Komponente
  * 100% jQuery-Mobile-Style, alle Features, Edit-Dialog, Popups, etc.
