@@ -405,27 +405,39 @@ export default function FahrerListe() {
                 </div>
                 {/* Formular */}
                 <form
-                  onSubmit={async e => {
-                    e.preventDefault();
-                    setEditSaving(true);
-                    await fetch(`/api/proxy?path=api/admin/buchung/${editBuchung.id}`, {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Basic ${auth}`
-                      },
-                      body: JSON.stringify(editBuchung)
-                    });
-                    setEditSaving(false);
-                    setEditBuchung(null);
-                    // Nach dem Speichern: Liste neu laden
-                    setLoading(true);
-                    let url = `/api/proxy?path=api/admin/buchungen&sort=${sort}&dir=asc`;
-                    if (suchtext) url += `&suchtext=${encodeURIComponent(suchtext)}`;
-                    fetch(url, { headers: { Authorization: `Basic ${auth}` } })
-                      .then(r => r.json())
-                      .then(data => { setList(data.buchungen || []); setLoading(false); });
-                  }}
+  onSubmit={async e => {
+    e.preventDefault();
+    setEditSaving(true);
+
+    // NEU: Datumsfelder ins richtige Format bringen!
+    function toDateString(dateString) {
+      if (!dateString) return "";
+      return dateString.split("T")[0];
+    }
+    // Kopie von editBuchung bearbeiten:
+    const dataToSend = { ...editBuchung };
+    ["abflugdatum", "rueckflugdatum", "start", "end"].forEach(field => {
+      if (dataToSend[field]) dataToSend[field] = toDateString(dataToSend[field]);
+    });
+
+    await fetch(`/api/proxy?path=api/admin/buchung/${editBuchung.id}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Basic ${auth}`
+      },
+      body: JSON.stringify(dataToSend)
+    });
+    setEditSaving(false);
+    setEditBuchung(null);
+    // Nach dem Speichern: Liste neu laden
+    setLoading(true);
+    let url = `/api/proxy?path=api/admin/buchungen&sort=${sort}&dir=asc`;
+    if (suchtext) url += `&suchtext=${encodeURIComponent(suchtext)}`;
+    fetch(url, { headers: { Authorization: `Basic ${auth}` } })
+      .then(r => r.json())
+      .then(data => { setList(data.buchungen || []); setLoading(false); });
+  }}
                   style={{
                     margin: "0 auto", maxWidth: 1300, background: "#f8f8f8",
                     borderRadius: 14, padding: 18, marginTop: 12
