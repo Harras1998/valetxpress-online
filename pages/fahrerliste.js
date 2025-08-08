@@ -382,7 +382,7 @@ function handleLogin(e) {
             </div>
           </div>
         </div>
-      {editBuchung && (
+{editBuchung && (
   <div style={{
     position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
     background: "#fff", zIndex: 10000, overflowY: "auto"
