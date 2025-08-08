@@ -408,7 +408,7 @@ export default function FahrerListe() {
                   onSubmit={async e => {
                     e.preventDefault();
                     setEditSaving(true);
-                    await fetch(`/api/admin/buchungen/${editBuchung.id}`, {
+                    await fetch(`/api/proxy?path=api/admin/buchung/${id}`, {
                       method: "POST",
                       headers: {
                         "Content-Type": "application/json",
