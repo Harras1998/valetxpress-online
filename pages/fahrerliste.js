@@ -176,8 +176,11 @@ export default function FahrerListe() {
   const [error, setError] = useState("");
   const [sort, setSort] = useState("abflugdatum");
   const [username, setUsername] = useState("");
-
-  function handleLogin(e) {
+// HIER EINFÜGEN:
+const [editBuchung, setEditBuchung] = useState(null);
+const [editSaving, setEditSaving] = useState(false);
+  
+function handleLogin(e) {
     e.preventDefault();
     const encoded = btoa(`${login.user}:${login.pass}`);
     setAuth(encoded);
@@ -363,7 +366,12 @@ export default function FahrerListe() {
                     justifyContent: "flex-end",
                     marginRight: 30
                   }}>
-                    <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Bearbeiten">✏️</span>
+                    <span
+    style={{ fontSize: 20, color: "#444", cursor: "pointer" }}
+    title="Bearbeiten"
+    // HIER DEIN onClick:
+    onClick={() => setEditBuchung({ ...row })}
+  >✏️</span>
                     <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
                     <a href={`tel:${row.telefon}`}>
                       <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Anrufen">📞</span>
@@ -374,7 +382,201 @@ export default function FahrerListe() {
             </div>
           </div>
         </div>
-      )}
+      {editBuchung && (
+  <div style={{
+    position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
+    background: "#fff", zIndex: 10000, overflowY: "auto"
+  }}>
+    <div style={{
+      width: 1440, margin: "0 auto", minHeight: "100vh", fontFamily: "Arial"
+    }}>
+      {/* Header */}
+      <div style={{
+        background: "#222", color: "#fff", padding: 10,
+        fontWeight: "bold", fontSize: 22, textAlign: "center",
+        borderRadius: "0 0 8px 8px", position: "relative"
+      }}>
+        <button
+          onClick={() => setEditBuchung(null)}
+          style={{
+            position: "absolute", left: 12, top: 7, fontSize: 18,
+            background: "#222", color: "#fff", border: "none", borderRadius: 6,
+            padding: "4px 12px", cursor: "pointer"
+          }}
+        >▲ Zurück</button>
+        Buchung {editBuchung.nachname} bearbeiten
+      </div>
+
+      {/* Formular */}
+      <form
+        onSubmit={async e => {
+          e.preventDefault();
+          setEditSaving(true);
+          await fetch(`/api/admin/buchung/${editBuchung.id}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Basic ${auth}`
+            },
+            body: JSON.stringify(editBuchung)
+          });
+          setEditSaving(false);
+          setEditBuchung(null);
+          // Liste neu laden nach Speichern:
+          setLoading(true);
+          let url = `/api/proxy?path=api/admin/buchungen&sort=${sort}&dir=asc`;
+          if (suchtext) url += `&suchtext=${encodeURIComponent(suchtext)}`;
+          fetch(url, { headers: { Authorization: `Basic ${auth}` } })
+            .then(r => r.json())
+            .then(data => { setList(data.buchungen || []); setLoading(false); });
+        }}
+        style={{
+          margin: "0 auto", maxWidth: 1300, background: "#f8f8f8",
+          borderRadius: 14, padding: 18, marginTop: 12
+        }}
+      >
+
+        {/* Alle Felder: exakt 1:1 wie dein DB-Feldnamen! */}
+        <div style={{ marginBottom: 10 }}>
+          <label>Firma:</label><br />
+          <input value={editBuchung.firma || ""} onChange={e => setEditBuchung({ ...editBuchung, firma: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+        </div>
+        <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
+          <div style={{ flex: 1 }}>
+            <label>Vorname:</label><br />
+            <input value={editBuchung.vorname || ""} onChange={e => setEditBuchung({ ...editBuchung, vorname: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label>Nachname:</label><br />
+            <input value={editBuchung.nachname || ""} onChange={e => setEditBuchung({ ...editBuchung, nachname: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+          </div>
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <label>Straße / Hausnr.:</label><br />
+          <input value={editBuchung.strasse || ""} onChange={e => setEditBuchung({ ...editBuchung, strasse: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+        </div>
+        <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
+          <div style={{ flex: 1 }}>
+            <label>PLZ:</label><br />
+            <input value={editBuchung.plz || ""} onChange={e => setEditBuchung({ ...editBuchung, plz: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+          </div>
+          <div style={{ flex: 2 }}>
+            <label>Ort:</label><br />
+            <input value={editBuchung.ort || ""} onChange={e => setEditBuchung({ ...editBuchung, ort: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+          </div>
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <label>Email:</label><br />
+          <input value={editBuchung.email || ""} onChange={e => setEditBuchung({ ...editBuchung, email: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <label>Telefon:</label><br />
+          <input value={editBuchung.telefon || ""} onChange={e => setEditBuchung({ ...editBuchung, telefon: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <label>Fahrzeugtyp/Modell:</label><br />
+          <input value={editBuchung.auto || ""} onChange={e => setEditBuchung({ ...editBuchung, auto: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <label>KFZ-Kennzeichen:</label><br />
+          <input value={editBuchung.kennzeichen || ""} onChange={e => setEditBuchung({ ...editBuchung, kennzeichen: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <label>Ankft Parkpl.:</label><br />
+          <input value={editBuchung.ankunftUhrzeit || ""} onChange={e => setEditBuchung({ ...editBuchung, ankunftUhrzeit: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+        </div>
+        {/* Abflugdatum und Uhrzeit */}
+        <div style={{ marginBottom: 10 }}>
+          <label>Abflug:</label><br />
+          <input
+            type="date"
+            value={editBuchung.abflugdatum ? editBuchung.abflugdatum.slice(0, 10) : ""}
+            onChange={e => setEditBuchung({ ...editBuchung, abflugdatum: e.target.value })}
+            style={{ fontSize: 20 }}
+          />
+          <input
+            type="time"
+            value={editBuchung.abflugUhrzeit || ""}
+            onChange={e => setEditBuchung({ ...editBuchung, abflugUhrzeit: e.target.value })}
+            style={{ fontSize: 20, marginLeft: 8 }}
+          />
+        </div>
+        {/* Rückflugdatum und Uhrzeit */}
+        <div style={{ marginBottom: 10 }}>
+          <label>Rückflug:</label><br />
+          <input
+            type="date"
+            value={editBuchung.rueckflugdatum ? editBuchung.rueckflugdatum.slice(0, 10) : ""}
+            onChange={e => setEditBuchung({ ...editBuchung, rueckflugdatum: e.target.value })}
+            style={{ fontSize: 20 }}
+          />
+          <input
+            type="time"
+            value={editBuchung.rueckflugUhrzeit || ""}
+            onChange={e => setEditBuchung({ ...editBuchung, rueckflugUhrzeit: e.target.value })}
+            style={{ fontSize: 20, marginLeft: 8 }}
+          />
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <label>Reiseziel:</label><br />
+          <input value={editBuchung.reiseziel || ""} onChange={e => setEditBuchung({ ...editBuchung, reiseziel: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <label>Fluggesellschaft:</label><br />
+          <input value={editBuchung.fluggesellschaft || ""} onChange={e => setEditBuchung({ ...editBuchung, fluggesellschaft: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <label>Flugnr. Abflug:</label><br />
+          <input value={editBuchung.flugnummerHin || ""} onChange={e => setEditBuchung({ ...editBuchung, flugnummerHin: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <label>Flugnr. Rückflug:</label><br />
+          <input value={editBuchung.flugnummerRueck || ""} onChange={e => setEditBuchung({ ...editBuchung, flugnummerRueck: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <label>Terminal:</label><br />
+          <input value={editBuchung.terminal || ""} onChange={e => setEditBuchung({ ...editBuchung, terminal: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <label>Anzahl Personen:</label><br />
+          <input type="number" min="1" max="10" value={editBuchung.anzahl_personen || ""} onChange={e => setEditBuchung({ ...editBuchung, anzahl_personen: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <label>
+            <input type="checkbox" checked={!!editBuchung.handgepaeck} onChange={e => setEditBuchung({ ...editBuchung, handgepaeck: e.target.checked ? 1 : 0 })} />
+            {" "}Handgepäck
+          </label>
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <label>Sperrgepäck/Notizen:</label><br />
+          <textarea value={editBuchung.bemerkung || ""} onChange={e => setEditBuchung({ ...editBuchung, bemerkung: e.target.value })} style={{ width: "100%", fontSize: 18 }} />
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <label>Typ (valet/allinclusive):</label><br />
+          <input value={editBuchung.typ || ""} onChange={e => setEditBuchung({ ...editBuchung, typ: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <label>Preis (€):</label><br />
+          <input value={editBuchung.preis || ""} onChange={e => setEditBuchung({ ...editBuchung, preis: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+        </div>
+
+        <div>
+          <button
+            type="submit"
+            disabled={editSaving}
+            style={{
+              width: "100%", background: "red", color: "#fff",
+              fontWeight: "bold", fontSize: 20, padding: 10,
+              border: "none", borderRadius: 14, marginTop: 22
+            }}
+          >
+            {editSaving ? "Speichere..." : "Änderung speichern"}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
     </>
   );
 }
