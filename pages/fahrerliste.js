@@ -368,7 +368,7 @@ export default function FahrerListe() {
                       style={{ fontSize: 20, color: "#444", cursor: "pointer" }}
                       title="Bearbeiten"
                       onClick={() => setEditBuchung({ ...row })}
-                    ✏️</span>
+                    >✏️</span>
                     <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
                     <a href={`tel:${row.telefon}`}>
                       <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Anrufen">📞</span>
