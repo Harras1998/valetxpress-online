@@ -378,8 +378,7 @@ function handleLogin(e) {
                     </a>
                 </div>
               </div>
-            ))
-          )}
+          ))}
         </div>
       </div>
 
