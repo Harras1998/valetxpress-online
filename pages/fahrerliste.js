@@ -316,9 +316,9 @@ export default function FahrerListe() {
             marginTop: "auto",
             overflowX: "hidden"
           }}>
-            <div style={{ padding: 12, color: "#777", fontSize: 18, marginLeft: 10 }}>
+            <div style={{ padding: 12, color: "#777", fontSize: 18, marginLeft: 10, marginBottom: 5 }}>
               {loading ? "Lade Daten..." : ""}
-              <b> Anzahl Fahrten: {filtered.length}</b>
+              <b> Anzahl Kunden: {filtered.length}</b>
             </div>
 
             {/* NEU: gerenderte Liste mit Datumsbalken je Tag */}
