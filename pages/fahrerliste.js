@@ -339,7 +339,7 @@ export default function FahrerListe() {
                       padding: "8px 14px",
                       borderTop: "1px solid #4677A2",
                       borderBottom: "1px solid #4677A2",
-                      marginTop: 10
+                      marginTop: 0
                     }}
                   >
                     {formatDE(day)}
