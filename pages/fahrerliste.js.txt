@@ -1,154 +1,6 @@
-// fahrerliste.js
 import { useState, useEffect } from "react";
+import Head from "next/head";
 
-// ======= Mobile Style-Injection für ParkXpress-Optik =======
-const mobileStyles = `
-@media (max-width: 500px) {
-  /* HEADER kompakt wie ParkXpress */
-  .PXHeader,
-  .ui-header,
-  .header-bar {
-    height: 22px !important;
-    min-height: 0 !important;
-    font-size: 11px !important;
-    padding: 0 2px !important;
-    background: linear-gradient(#222 85%, #eee 100%) !important;
-  }
-
-  /* Header-Titel und Username */
-  .PXHeader > div,
-  .PXHeader > div > span,
-  .PXHeader span,
-  .ui-header > div,
-  .ui-header span,
-  .px-header-title,
-  .fahrerliste-label,
-  .px-header-username {
-    font-size: 12px !important;
-    line-height: 1.1 !important;
-    font-weight: bold !important;
-    padding: 0 1px !important;
-    letter-spacing: 0 !important;
-  }
-
-  /* Logout-Button (Power Icon) */
-  [title="Abmelden"] {
-    font-size: 16px !important;
-    padding-right: 2px !important;
-  }
-
-  /* Logo/Brand */
-  img[alt="ValetXpress"], img[alt="PARKXPRESS"] {
-    height: 16px !important;
-    margin-left: 2px !important;
-    margin-right: 2px !important;
-  }
-
-  /* Tabs/Buttons */
-  button {
-    font-size: 11px !important;
-    padding: 2px 10px !important;
-    border-radius: 8px !important;
-    height: 22px !important;
-    min-width: 35px !important;
-    margin-right: 1px !important;
-  }
-  button:nth-child(2) {
-    white-space: nowrap !important;
-    font-size: 11px !important;
-    padding: 2px 6px !important;
-  }
-
-  /* Input und Select */
-  input[type="text"] {
-    font-size: 11px !important;
-    padding: 3px 6px !important;
-    border-radius: 6px !important;
-    margin-left: 2px !important;
-    margin-right: 2px !important;
-    height: 22px !important;
-    min-width: 60px !important;
-  }
-  select {
-    font-size: 11px !important;
-    padding: 2px 5px !important;
-    min-width: 40px !important;
-    height: 22px !important;
-  }
-
-  /* "Anzahl Fahrten" */
-  .anzahl-fahrten {
-    font-size: 11px !important;
-    padding: 3px 0 3px 2px !important;
-    margin-left: 1px !important;
-  }
-
-  /* FAHRTENKARTEN SEHR KOMPAKT */
-  .fahrer-card-title {
-    font-size: 8px !important;
-    font-weight: bold !important;
-    line-height: 1.1 !important;
-  }
-  .fahrer-card {
-    font-size: 7px !important;
-    padding: 1px 0px 1px 1px !important;
-    border-radius: 0 !important;
-    margin-bottom: 0 !important;
-    background: #fff !important;
-    box-shadow: none !important;
-    border-bottom: 1px solid #ccc !important;
-    display: block !important;
-    overflow-x: auto !important;
-  }
-  .fahrer-card .info-zeile {
-    font-size: 7px !important;
-    margin: 0 !important;
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    gap: 0 !important;
-  }
-  .fahrer-card .actions {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 2px !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    min-width: 0 !important;
-    margin: 1px 1px 0 0 !important;
-    font-size: 8px !important;
-  }
-  .fahrer-card a {
-    font-size: 7px !important;
-    word-break: break-all !important;
-  }
-  .fahrer-card span,
-  .fahrer-card b {
-    font-size: 7px !important;
-  }
-  .fahrer-card .notiz-label {
-    font-size: 7px !important;
-  }
-  .fahrer-card .telefon-link {
-    font-size: 7px !important;
-    color: #001cff !important;
-    font-weight: 600 !important;
-    text-decoration: underline !important;
-    word-break: break-all !important;
-  }
-}
-`;
-
-
-if (typeof document !== "undefined" && !document.getElementById("mobile-fahrerlist-style")) {
-  const style = document.createElement("style");
-  style.id = "mobile-fahrerlist-style";
-  style.innerHTML = mobileStyles;
-  document.head.appendChild(style);
-}
-// ============================================================
-
-// Header-Komponente wie gehabt
 function PXHeader({
   username,
   tab,
@@ -324,6 +176,8 @@ export default function FahrerListe() {
   const [error, setError] = useState("");
   const [sort, setSort] = useState("abflugdatum");
   const [username, setUsername] = useState("");
+  const [editBuchung, setEditBuchung] = useState(null);
+  const [editSaving, setEditSaving] = useState(false);
 
   function handleLogin(e) {
     e.preventDefault();
@@ -396,123 +250,343 @@ export default function FahrerListe() {
     return "#e0e0e0";
   }
 
-  if (!auth)
-    return (
-      <div style={{
-        maxWidth: 400,
-        margin: "5rem auto",
-        background: "#fff",
-        borderRadius: 12,
-        padding: 32,
-        boxShadow: "0 2px 12px #0002",
-        fontFamily: "Arial",
-        overflowX: "hidden"
-      }}>
-        <h2>Fahrer-Login</h2>
-        <form onSubmit={handleLogin}>
-          <input type="text" placeholder="Benutzername" value={login.user} onChange={e => setLogin({ ...login, user: e.target.value })} required style={{ width: "100%", marginBottom: 8 }} />
-          <input type="password" placeholder="Passwort" value={login.pass} onChange={e => setLogin({ ...login, pass: e.target.value })} required style={{ width: "100%", marginBottom: 16 }} />
-          <button type="submit" style={{ width: "100%", padding: "10px 0", background: "#1db954", color: "#fff", border: "none", borderRadius: 8, fontWeight: "bold" }}>Login</button>
-        </form>
-        {error && <div style={{ color: "red", marginTop: 10 }}>{error}</div>}
-      </div>
-    );
-
   return (
-    <div style={{
-      width: "100%",
-      minHeight: "100vh",
-      background: "#e2e2e2",
-      fontFamily: "Arial",
-      overflowX: "hidden"
-    }}>
-      <PXHeader
-        username={username}
-        tab={tab}
-        setTab={setTab}
-        suchtext={suchtext}
-        setSuchtext={setSuchtext}
-        sort={sort}
-        setSort={setSort}
-        onLogout={handleLogout}
-      />
-      <div style={{
-        maxWidth: "100%",
-        margin: "auto",
-        marginTop: 30,
-        overflowX: "hidden"
-      }}>
-        <div style={{ padding: 12, color: "#777", fontSize: 18, marginLeft: 10 }}>
-          {loading ? "Lade Daten..." : ""}
-          <b> Anzahl Fahrten: {filtered.length}</b>
+    <>
+      <Head>
+        <meta name="viewport" content="width=1440, user-scalable=no" />
+      </Head>
+      {!auth ? (
+        <div
+          style={{
+            maxWidth: 1440,
+            minWidth: 1440,
+            background: "#fff",
+            borderRadius: 12,
+            padding: 32,
+            boxShadow: "0 2px 12px #0002",
+            fontFamily: "Arial",
+            overflowX: "hidden",
+            margin: "0 auto"
+          }}>
+          <h2>Fahrer-Login</h2>
+          <form onSubmit={handleLogin}>
+            <input type="text" placeholder="Benutzername" value={login.user} onChange={e => setLogin({ ...login, user: e.target.value })} required style={{ width: "100%", marginBottom: 8 }} />
+            <input type="password" placeholder="Passwort" value={login.pass} onChange={e => setLogin({ ...login, pass: e.target.value })} required style={{ width: "100%", marginBottom: 16 }} />
+            <button type="submit" style={{ width: "100%", padding: "10px 0", background: "#1db954", color: "#fff", border: "none", borderRadius: 8, fontWeight: "bold" }}>Login</button>
+          </form>
+          {error && <div style={{ color: "red", marginTop: 10 }}>{error}</div>}
         </div>
-        <div>
-          {filtered.length === 0 && (
-            <div style={{ margin: 30, color: '#888', fontSize: 28 }}>Keine Fahrten gefunden.</div>
-          )}
-          {filtered.map(row => (
-            <div
-              key={row.id}
-              className="fahrer-card"
-              style={{
-                marginBottom: 0,
-                borderRadius: 0,
-                background: cardColor(row),
-                padding: "16px 0 8px 0",
-                boxShadow: "none",
-                border: "none",
-                borderBottom: "2px solid #ccc",
-                display: "flex",
-                alignItems: "flex-start",
-                fontSize: "32px",
-                fontFamily: "Arial, Helvetica, sans-serif"
-              }}
-            >
-              <div style={{ flex: 1, marginLeft: 18 }}>
-                <div className="fahrer-card-title" style={{ fontWeight: "bold", marginBottom: 0, fontSize: "20px" }}>
-                  {row.abflugUhrzeit} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
-                  ? "All"
-                  : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
-                  <a className="telefon-link" href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
+      ) : (
+        <div
+          style={{
+            maxWidth: 1440,
+            minWidth: 1440,
+            background: "#fff",
+            fontFamily: "Arial",
+            margin: "0 auto",
+            minHeight: "100vh",
+            overflowX: "hidden"
+          }}>
+          <PXHeader
+            username={username}
+            tab={tab}
+            setTab={setTab}
+            suchtext={suchtext}
+            setSuchtext={setSuchtext}
+            sort={sort}
+            setSort={setSort}
+            onLogout={handleLogout}
+          />
+          <div style={{
+            maxWidth: "100%",
+            margin: "auto",
+            marginTop: "auto",
+            overflowX: "hidden"
+          }}>
+            <div style={{ padding: 12, color: "#777", fontSize: 18, marginLeft: 10 }}>
+              {loading ? "Lade Daten..." : ""}
+              <b> Anzahl Fahrten: {filtered.length}</b>
+            </div>
+            <div>
+              {filtered.length === 0 && (
+                <div style={{ margin: 30, color: '#888', fontSize: 28 }}>Keine Fahrten gefunden.</div>
+              )}
+              {filtered.map(row => (
+                <div
+                  key={row.id}
+                  className="fahrer-card"
+                  style={{
+                    marginBottom: 0,
+                    borderRadius: 0,
+                    background: cardColor(row),
+                    padding: "16px 0 8px 0",
+                    boxShadow: "none",
+                    border: "none",
+                    borderBottom: "2px solid #ccc",
+                    display: "flex",
+                    alignItems: "flex-start",
+                    fontSize: "32px",
+                    fontFamily: "Arial, Helvetica, sans-serif"
+                  }}
+                >
+                  <div style={{ flex: 1, marginLeft: 18 }}>
+                    <div className="fahrer-card-title" style={{ fontWeight: "bold", marginBottom: 0, fontSize: "20px" }}>
+                      {row.ankunftUhrzeit} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
+                        ? "All"
+                        : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
+                      <a className="telefon-link" href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
+                    </div>
+                    <div className="info-zeile" style={{
+                      fontSize: 17, margin: "12px 0 0 0", color: "#444", display: "flex", alignItems: "center", fontWeight: 700
+                    }}>
+                      <span>{formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin}</span>
+                      <span style={{ margin: "0 5px", fontWeight: 500 }}>|</span>
+                      <span className="notiz-label"><b>Notizen:</b> {row.bemerkung}</span>
+                    </div>
+                    <div className="info-zeile" style={{
+                      display: "flex", alignItems: "center", gap: 0, fontSize: 17, marginTop: 0, fontWeight: 700
+                    }}>
+                      <span style={{ color: "#16b000" }}>
+                        {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
+                      </span>
+                      <span style={{ color: "#888", margin: "0 5px" }}>|</span>
+                      <span style={{ color: "#111" }}>{row.kennzeichen}</span>
+                      <span style={{ color: "#888", margin: "0 5px" }}>|</span>
+                      <span style={{ color: "red" }}>{priceDisplay(row)}</span>
+                    </div>
+                  </div>
+                  <div className="actions" style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    gap: 38,
+                    alignItems: "center",
+                    minWidth: 270,
+                    justifyContent: "flex-end",
+                    marginRight: 30
+                  }}>
+                    <span
+                      style={{ fontSize: 20, color: "#444", cursor: "pointer" }}
+                      title="Bearbeiten"
+                      onClick={() => setEditBuchung({ ...row })}
+                    >✏️</span>
+                    <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
+                    <a href={`tel:${row.telefon}`}>
+                      <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Anrufen">📞</span>
+                    </a>
+                  </div>
                 </div>
-                <div className="info-zeile" style={{
-                  fontSize: 17, margin: "12px 0 0 0", color: "#444", display: "flex", alignItems: "center", fontWeight: 700
-                }}>
-                  <span>{formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin}</span>
-                  <span style={{ margin: "0 5px", fontWeight: 500 }}>|</span>
-                  <span className="notiz-label"><b>Notizen:</b> {row.bemerkung}</span>
-                </div>
-                <div className="info-zeile" style={{
-                  display: "flex", alignItems: "center", gap: 0, fontSize: 17, marginTop: 0, fontWeight: 700
-                }}>
-                  <span style={{ color: "#16b000" }}>
-                    {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
-                  </span>
-                  <span style={{ color: "#888", margin: "0 5px" }}>|</span>
-                  <span style={{ color: "#111" }}>{row.kennzeichen}</span>
-                  <span style={{ color: "#888", margin: "0 5px" }}>|</span>
-                  <span style={{ color: "red" }}>{priceDisplay(row)}</span>
-                </div>
-              </div>
-              <div className="actions" style={{
-                display: "flex",
-                flexDirection: "row",
-                gap: 38,
-                alignItems: "center",
-                minWidth: 270,
-                justifyContent: "flex-end",
-                marginRight: 30
+              ))}
+            </div>
+          </div>
+
+          {editBuchung && (
+            <div style={{
+              position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
+              background: "#fff", zIndex: 10000, overflowY: "auto"
+            }}>
+              <div style={{
+                width: 1440, margin: "0 auto", minHeight: "100vh", fontFamily: "Arial"
               }}>
-                <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Bearbeiten">✏️</span>
-                <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
-                <a href={`tel:${row.telefon}`}>
-                  <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Anrufen">📞</span>
-                </a>
+                {/* Header */}
+                <div style={{
+                  background: "#222", color: "#fff", padding: 10,
+                  fontWeight: "bold", fontSize: 22, textAlign: "center",
+                  borderRadius: "0 0 8px 8px", position: "relative"
+                }}>
+                  <button
+                    onClick={() => setEditBuchung(null)}
+                    style={{
+                      position: "absolute", left: 12, top: 7, fontSize: 18,
+                      background: "#222", color: "#fff", border: "none", borderRadius: 6,
+                      padding: "4px 12px", cursor: "pointer"
+                    }}
+                  >▲ Zurück</button>
+                  Buchung {editBuchung.nachname} bearbeiten
+                </div>
+                {/* Formular */}
+                <form
+  onSubmit={async e => {
+    e.preventDefault();
+    setEditSaving(true);
+
+    // NEU: Datumsfelder ins richtige Format bringen!
+    function toDateString(dateString) {
+      if (!dateString) return "";
+      return dateString.split("T")[0];
+    }
+    // Kopie von editBuchung bearbeiten:
+    const dataToSend = { ...editBuchung };
+    ["abflugdatum", "rueckflugdatum", "start", "end"].forEach(field => {
+      if (dataToSend[field]) dataToSend[field] = toDateString(dataToSend[field]);
+    });
+
+    await fetch(`/api/proxy?path=api/admin/buchung/${editBuchung.id}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Basic ${auth}`
+      },
+      body: JSON.stringify(dataToSend)
+    });
+    setEditSaving(false);
+    setEditBuchung(null);
+    // Nach dem Speichern: Liste neu laden
+    setLoading(true);
+    let url = `/api/proxy?path=api/admin/buchungen&sort=${sort}&dir=asc`;
+    if (suchtext) url += `&suchtext=${encodeURIComponent(suchtext)}`;
+    fetch(url, { headers: { Authorization: `Basic ${auth}` } })
+      .then(r => r.json())
+      .then(data => { setList(data.buchungen || []); setLoading(false); });
+  }}
+                  style={{
+                    margin: "0 auto", maxWidth: 1300, background: "#f8f8f8",
+                    borderRadius: 14, padding: 18, marginTop: 12
+                  }}
+                >
+
+                  {/* Alle Felder wie im Screenshot */}
+                  <div style={{ marginBottom: 10 }}>
+                    <label>Firma:</label><br />
+                    <input value={editBuchung.firma || ""} onChange={e => setEditBuchung({ ...editBuchung, firma: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                  </div>
+                  <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
+                    <div style={{ flex: 1 }}>
+                      <label>Vorname:</label><br />
+                      <input value={editBuchung.vorname || ""} onChange={e => setEditBuchung({ ...editBuchung, vorname: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label>Nachname:</label><br />
+                      <input value={editBuchung.nachname || ""} onChange={e => setEditBuchung({ ...editBuchung, nachname: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                    </div>
+                  </div>
+                  <div style={{ marginBottom: 10 }}>
+                    <label>Straße / Hausnr.:</label><br />
+                    <input value={editBuchung.strasse || ""} onChange={e => setEditBuchung({ ...editBuchung, strasse: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                  </div>
+                  <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
+                    <div style={{ flex: 1 }}>
+                      <label>PLZ:</label><br />
+                      <input value={editBuchung.plz || ""} onChange={e => setEditBuchung({ ...editBuchung, plz: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                    </div>
+                    <div style={{ flex: 2 }}>
+                      <label>Ort:</label><br />
+                      <input value={editBuchung.ort || ""} onChange={e => setEditBuchung({ ...editBuchung, ort: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                    </div>
+                  </div>
+                  <div style={{ marginBottom: 10 }}>
+                    <label>Email:</label><br />
+                    <input value={editBuchung.email || ""} onChange={e => setEditBuchung({ ...editBuchung, email: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                  </div>
+                  <div style={{ marginBottom: 10 }}>
+                    <label>Telefon:</label><br />
+                    <input value={editBuchung.telefon || ""} onChange={e => setEditBuchung({ ...editBuchung, telefon: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                  </div>
+                  <div style={{ marginBottom: 10 }}>
+                    <label>Fahrzeugtyp/Modell:</label><br />
+                    <input value={editBuchung.auto || ""} onChange={e => setEditBuchung({ ...editBuchung, auto: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                  </div>
+                  <div style={{ marginBottom: 10 }}>
+                    <label>KFZ-Kennzeichen:</label><br />
+                    <input value={editBuchung.kennzeichen || ""} onChange={e => setEditBuchung({ ...editBuchung, kennzeichen: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                  </div>
+                  <div style={{ marginBottom: 10 }}>
+                    <label>Ankft Parkpl.:</label><br />
+                    <input value={editBuchung.ankunftUhrzeit || ""} onChange={e => setEditBuchung({ ...editBuchung, ankunftUhrzeit: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                  </div>
+                  {/* Abflugdatum und Uhrzeit */}
+                  <div style={{ marginBottom: 10 }}>
+                    <label>Abflug:</label><br />
+                    <input
+                      type="date"
+                      value={editBuchung.abflugdatum ? editBuchung.abflugdatum.slice(0, 10) : ""}
+                      onChange={e => setEditBuchung({ ...editBuchung, abflugdatum: e.target.value })}
+                      style={{ fontSize: 20 }}
+                    />
+                    <input
+                      type="time"
+                      value={editBuchung.abflugUhrzeit || ""}
+                      onChange={e => setEditBuchung({ ...editBuchung, abflugUhrzeit: e.target.value })}
+                      style={{ fontSize: 20, marginLeft: 8 }}
+                    />
+                  </div>
+                  {/* Rückflugdatum und Uhrzeit */}
+                  <div style={{ marginBottom: 10 }}>
+                    <label>Rückflug:</label><br />
+                    <input
+                      type="date"
+                      value={editBuchung.rueckflugdatum ? editBuchung.rueckflugdatum.slice(0, 10) : ""}
+                      onChange={e => setEditBuchung({ ...editBuchung, rueckflugdatum: e.target.value })}
+                      style={{ fontSize: 20 }}
+                    />
+                    <input
+                      type="time"
+                      value={editBuchung.rueckflugUhrzeit || ""}
+                      onChange={e => setEditBuchung({ ...editBuchung, rueckflugUhrzeit: e.target.value })}
+                      style={{ fontSize: 20, marginLeft: 8 }}
+                    />
+                  </div>
+                  <div style={{ marginBottom: 10 }}>
+                    <label>Reiseziel:</label><br />
+                    <input value={editBuchung.reiseziel || ""} onChange={e => setEditBuchung({ ...editBuchung, reiseziel: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                  </div>
+                  <div style={{ marginBottom: 10 }}>
+                    <label>Fluggesellschaft:</label><br />
+                    <input value={editBuchung.fluggesellschaft || ""} onChange={e => setEditBuchung({ ...editBuchung, fluggesellschaft: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                  </div>
+                  <div style={{ marginBottom: 10 }}>
+                    <label>Flugnr. Abflug:</label><br />
+                    <input value={editBuchung.flugnummerHin || ""} onChange={e => setEditBuchung({ ...editBuchung, flugnummerHin: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                  </div>
+                  <div style={{ marginBottom: 10 }}>
+                    <label>Flugnr. Rückflug:</label><br />
+                    <input value={editBuchung.flugnummerRueck || ""} onChange={e => setEditBuchung({ ...editBuchung, flugnummerRueck: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                  </div>
+                  <div style={{ marginBottom: 10 }}>
+                    <label>Terminal:</label><br />
+                    <input value={editBuchung.terminal || ""} onChange={e => setEditBuchung({ ...editBuchung, terminal: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                  </div>
+                  <div style={{ marginBottom: 10 }}>
+                    <label>Anzahl Personen:</label><br />
+                    <input type="number" min="1" max="10" value={editBuchung.anzahl_personen || ""} onChange={e => setEditBuchung({ ...editBuchung, anzahl_personen: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                  </div>
+                  <div style={{ marginBottom: 10 }}>
+                    <label>
+                      <input type="checkbox" checked={!!editBuchung.handgepaeck} onChange={e => setEditBuchung({ ...editBuchung, handgepaeck: e.target.checked ? 1 : 0 })} />
+                      {" "}Handgepäck
+                    </label>
+                  </div>
+                  <div style={{ marginBottom: 10 }}>
+                    <label>Sperrgepäck/Notizen:</label><br />
+                    <textarea value={editBuchung.bemerkung || ""} onChange={e => setEditBuchung({ ...editBuchung, bemerkung: e.target.value })} style={{ width: "100%", fontSize: 18 }} />
+                  </div>
+                  <div style={{ marginBottom: 10 }}>
+                    <label>Typ (valet/allinclusive):</label><br />
+                    <input value={editBuchung.typ || ""} onChange={e => setEditBuchung({ ...editBuchung, typ: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                  </div>
+                  <div style={{ marginBottom: 10 }}>
+                    <label>Preis (€):</label><br />
+                    <input value={editBuchung.preis || ""} onChange={e => setEditBuchung({ ...editBuchung, preis: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                  </div>
+
+                  <div>
+                    <button
+                      type="submit"
+                      disabled={editSaving}
+                      style={{
+                        width: "100%", background: "red", color: "#fff",
+                        fontWeight: "bold", fontSize: 20, padding: 10,
+                        border: "none", borderRadius: 14, marginTop: 22
+                      }}
+                    >
+                      {editSaving ? "Speichere..." : "Änderung speichern"}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
-          ))}
+          )}
         </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 }
