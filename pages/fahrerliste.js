@@ -275,14 +275,47 @@ export default function FahrerListe() {
   return "#e0e0e0";
 }
 
-  // NEU: Gruppierung nach Abflug-Datum (YYYY-MM-DD)
-  const groupsByDate = filtered.reduce((acc, b) => {
+  // Gruppierung für die Liste je nach Tab
+let groupsByDate = {};
+let dayKeys = [];
+
+if (tab === "alle") {
+  // wie bisher: nach Abflugdatum gruppieren
+  groupsByDate = filtered.reduce((acc, b) => {
     const key = (b.abflugdatum || "").slice(0, 10);
     if (!key) return acc;
     (acc[key] ||= []).push(b);
     return acc;
   }, {});
-  const dayKeys = Object.keys(groupsByDate).sort();
+  dayKeys = Object.keys(groupsByDate).sort();
+} else {
+  // Für "Heute" und "2-Tage": feste Tage bauen und nach Abflug ODER Rückflug einsortieren
+  const base = new Date();
+  base.setHours(0, 0, 0, 0);
+
+  const toISO = (d) => {
+    const x = new Date(d);
+    x.setHours(0, 0, 0, 0);
+    return x.toISOString().slice(0, 10);
+  };
+
+  const todayISO = toISO(base);
+  const tomorrowISO = toISO(new Date(base.getFullYear(), base.getMonth(), base.getDate() + 1));
+  const dayAfterISO = toISO(new Date(base.getFullYear(), base.getMonth(), base.getDate() + 2));
+
+  const wantedDays = tab === "heute" ? [todayISO] : [tomorrowISO, dayAfterISO];
+
+  wantedDays.forEach(k => {
+    const items = filtered.filter(b => {
+      const ab = b.abflugdatum?.slice(0, 10);
+      const rf = b.rueckflugdatum?.slice(0, 10);
+      return ab === k || rf === k; // ODER-Logik: Abflug ODER Rückflug an diesem Tag
+    });
+    if (items.length) groupsByDate[k] = items; // nur Tage mit Einträgen anzeigen
+  });
+
+  dayKeys = wantedDays.filter(k => groupsByDate[k]?.length);
+}
 
   return (
     <>
