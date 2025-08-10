@@ -108,7 +108,7 @@ function PXHeader({
             type="text"
             value={suchtext}
             onChange={e => setSuchtext(e.target.value)}
-            placeholder="Suche nach Kennzeichen, Name, Flug…"
+            placeholder="Suche nach Kennzeichen"
             style={{
               width: "100%",
               fontSize: 18,
