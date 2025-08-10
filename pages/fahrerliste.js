@@ -249,21 +249,22 @@ export default function FahrerListe() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const abflug = parseDate(b.abflugdatum, b.abflugUhrzeit);
+  // Nur Datum, Uhrzeit ignorieren
+  const abflug = new Date(b.abflugdatum);
   abflug.setHours(0, 0, 0, 0);
 
-  // Differenz in Tagen
   const diffTage = Math.floor((abflug - today) / (1000 * 60 * 60 * 24));
 
-  // Heute, morgen oder übermorgen → weiß
   if (diffTage >= 0 && diffTage <= 2) {
-    return "#fff";
+    return "#fff"; // heute, morgen, übermorgen
   }
 
-  const rueck = parseDate(b.rueckflugdatum, b.rueckflugUhrzeit);
+  const rueck = new Date(b.rueckflugdatum);
+  rueck.setHours(0, 0, 0, 0);
 
-  if (new Date() < abflug) return "#fff";
-  if (new Date() >= abflug && new Date() < rueck) return "#eee";
+  const now = new Date();
+  if (now < abflug) return "#fff";
+  if (now >= abflug && now < rueck) return "#eee";
   return "#e0e0e0";
 }
 
