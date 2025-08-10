@@ -316,7 +316,7 @@ export default function FahrerListe() {
             marginTop: "auto",
             overflowX: "hidden"
           }}>
-            <div style={{ padding: 12, color: "#777", fontSize: 18, marginLeft: 10, paddingBottom: 1 }}>
+            <div style={{ padding: 12, color: "#777", fontSize: 18, marginLeft: 10 }}>
               {loading ? "Lade Daten..." : ""}
               <b> Anzahl Kunden: {filtered.length}</b>
             </div>
