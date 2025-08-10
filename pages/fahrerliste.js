@@ -205,21 +205,28 @@ export default function FahrerListe() {
   let filtered = list;
   const today = new Date();
   if (tab === "heute") {
-    const isoToday = today.toISOString().slice(0, 10);
-    filtered = filtered.filter(b => b.abflugdatum?.slice(0, 10) === isoToday);
-  } else if (tab === "2tage") {
-    // NEU: NUR morgen & übermorgen (heute NICHT)
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
-    const dayAfter = new Date(today);
-    dayAfter.setDate(today.getDate() + 2);
-    const isoTomorrow = tomorrow.toISOString().slice(0, 10);
-    const isoDayAfter = dayAfter.toISOString().slice(0, 10);
-    filtered = filtered.filter(b => {
-      const d = b.abflugdatum?.slice(0, 10);
-      return d === isoTomorrow || d === isoDayAfter;
-    });
-  }
+  const isoToday = today.toISOString().slice(0, 10);
+  filtered = filtered.filter(b => {
+    const abflug = b.abflugdatum?.slice(0, 10);
+    const rueck = b.rueckflugdatum?.slice(0, 10);
+    return abflug === isoToday || rueck === isoToday;
+  });
+} else if (tab === "2tage") {
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  const dayAfter = new Date(today);
+  dayAfter.setDate(today.getDate() + 2);
+  const isoTomorrow = tomorrow.toISOString().slice(0, 10);
+  const isoDayAfter = dayAfter.toISOString().slice(0, 10);
+  filtered = filtered.filter(b => {
+    const abflug = b.abflugdatum?.slice(0, 10);
+    const rueck = b.rueckflugdatum?.slice(0, 10);
+    return (
+      abflug === isoTomorrow || abflug === isoDayAfter ||
+      rueck === isoTomorrow || rueck === isoDayAfter
+    );
+  });
+}
   if (suchtext) {
     const search = suchtext.toLowerCase();
     filtered = filtered.filter(b =>
