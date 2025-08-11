@@ -266,6 +266,22 @@ export default function FahrerListe() {
     return "#fff"; // heute, morgen, übermorgen
   }
 
+
+
+function dateOnlyISO(dt) {
+  return (dt || "").slice(0, 10);
+}
+function isRueckHeuteOder2(b) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const rStr = dateOnlyISO(b.rueckflugdatum);
+  if (!rStr) return false;
+  const r = new Date(rStr);
+  if (isNaN(r)) return false;
+  r.setHours(0,0,0,0);
+  const diffDays = Math.floor((r - today) / (1000*60*60*24));
+  return diffDays >= 0 && diffDays <= 2; // heute, morgen, übermorgen
+}
+
   const rueck = new Date(b.rueckflugdatum);
   rueck.setHours(0, 0, 0, 0);
 
@@ -275,9 +291,9 @@ export default function FahrerListe() {
   return "#e0e0e0";
 }
 
-  // NEU: Gruppierung nach Abflug-Datum (YYYY-MM-DD)
+  // Gruppierung: Wenn Rückflug heute/2 Tage -> nach Rückflugdatum gruppieren, sonst nach Abflugdatum
 const groupsByDate = filtered.reduce((acc, b) => {
-  const key = (b.abflugdatum || "").slice(0, 10);
+  const key = isRueckHeuteOder2(b) ? dateOnlyISO(b.rueckflugdatum) : dateOnlyISO(b.abflugdatum);
   if (!key) return acc;
   (acc[key] ||= []).push(b);
   return acc;
@@ -386,7 +402,7 @@ const dayKeys = Object.keys(groupsByDate).sort();
                     >
                       <div style={{ flex: 1, marginLeft: 18 }}>
                         <div className="fahrer-card-title" style={{ fontWeight: "bold", marginBottom: 0, fontSize: "20px" }}>
-                          {row.ankunftUhrzeit} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
+                          {(isRueckHeuteOder2(row) ? row.rueckflugUhrzeit : row.ankunftUhrzeit) || ""} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
                             ? "All"
                             : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
                           <a className="telefon-link" href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>

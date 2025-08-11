@@ -108,7 +108,7 @@ function PXHeader({
             type="text"
             value={suchtext}
             onChange={e => setSuchtext(e.target.value)}
-            placeholder="Suche nach Kennzeichen, Name, Flug…"
+            placeholder="Suche nach Kennzeichen"
             style={{
               width: "100%",
               fontSize: 18,
@@ -205,17 +205,28 @@ export default function FahrerListe() {
   let filtered = list;
   const today = new Date();
   if (tab === "heute") {
-    const isoToday = today.toISOString().slice(0, 10);
-    filtered = filtered.filter(b => b.abflugdatum?.slice(0, 10) === isoToday);
-  } else if (tab === "2tage") {
-    const isoToday = today.toISOString().slice(0, 10);
-    const tomorrow = new Date();
-    tomorrow.setDate(today.getDate() + 1);
-    const isoTomorrow = tomorrow.toISOString().slice(0, 10);
-    filtered = filtered.filter(b =>
-      b.abflugdatum?.slice(0, 10) === isoToday || b.abflugdatum?.slice(0, 10) === isoTomorrow
+  const isoToday = today.toISOString().slice(0, 10);
+  filtered = filtered.filter(b => {
+    const abflug = b.abflugdatum?.slice(0, 10);
+    const rueck = b.rueckflugdatum?.slice(0, 10);
+    return abflug === isoToday || rueck === isoToday;
+  });
+} else if (tab === "2tage") {
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  const dayAfter = new Date(today);
+  dayAfter.setDate(today.getDate() + 2);
+  const isoTomorrow = tomorrow.toISOString().slice(0, 10);
+  const isoDayAfter = dayAfter.toISOString().slice(0, 10);
+  filtered = filtered.filter(b => {
+    const abflug = b.abflugdatum?.slice(0, 10);
+    const rueck = b.rueckflugdatum?.slice(0, 10);
+    return (
+      abflug === isoTomorrow || abflug === isoDayAfter ||
+      rueck === isoTomorrow || rueck === isoDayAfter
     );
-  }
+  });
+}
   if (suchtext) {
     const search = suchtext.toLowerCase();
     filtered = filtered.filter(b =>
@@ -242,13 +253,36 @@ export default function FahrerListe() {
   });
 
   function cardColor(b) {
-    const now = new Date();
-    const abflug = parseDate(b.abflugdatum, b.abflugUhrzeit);
-    const rueck = parseDate(b.rueckflugdatum, b.rueckflugUhrzeit);
-    if (now < abflug) return "#fff";
-    if (now >= abflug && now < rueck) return "#eee";
-    return "#e0e0e0";
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Nur Datum, Uhrzeit ignorieren
+  const abflug = new Date(b.abflugdatum);
+  abflug.setHours(0, 0, 0, 0);
+
+  const diffTage = Math.floor((abflug - today) / (1000 * 60 * 60 * 24));
+
+  if (diffTage >= 0 && diffTage <= 2) {
+    return "#fff"; // heute, morgen, übermorgen
   }
+
+  const rueck = new Date(b.rueckflugdatum);
+  rueck.setHours(0, 0, 0, 0);
+
+  const now = new Date();
+  if (now < abflug) return "#fff";
+  if (now >= abflug && now < rueck) return "#eee";
+  return "#e0e0e0";
+}
+
+  // NEU: Gruppierung nach Abflug-Datum (YYYY-MM-DD)
+const groupsByDate = filtered.reduce((acc, b) => {
+  const key = (b.abflugdatum || "").slice(0, 10);
+  if (!key) return acc;
+  (acc[key] ||= []).push(b);
+  return acc;
+}, {});
+const dayKeys = Object.keys(groupsByDate).sort();
 
   return (
     <>
@@ -305,75 +339,98 @@ export default function FahrerListe() {
           }}>
             <div style={{ padding: 12, color: "#777", fontSize: 18, marginLeft: 10 }}>
               {loading ? "Lade Daten..." : ""}
-              <b> Anzahl Fahrten: {filtered.length}</b>
+              <b> Anzahl Kunden: {filtered.length}</b>
             </div>
+
+            {/* NEU: gerenderte Liste mit Datumsbalken je Tag */}
             <div>
-              {filtered.length === 0 && (
+              {dayKeys.length === 0 && (
                 <div style={{ margin: 30, color: '#888', fontSize: 28 }}>Keine Fahrten gefunden.</div>
               )}
-              {filtered.map(row => (
-                <div
-                  key={row.id}
-                  className="fahrer-card"
-                  style={{
-                    marginBottom: 0,
-                    borderRadius: 0,
-                    background: cardColor(row),
-                    padding: "16px 0 8px 0",
-                    boxShadow: "none",
-                    border: "none",
-                    borderBottom: "2px solid #ccc",
-                    display: "flex",
-                    alignItems: "flex-start",
-                    fontSize: "32px",
-                    fontFamily: "Arial, Helvetica, sans-serif"
-                  }}
-                >
-                  <div style={{ flex: 1, marginLeft: 18 }}>
-                    <div className="fahrer-card-title" style={{ fontWeight: "bold", marginBottom: 0, fontSize: "20px" }}>
-                      {row.ankunftUhrzeit} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
-                        ? "All"
-                        : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
-                      <a className="telefon-link" href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
-                    </div>
-                    <div className="info-zeile" style={{
-                      fontSize: 17, margin: "12px 0 0 0", color: "#444", display: "flex", alignItems: "center", fontWeight: 700
-                    }}>
-                      <span>{formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin}</span>
-                      <span style={{ margin: "0 5px", fontWeight: 500 }}>|</span>
-                      <span className="notiz-label"><b>Notizen:</b> {row.bemerkung}</span>
-                    </div>
-                    <div className="info-zeile" style={{
-                      display: "flex", alignItems: "center", gap: 0, fontSize: 17, marginTop: 0, fontWeight: 700
-                    }}>
-                      <span style={{ color: "#16b000" }}>
-                        {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
-                      </span>
-                      <span style={{ color: "#888", margin: "0 5px" }}>|</span>
-                      <span style={{ color: "#111" }}>{row.kennzeichen}</span>
-                      <span style={{ color: "#888", margin: "0 5px" }}>|</span>
-                      <span style={{ color: "red" }}>{priceDisplay(row)}</span>
-                    </div>
+
+              {dayKeys.map(day => (
+                <div key={day}>
+                  {/* Blauer Balken (kräftig/dunkel wie im 2. Screenshot) */}
+                  <div
+                    style={{
+                      background: "linear-gradient(#6E97BF, #4F7FA9)",
+                      color: "#ffffff",
+                      fontWeight: "bold",
+                      fontSize: 22,
+                      padding: "8px 14px",
+                      borderTop: "1px solid #4677A2",
+                      borderBottom: "1px solid #4677A2",
+                      marginTop: 0
+                    }}
+                  >
+                    {formatDE(day)}
                   </div>
-                  <div className="actions" style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    gap: 38,
-                    alignItems: "center",
-                    minWidth: 270,
-                    justifyContent: "flex-end",
-                    marginRight: 30
-                  }}>
-                    <span
-                      style={{ fontSize: 20, color: "#444", cursor: "pointer" }}
-                      title="Bearbeiten"
-                      onClick={() => setEditBuchung({ ...row })}
-                    >✏️</span>
-                    <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
-                    <a href={`tel:${row.telefon}`}>
-                      <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Anrufen">📞</span>
-                    </a>
-                  </div>
+
+                  {groupsByDate[day].map(row => (
+                    <div
+                      key={row.id}
+                      className="fahrer-card"
+                      style={{
+                        marginBottom: 0,
+                        borderRadius: 0,
+                        background: cardColor(row),
+                        padding: "16px 0 8px 0",
+                        boxShadow: "none",
+                        border: "none",
+                        borderBottom: "2px solid #ccc",
+                        display: "flex",
+                        alignItems: "flex-start",
+                        fontSize: "32px",
+                        fontFamily: "Arial, Helvetica, sans-serif"
+                      }}
+                    >
+                      <div style={{ flex: 1, marginLeft: 18 }}>
+                        <div className="fahrer-card-title" style={{ fontWeight: "bold", marginBottom: 0, fontSize: "20px" }}>
+                          {row.ankunftUhrzeit} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
+                            ? "All"
+                            : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
+                          <a className="telefon-link" href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
+                        </div>
+                        <div className="info-zeile" style={{
+                          fontSize: 17, margin: "12px 0 0 0", color: "#444", display: "flex", alignItems: "center", fontWeight: 700
+                        }}>
+                          <span>{formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin}</span>
+                          <span style={{ margin: "0 5px", fontWeight: 500 }}>|</span>
+                          <span className="notiz-label"><b>Notizen:</b> {row.bemerkung}</span>
+                        </div>
+                        <div className="info-zeile" style={{
+                          display: "flex", alignItems: "center", gap: 0, fontSize: 17, marginTop: 0, fontWeight: 700
+                        }}>
+                          <span style={{ color: "#16b000" }}>
+                            {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
+                          </span>
+                          <span style={{ color: "#888", margin: "0 5px" }}>|</span>
+                          <span style={{ color: "#111" }}>{row.kennzeichen}</span>
+                          <span style={{ color: "#888", margin: "0 5px" }}>|</span>
+                          <span style={{ color: "red" }}>{priceDisplay(row)}</span>
+                        </div>
+                      </div>
+                      <div className="actions" style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        gap: 38,
+                        alignItems: "center",
+                        minWidth: 270,
+                        justifyContent: "flex-end",
+                        marginRight: 30
+                      }}>
+                        <span
+                          style={{ fontSize: 20, color: "#444", cursor: "pointer" }}
+                          title="Bearbeiten"
+                          onClick={() => setEditBuchung({ ...row })}
+                        >✏️</span>
+                        <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
+                        <a href={`tel:${row.telefon}`}>
+                          <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Anrufen">📞</span>
+                        </a>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>
