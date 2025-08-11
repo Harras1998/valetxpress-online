@@ -164,7 +164,21 @@ function priceDisplay(row) {
   if (!val) return "";
   if (typeof val === "string") val = val.replace(",", ".");
   return `${parseFloat(val).toFixed(0)} €`;
+}function dateOnlyISO(dt) {
+  return (dt || "").slice(0, 10);
 }
+function isRueckHeuteOder2(b) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const rStr = dateOnlyISO(b.rueckflugdatum);
+  if (!rStr) return false;
+  const r = new Date(rStr);
+  if (isNaN(r)) return false;
+  r.setHours(0,0,0,0);
+  const diffDays = Math.floor((r - today) / (1000*60*60*24));
+  return diffDays >= 0 && diffDays <= 2;
+}
+
+
 
 export default function FahrerListe() {
   const [tab, setTab] = useState("alle");
@@ -178,6 +192,8 @@ export default function FahrerListe() {
   const [username, setUsername] = useState("");
   const [editBuchung, setEditBuchung] = useState(null);
   const [editSaving, setEditSaving] = useState(false);
+
+  const rueckModus = tab === "heute" || tab === "2tage";
 
   function handleLogin(e) {
     e.preventDefault();
@@ -252,26 +268,19 @@ export default function FahrerListe() {
     return a2 - b2;
   });
 
-  function cardColor(b, day, rueckModus) {
-  // Kontextabhängige Farbe:
-  // - Wenn wir unter dem Rückflug-Balken rendern (rueckModus && day === rueckflugdatum):
-  //   => Vor Rückflugzeit: weiß, zwischen Abflug und Rückflug: hellgrau, nach Rückflug: dunkelgrau
-  // - Sonst (Abflug-Balken):
-  //   => Vor Abflugzeit: weiß, zwischen Abflug und Rückflug: hellgrau, nach Rückflug: dunkelgrau
-  const now = new Date();
+  function cardColor(b) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-  const abflugDT = parseDate(b.abflugdatum, b.abflugUhrzeit);
-  const rueckDT  = parseDate(b.rueckflugdatum, b.rueckflugUhrzeit);
+  // Nur Datum, Uhrzeit ignorieren
+  const abflug = new Date(b.abflugdatum);
+  abflug.setHours(0, 0, 0, 0);
 
-  const dayIsRueck = (rueckModus && dateOnlyISO(b.rueckflugdatum) === day);
+  const diffTage = Math.floor((abflug - today) / (1000 * 60 * 60 * 24));
 
-  const eventDT = dayIsRueck ? rueckDT : abflugDT;
-
-  if (now < eventDT) return "#fff";
-  if (now >= abflugDT && now < rueckDT) return "#eee";
-  return "#e0e0e0";
-}
-
+  if (diffTage >= 0 && diffTage <= 2) {
+    return "#fff"; // heute, morgen, übermorgen
+  }
 
   const rueck = new Date(b.rueckflugdatum);
   rueck.setHours(0, 0, 0, 0);
@@ -282,9 +291,34 @@ export default function FahrerListe() {
   return "#e0e0e0";
 }
 
-  // NEU: Gruppierung nach Abflug-Datum (YYYY-MM-DD)
+  // Gruppierung pro Tab: 
+// - Heute: nach dem Datum gruppieren, das HEUTE ist (Rückflug ODER Abflug)
+// - 2-Tage: nach dem Datum gruppieren, das in den beiden Tagen liegt (Rückflug bevorzugt, sonst Abflug)
+// - Alle: immer nach Abflugdatum
+const isoToday = new Date().toISOString().slice(0, 10);
+const tomorrow = new Date(); tomorrow.setDate(new Date().getDate() + 1);
+const dayAfter = new Date(); dayAfter.setDate(new Date().getDate() + 2);
+const isoTomorrow = tomorrow.toISOString().slice(0, 10);
+const isoDayAfter = dayAfter.toISOString().slice(0, 10);
+
+function keyForTab(b) {
+  const abf = dateOnlyISO(b.abflugdatum);
+  const rue = dateOnlyISO(b.rueckflugdatum);
+  if (tab === "heute") {
+    if (rue === isoToday) return rue;
+    return abf;
+  } else if (tab === "2tage") {
+    const in2 = (d) => d === isoTomorrow || d === isoDayAfter;
+    if (in2(rue)) return rue;
+    if (in2(abf)) return abf;
+    return abf; // Fallback
+  } else {
+    return abf;
+  }
+}
+
 const groupsByDate = filtered.reduce((acc, b) => {
-  const key = (b.abflugdatum || "").slice(0, 10);
+  const key = keyForTab(b);
   if (!key) return acc;
   (acc[key] ||= []).push(b);
   return acc;
@@ -380,7 +414,7 @@ const dayKeys = Object.keys(groupsByDate).sort();
                       style={{
                         marginBottom: 0,
                         borderRadius: 0,
-                        background: cardColor(row, day, rueckModus),
+                        background: cardColor(row),
                         padding: "16px 0 8px 0",
                         boxShadow: "none",
                         border: "none",
@@ -393,7 +427,7 @@ const dayKeys = Object.keys(groupsByDate).sort();
                     >
                       <div style={{ flex: 1, marginLeft: 18 }}>
                         <div className="fahrer-card-title" style={{ fontWeight: "bold", marginBottom: 0, fontSize: "20px" }}>
-                          {row.ankunftUhrzeit} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
+                          {(dateOnlyISO(row.rueckflugdatum) === day ? row.rueckflugUhrzeit : row.ankunftUhrzeit) || ""} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
                             ? "All"
                             : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
                           <a className="telefon-link" href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
