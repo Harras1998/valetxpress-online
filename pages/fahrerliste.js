@@ -165,6 +165,19 @@ function priceDisplay(row) {
   if (typeof val === "string") val = val.replace(",", ".");
   return `${parseFloat(val).toFixed(0)} €`;
 }
+function dateOnlyISO(dt) {
+  return (dt || "").slice(0, 10);
+}
+function isRueckHeuteOder2(b) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const rStr = dateOnlyISO(b.rueckflugdatum);
+  if (!rStr) return false;
+  const r = new Date(rStr);
+  if (isNaN(r)) return false;
+  r.setHours(0,0,0,0);
+  const diffDays = Math.floor((r - today) / (1000*60*60*24));
+  return diffDays >= 0 && diffDays <= 2;
+}
 
 export default function FahrerListe() {
   const [tab, setTab] = useState("alle");
@@ -265,22 +278,6 @@ export default function FahrerListe() {
   if (diffTage >= 0 && diffTage <= 2) {
     return "#fff"; // heute, morgen, übermorgen
   }
-
-
-
-function dateOnlyISO(dt) {
-  return (dt || "").slice(0, 10);
-}
-function isRueckHeuteOder2(b) {
-  const today = new Date(); today.setHours(0,0,0,0);
-  const rStr = dateOnlyISO(b.rueckflugdatum);
-  if (!rStr) return false;
-  const r = new Date(rStr);
-  if (isNaN(r)) return false;
-  r.setHours(0,0,0,0);
-  const diffDays = Math.floor((r - today) / (1000*60*60*24));
-  return diffDays >= 0 && diffDays <= 2; // heute, morgen, übermorgen
-}
 
   const rueck = new Date(b.rueckflugdatum);
   rueck.setHours(0, 0, 0, 0);
