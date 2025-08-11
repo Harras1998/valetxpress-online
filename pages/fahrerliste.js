@@ -192,6 +192,9 @@ export default function FahrerListe() {
   const [editBuchung, setEditBuchung] = useState(null);
   const [editSaving, setEditSaving] = useState(false);
 
+  // Nur in den Tabs 'Heute' und '2-Tage' gilt der Rückflug-Sondermodus
+  const rueckModus = tab === "heute" || tab === "2tage";
+
   function handleLogin(e) {
     e.preventDefault();
     const encoded = btoa(`${login.user}:${login.pass}`);
@@ -290,7 +293,7 @@ export default function FahrerListe() {
 
   // Gruppierung: Wenn Rückflug heute/2 Tage -> nach Rückflugdatum gruppieren, sonst nach Abflugdatum
 const groupsByDate = filtered.reduce((acc, b) => {
-  const key = isRueckHeuteOder2(b) ? dateOnlyISO(b.rueckflugdatum) : dateOnlyISO(b.abflugdatum);
+  const key = (rueckModus && isRueckHeuteOder2(b)) ? dateOnlyISO(b.rueckflugdatum) : dateOnlyISO(b.abflugdatum);
   if (!key) return acc;
   (acc[key] ||= []).push(b);
   return acc;
@@ -399,7 +402,7 @@ const dayKeys = Object.keys(groupsByDate).sort();
                     >
                       <div style={{ flex: 1, marginLeft: 18 }}>
                         <div className="fahrer-card-title" style={{ fontWeight: "bold", marginBottom: 0, fontSize: "20px" }}>
-                          {(isRueckHeuteOder2(row) ? row.rueckflugUhrzeit : row.ankunftUhrzeit) || ""} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
+                          {((rueckModus && isRueckHeuteOder2(row)) ? row.rueckflugUhrzeit : row.ankunftUhrzeit) || ""} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
                             ? "All"
                             : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
                           <a className="telefon-link" href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
