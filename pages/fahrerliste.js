@@ -349,13 +349,13 @@ for (const k of Object.keys(groupsByDate)) {
   return (
     <>
       <Head>
-        <meta name="viewport" content="width=1500, user-scalable=no" />
+        <meta name="viewport" content="width=100%, user-scalable=no" />
       </Head>
       {!auth ? (
         <div
           style={{
-            maxWidth: 1500,
-            minWidth: 1500,
+            maxWidth: 100%,
+            minWidth: 100%,
             background: "#fff",
             borderRadius: 12,
             padding: 32,
@@ -375,8 +375,8 @@ for (const k of Object.keys(groupsByDate)) {
       ) : (
         <div
           style={{
-            maxWidth: 1500,
-            minWidth: 1500,
+            maxWidth: 100%,
+            minWidth: 100%,
             background: "#fff",
             fontFamily: "Arial",
             margin: "0 auto",
@@ -504,7 +504,7 @@ for (const k of Object.keys(groupsByDate)) {
               background: "#fff", zIndex: 10000, overflowY: "auto"
             }}>
               <div style={{
-                width: 1500, margin: "0 auto", minHeight: "100vh", fontFamily: "Arial"
+                width: 100%, margin: "0 auto", minHeight: "100vh", fontFamily: "Arial"
               }}>
                 {/* Header */}
                 <div style={{
