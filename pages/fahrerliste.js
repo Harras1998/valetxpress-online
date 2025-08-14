@@ -366,9 +366,9 @@ for (const k of Object.keys(groupsByDate)) {
           }}>
           <h2>Fahrer-Login</h2>
           <form onSubmit={handleLogin}>
-            <input type="text" placeholder="Benutzername" value={login.user} onChange={e => setLogin({ ...login, user: e.target.value })} required style={{ width: "100vw", marginBottom: 8 }} />
-            <input type="password" placeholder="Passwort" value={login.pass} onChange={e => setLogin({ ...login, pass: e.target.value })} required style={{ width: "100vw", marginBottom: 16 }} />
-            <button type="submit" style={{ width: "100vw", padding: "10px 0", background: "#1db954", color: "#fff", border: "none", borderRadius: 8, fontWeight: "bold" }}>Login</button>
+            <input type="text" placeholder="Benutzername" value={login.user} onChange={e => setLogin({ ...login, user: e.target.value })} required style={{ width: "100%", marginBottom: 8 }} />
+            <input type="password" placeholder="Passwort" value={login.pass} onChange={e => setLogin({ ...login, pass: e.target.value })} required style={{ width: "100%", marginBottom: 16 }} />
+            <button type="submit" style={{ width: "100%", padding: "10px 0", background: "#1db954", color: "#fff", border: "none", borderRadius: 8, fontWeight: "bold" }}>Login</button>
           </form>
           {error && <div style={{ color: "red", marginTop: 10 }}>{error}</div>}
         </div>
