@@ -269,24 +269,25 @@ export default function FahrerListe() {
   });
 
   function cardColor(b) {
-  // Immer nur mit reinen Datumsanteilen rechnen (Zeitzonen-sicherer)
-  const today = new Date(); today.setHours(0,0,0,0);
-  const abflug = new Date((b.abflugdatum || "").slice(0,10)); abflug.setHours(0,0,0,0);
-  const rueck  = new Date((b.rueckflugdatum || "").slice(0,10)); rueck.setHours(0,0,0,0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-  // Wie bisher: "heute/morgen/übermorgen" relativ zum Abflug -> weiß
-  const diffTage = Math.floor((abflug - today) / (1000*60*60*24));
-  if (diffTage >= 0 && diffTage <= 2) return "#fff";
+  // Nur Datum, Uhrzeit ignorieren
+  const abflug = new Date(b.abflugdatum);
+  abflug.setHours(0, 0, 0, 0);
 
-  // In Heute- und 2-Tage-Tab nach dem Abflug immer dunkleres Grau,
-  // damit die Karte dort konsistent so aussieht wie gewünscht.
-  if (tab === "heute" || tab === "2tage") {
-    if (today >= abflug) return "#e0e0e0";
+  const diffTage = Math.floor((abflug - today) / (1000 * 60 * 60 * 24));
+
+  if (diffTage >= 0 && diffTage <= 2) {
+    return "#fff"; // heute, morgen, übermorgen
   }
 
-  // Fallback (z.B. Tab "Alle"): alte Logik beibehalten
-  if (today < abflug) return "#fff";
-  if (today >= abflug && today < rueck) return "#eee";
+  const rueck = new Date(b.rueckflugdatum);
+  rueck.setHours(0, 0, 0, 0);
+
+  const now = new Date();
+  if (now < abflug) return "#fff";
+  if (now >= abflug && now < rueck) return "#eee";
   return "#e0e0e0";
 }
 
@@ -307,8 +308,10 @@ function keyForTab(b) {
     if (rue === isoToday) return rue;
     return abf;
   } else if (tab === "2tage") {
-    if (rue === isoTomorrow || rue === isoDayAfter) return rue;
-    return abf;
+    const in2 = (d) => d === isoTomorrow || d === isoDayAfter;
+    if (in2(rue)) return rue;
+    if (in2(abf)) return abf;
+    return abf; // Fallback
   } else {
     return abf;
   }
@@ -321,6 +324,30 @@ const groupsByDate = filtered.reduce((acc, b) => {
   return acc;
 }, {});
 const dayKeys = Object.keys(groupsByDate).sort();
+
+
+// --- Helper: Zeit für die jeweilige Tagesgruppe bestimmen (entspricht der Anzeige links) ---
+function displayTimeForDay(row, dayKey) {
+  // Wenn der Tagesheader dem Rückflugdatum entspricht -> Rückflug-Uhrzeit,
+  // sonst (Abflug-Tag) -> Ankunftszeit am Parkplatz
+  if (dateOnlyISO(row.rueckflugdatum) === dayKey) {
+    return row.rueckflugUhrzeit || "";
+  }
+  return row.ankunftUhrzeit || "";
+}
+function timeToMinutes(t) {
+  if (!t || typeof t !== "string") return 24*60+1; // fehlende Zeit -> ganz ans Ende
+  const m = t.match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return 24*60+1;
+  const hh = parseInt(m[1], 10);
+  const mm = parseInt(m[2], 10);
+  return hh*60 + mm;
+}
+// Alle Gruppen nach der oben definierten Anzeige-Zeit sortieren (00:00 -> 23:59)
+for (const k of Object.keys(groupsByDate)) {
+  groupsByDate[k].sort((a, b) => timeToMinutes(displayTimeForDay(a, k)) - timeToMinutes(displayTimeForDay(b, k)));
+}
+
 
   return (
     <>
