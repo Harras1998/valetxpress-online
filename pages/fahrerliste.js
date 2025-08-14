@@ -269,25 +269,24 @@ export default function FahrerListe() {
   });
 
   function cardColor(b) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // Immer nur mit reinen Datumsanteilen rechnen (Zeitzonen-sicherer)
+  const today = new Date(); today.setHours(0,0,0,0);
+  const abflug = new Date((b.abflugdatum || "").slice(0,10)); abflug.setHours(0,0,0,0);
+  const rueck  = new Date((b.rueckflugdatum || "").slice(0,10)); rueck.setHours(0,0,0,0);
 
-  // Nur Datum, Uhrzeit ignorieren
-  const abflug = new Date(b.abflugdatum);
-  abflug.setHours(0, 0, 0, 0);
+  // Wie bisher: "heute/morgen/übermorgen" relativ zum Abflug -> weiß
+  const diffTage = Math.floor((abflug - today) / (1000*60*60*24));
+  if (diffTage >= 0 && diffTage <= 2) return "#fff";
 
-  const diffTage = Math.floor((abflug - today) / (1000 * 60 * 60 * 24));
-
-  if (diffTage >= 0 && diffTage <= 2) {
-    return "#fff"; // heute, morgen, übermorgen
+  // In Heute- und 2-Tage-Tab nach dem Abflug immer dunkleres Grau,
+  // damit die Karte dort konsistent so aussieht wie gewünscht.
+  if (tab === "heute" || tab === "2tage") {
+    if (today >= abflug) return "#e0e0e0";
   }
 
-  const rueck = new Date(b.rueckflugdatum);
-  rueck.setHours(0, 0, 0, 0);
-
-  const now = new Date();
-  if (now < abflug) return "#fff";
-  if (now >= abflug && now < rueck) return "#eee";
+  // Fallback (z.B. Tab "Alle"): alte Logik beibehalten
+  if (today < abflug) return "#fff";
+  if (today >= abflug && today < rueck) return "#eee";
   return "#e0e0e0";
 }
 
@@ -308,10 +307,8 @@ function keyForTab(b) {
     if (rue === isoToday) return rue;
     return abf;
   } else if (tab === "2tage") {
-    const in2 = (d) => d === isoTomorrow || d === isoDayAfter;
-    if (in2(rue)) return rue;
-    if (in2(abf)) return abf;
-    return abf; // Fallback
+    if (rue === isoTomorrow || rue === isoDayAfter) return rue;
+    return abf;
   } else {
     return abf;
   }
