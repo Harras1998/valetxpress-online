@@ -308,11 +308,9 @@ function keyForTab(b) {
     if (rue === isoToday) return rue;
     return abf;
   } else if (tab === "2tage") {
-    const in2 = (d) => d === isoTomorrow || d === isoDayAfter;
-    if (in2(rue)) return rue;
-    if (in2(abf)) return abf;
-    return abf; // Fallback
-  } else {
+  if (rue === isoTomorrow || rue === isoDayAfter) return rue;
+  return abf;
+} else {
     return abf;
   }
 }
