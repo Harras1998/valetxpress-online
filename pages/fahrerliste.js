@@ -349,13 +349,13 @@ for (const k of Object.keys(groupsByDate)) {
   return (
     <>
       <Head>
-        <meta name="viewport" content="width=100%, user-scalable=no" />
+        <meta name="viewport" content="width=1460, user-scalable=no" />
       </Head>
       {!auth ? (
         <div
           style={{
-            maxWidth: 100%,
-            minWidth: 100%,
+            maxWidth: 1460,
+            minWidth: 1460,
             background: "#fff",
             borderRadius: 12,
             padding: 32,
@@ -366,17 +366,17 @@ for (const k of Object.keys(groupsByDate)) {
           }}>
           <h2>Fahrer-Login</h2>
           <form onSubmit={handleLogin}>
-            <input type="text" placeholder="Benutzername" value={login.user} onChange={e => setLogin({ ...login, user: e.target.value })} required style={{ width: "100%", marginBottom: 8 }} />
-            <input type="password" placeholder="Passwort" value={login.pass} onChange={e => setLogin({ ...login, pass: e.target.value })} required style={{ width: "100%", marginBottom: 16 }} />
-            <button type="submit" style={{ width: "100%", padding: "10px 0", background: "#1db954", color: "#fff", border: "none", borderRadius: 8, fontWeight: "bold" }}>Login</button>
+            <input type="text" placeholder="Benutzername" value={login.user} onChange={e => setLogin({ ...login, user: e.target.value })} required style={{ width: "100vw", marginBottom: 8 }} />
+            <input type="password" placeholder="Passwort" value={login.pass} onChange={e => setLogin({ ...login, pass: e.target.value })} required style={{ width: "100vw", marginBottom: 16 }} />
+            <button type="submit" style={{ width: "100vw", padding: "10px 0", background: "#1db954", color: "#fff", border: "none", borderRadius: 8, fontWeight: "bold" }}>Login</button>
           </form>
           {error && <div style={{ color: "red", marginTop: 10 }}>{error}</div>}
         </div>
       ) : (
         <div
           style={{
-            maxWidth: 100%,
-            minWidth: 100%,
+            maxWidth: 1460,
+            minWidth: 1460,
             background: "#fff",
             fontFamily: "Arial",
             margin: "0 auto",
@@ -504,7 +504,7 @@ for (const k of Object.keys(groupsByDate)) {
               background: "#fff", zIndex: 10000, overflowY: "auto"
             }}>
               <div style={{
-                width: 100%, margin: "0 auto", minHeight: "100vh", fontFamily: "Arial"
+                width: 1460, margin: "0 auto", minHeight: "100vh", fontFamily: "Arial"
               }}>
                 {/* Header */}
                 <div style={{
