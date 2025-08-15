@@ -464,7 +464,7 @@ for (const k of Object.keys(groupsByDate)) {
           {/* Footer directly under the login panel without spacing */}
           <PXFooter />
         </div>
-      ) : () : (
+      ) : (
         <div
           style={{
             maxWidth: 1440,
