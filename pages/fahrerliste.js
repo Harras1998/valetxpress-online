@@ -10,7 +10,40 @@ function PXHeader({
   sort,
   setSort,
   onLogout,
-}) {
+}
+
+function PXFooter() {
+  return (
+    <div
+      style={{
+        width: "100%",
+        background: "linear-gradient(#000,#111)",
+        borderTop: "1.5px solid #444",
+        marginTop: 0
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 1440,
+          minWidth: 1440,
+          margin: "0 auto",
+          height: 56,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#fff",
+          fontSize: 28,
+          fontWeight: "bold",
+          letterSpacing: 0.5,
+          fontFamily: "Arial, Helvetica, sans-serif"
+        }}
+      >
+        ValetXpress Fahrerliste
+      </div>
+    </div>
+  );
+}
+) {
   return (
     <div style={{
       width: "100%",
@@ -498,7 +531,11 @@ for (const k of Object.keys(groupsByDate)) {
             </div>
           </div>
 
-          {editBuchung && (
+          
+
+<PXFooter />
+
+{editBuchung && (
             <div style={{
               position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
               background: "#fff", zIndex: 10000, overflowY: "auto"
