@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import Head from "next/head";
 
@@ -68,7 +69,7 @@ function PXHeader({
       }}>
         <div style={{ display: "flex", alignItems: "center", marginLeft: 14, gap: 0 }}>
           <button
-            onClick={() => setTab("heute")}
+            onClick={() => setTab && setTab("heute")}
             style={{
               background: tab === "heute" ? "#6DB6E2" : "#fff",
               color: tab === "heute" ? "#fff" : "#222",
@@ -77,10 +78,11 @@ function PXHeader({
               padding: "7px 36px",
               border: "1px solid #ccc",
               borderRight: "none",
-              borderRadius: "16px 0 0 16px"
+              borderRadius: "16px 0 0 16px",
+              cursor: setTab ? "pointer" : "default"
             }}>Heute</button>
           <button
-            onClick={() => setTab("2tage")}
+            onClick={() => setTab && setTab("2tage")}
             style={{
               background: tab === "2tage" ? "#6DB6E2" : "#fff",
               color: tab === "2tage" ? "#fff" : "#222",
@@ -90,10 +92,11 @@ function PXHeader({
               border: "1px solid #ccc",
               borderRight: "none",
               borderLeft: "none",
-              borderRadius: 0
+              borderRadius: 0,
+              cursor: setTab ? "pointer" : "default"
             }}>2-Tage</button>
           <button
-            onClick={() => setTab("alle")}
+            onClick={() => setTab && setTab("alle")}
             style={{
               background: tab === "alle" ? "#6DB6E2" : "#fff",
               color: tab === "alle" ? "#fff" : "#222",
@@ -102,14 +105,15 @@ function PXHeader({
               padding: "7px 36px",
               border: "1px solid #ccc",
               borderLeft: "none",
-              borderRadius: "0 16px 16px 0"
+              borderRadius: "0 16px 16px 0",
+              cursor: setTab ? "pointer" : "default"
             }}>Alle</button>
         </div>
         <div style={{ flex: 1, display: "flex", alignItems: "center", margin: "0 26px", maxWidth: 620 }}>
           <input
             type="text"
-            value={suchtext}
-            onChange={e => setSuchtext(e.target.value)}
+            value={suchtext || ""}
+            onChange={e => setSuchtext && setSuchtext(e.target.value)}
             placeholder="Suche nach Kennzeichen"
             style={{
               width: "100%",
@@ -120,12 +124,13 @@ function PXHeader({
               marginLeft: 16,
               marginRight: 16
             }}
+            disabled={!setSuchtext}
           />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 32, marginRight: 38 }}>
           <select
-            value={sort}
-            onChange={e => setSort(e.target.value)}
+            value={sort || "abflugdatum"}
+            onChange={e => setSort && setSort(e.target.value)}
             style={{
               color: "#1689ca",
               fontSize: 22,
@@ -133,9 +138,10 @@ function PXHeader({
               border: "none",
               background: "none",
               textDecoration: "underline",
-              cursor: "pointer",
+              cursor: setSort ? "pointer" : "default",
               marginRight: 20
             }}
+            disabled={!setSort}
           >
             <option value="abflugdatum">Sortieren: Abflugdatum</option>
             <option value="rueckflugdatum">Sortieren: Rückflugdatum</option>
@@ -428,24 +434,90 @@ for (const k of Object.keys(groupsByDate)) {
             maxWidth: 1440,
             minWidth: 1440,
             background: "#fff",
-            borderRadius: 12,
-            padding: 32,
-            boxShadow: "0 2px 12px #0002",
             fontFamily: "Arial",
-            overflowX: "hidden",
-            margin: "0 auto"
+            margin: "0 auto",
+            minHeight: "100vh",
+            overflowX: "hidden"
           }}>
-     <PXHeader username="" hideControls />
-          <h2>Fahrer-Login</h2>
-          <form onSubmit={handleLogin}>
-            <input type="text" placeholder="Benutzername" value={login.user} onChange={e => setLogin({ ...login, user: e.target.value })} required style={{ width: "100%", marginBottom: 8 }} />
-            <input type="password" placeholder="Passwort" value={login.pass} onChange={e => setLogin({ ...login, pass: e.target.value })} required style={{ width: "100%", marginBottom: 16 }} />
-            <button type="submit" style={{ width: "100%", padding: "10px 0", background: "#1db954", color: "#fff", border: "none", borderRadius: 8, fontWeight: "bold" }}>Login</button>
-          </form>
-          {error && <div style={{ color: "red", marginTop: 10 }}>{error}</div>}
-        
-     <PXFooter />
-</div>
+          <PXHeader
+            username=""
+            tab={tab}
+            setTab={setTab}
+            suchtext={suchtext}
+            setSuchtext={setSuchtext}
+            sort={sort}
+            setSort={setSort}
+            onLogout={() => setLogin({ user: "", pass: "" })} 
+            hideControls={false}
+          />
+
+          {/* Login-Bereich im grauen Streifen wie im Screenshot */}
+          <div style={{ background: "#ededed", borderBottom: "1.5px solid #dedede" }}>
+            <div style={{ padding: "24px 28px 30px 28px" }}>
+              <div style={{ fontSize: 36, fontWeight: "bold", color: "#333", marginBottom: 16 }}>
+                Fahrer<span style={{ display: "inline-block", width: 6 }}></span>liste Login
+              </div>
+              <form onSubmit={handleLogin} style={{ maxWidth: 420 }}>
+                <div style={{ marginBottom: 12 }}>
+                  <input
+                    type="text"
+                    placeholder="Username"
+                    value={login.user}
+                    onChange={e => setLogin({ ...login, user: e.target.value })}
+                    required
+                    style={{
+                      width: 260,
+                      fontSize: 18,
+                      padding: "8px 10px",
+                      borderRadius: 4,
+                      border: "1px solid #999",
+                      boxShadow: "inset 0 1px 2px #0001",
+                      background: "#fff"
+                    }}
+                  />
+                </div>
+                <div style={{ marginBottom: 20 }}>
+                  <input
+                    type="password"
+                    placeholder="Password"
+                    value={login.pass}
+                    onChange={e => setLogin({ ...login, pass: e.target.value })}
+                    required
+                    style={{
+                      width: 260,
+                      fontSize: 18,
+                      padding: "8px 10px",
+                      borderRadius: 4,
+                      border: "1px solid #999",
+                      boxShadow: "inset 0 1px 2px #0001",
+                      background: "#fff"
+                    }}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  style={{
+                    display: "inline-block",
+                    padding: "10px 32px",
+                    fontSize: 18,
+                    fontWeight: "bold",
+                    color: "#fff",
+                    background: "linear-gradient(#444,#222)",
+                    border: "1px solid #333",
+                    borderRadius: 24,
+                    boxShadow: "inset 0 1px 0 #777, 0 2px 6px #0002",
+                    cursor: "pointer"
+                  }}
+                >
+                  Login
+                </button>
+              </form>
+              {error && <div style={{ color: "red", marginTop: 12 }}>{error}</div>}
+            </div>
+          </div>
+
+          <PXFooter />
+        </div>
       ) : (
         <div
           style={{
@@ -486,7 +558,7 @@ for (const k of Object.keys(groupsByDate)) {
 
               {dayKeys.map(day => (
                 <div key={day}>
-                  {/* Blauer Balken (kräftig/dunkel wie im 2. Screenshot) */}
+                  {/* Blauer Balken */}
                   <div
                     style={{
                       background: "linear-gradient(#6E97BF, #4F7FA9)",
