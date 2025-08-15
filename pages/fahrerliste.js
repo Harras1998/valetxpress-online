@@ -407,8 +407,8 @@ for (const k of Object.keys(groupsByDate)) {
                 <input
                   type="text"
                   placeholder="Username"
-                  value={login.user}
-                  onChange={(e) => setLogin({ ...login, user: e.target.value })}
+                  value={usernameInput}
+                  onChange={(e) => setUsernameInput(e.target.value)}
                   required
                   style={{
                     width: "100%",
@@ -424,8 +424,8 @@ for (const k of Object.keys(groupsByDate)) {
                 <input
                   type="password"
                   placeholder="Password"
-                  value={login.pass}
-                  onChange={(e) => setLogin({ ...login, pass: e.target.value })}
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
                   required
                   style={{
                     width: "100%",
@@ -464,7 +464,7 @@ for (const k of Object.keys(groupsByDate)) {
           {/* Footer directly under the login panel without spacing */}
           <PXFooter />
         </div>
-      ) : (
+      ) : () : (
         <div
           style={{
             maxWidth: 1440,
