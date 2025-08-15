@@ -10,6 +10,7 @@ function PXHeader({
   sort,
   setSort,
   onLogout,
+  hideControls = false,
 }) {
 
   return (
@@ -41,7 +42,7 @@ function PXHeader({
           <span style={{ color: "#fff" }}>press-</span>
           <span style={{ color: "#fff", fontWeight: 400, fontSize: 24 }}>Fahrerliste</span>
         </div>
-        <div style={{ minWidth: 50, textAlign: "right", paddingRight: 28 }}>
+        <div style={{ minWidth: 50, textAlign: "right", paddingRight: 28, display: onLogout ? "block" : "none" }}>
           <span
             style={{
               fontSize: 36,
@@ -60,7 +61,7 @@ function PXHeader({
         background: "#ededed",
         width: "100%",
         minHeight: 68,
-        display: "flex",
+        display: hideControls ? "none" : "flex",
         alignItems: "center",
         justifyContent: "space-between",
         borderBottom: "1.5px solid #dedede"
@@ -434,6 +435,7 @@ for (const k of Object.keys(groupsByDate)) {
             overflowX: "hidden",
             margin: "0 auto"
           }}>
+     <PXHeader username="" hideControls />
           <h2>Fahrer-Login</h2>
           <form onSubmit={handleLogin}>
             <input type="text" placeholder="Benutzername" value={login.user} onChange={e => setLogin({ ...login, user: e.target.value })} required style={{ width: "100%", marginBottom: 8 }} />
@@ -441,7 +443,9 @@ for (const k of Object.keys(groupsByDate)) {
             <button type="submit" style={{ width: "100%", padding: "10px 0", background: "#1db954", color: "#fff", border: "none", borderRadius: 8, fontWeight: "bold" }}>Login</button>
           </form>
           {error && <div style={{ color: "red", marginTop: 10 }}>{error}</div>}
-        </div>
+        
+     <PXFooter />
+</div>
       ) : (
         <div
           style={{
