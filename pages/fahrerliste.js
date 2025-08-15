@@ -407,8 +407,8 @@ for (const k of Object.keys(groupsByDate)) {
                 <input
                   type="text"
                   placeholder="Username"
-                  value={usernameInput}
-                  onChange={(e) => setUsernameInput(e.target.value)}
+                  value={login.user}
+                  onChange={(e) => setLogin({ ...login, user: e.target.value })}
                   required
                   style={{
                     width: "100%",
@@ -424,8 +424,8 @@ for (const k of Object.keys(groupsByDate)) {
                 <input
                   type="password"
                   placeholder="Password"
-                  value={passwordInput}
-                  onChange={(e) => setPasswordInput(e.target.value)}
+                  value={login.pass}
+                  onChange={(e) => setLogin({ ...login, pass: e.target.value })}
                   required
                   style={{
                     width: "100%",
