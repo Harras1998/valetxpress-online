@@ -11,6 +11,7 @@ function PXHeader({
   setSort,
   onLogout,
 }) {
+
   return (
     <div style={{
       width: "100%",
@@ -178,6 +179,75 @@ function isRueckHeuteOder2(b) {
   return diffDays >= 0 && diffDays <= 2;
 }
 
+
+
+
+
+function PXFooter() {
+  return (
+    <div
+      style={{
+        width: "100%",
+        background: "linear-gradient(#000,#111)",
+        borderTop: "1.5px solid #444",
+        marginTop: 0
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 1440,
+          minWidth: 1440,
+          margin: "0 auto",
+          height: 56,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#fff",
+          fontSize: 28,
+          fontWeight: "bold",
+          letterSpacing: 0.5,
+          fontFamily: "Arial, Helvetica, sans-serif"
+        }}
+      >
+        ValetXpress Fahrerliste
+      </div>
+    </div>
+  );
+}
+
+
+function PXEditFooter({ name }) {
+  const label = (`Buchung ${name || ""}`).trim();
+  return (
+    <div
+      style={{
+        width: "100%",
+        background: "linear-gradient(#000,#111)",
+        borderTop: "1.5px solid #444",
+        marginTop: 0
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 1440,
+          minWidth: 1440,
+          margin: "0 auto",
+          height: 56,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#fff",
+          fontSize: 28,
+          fontWeight: "bold",
+          letterSpacing: 0.5,
+          fontFamily: "Arial, Helvetica, sans-serif"
+        }}
+      >
+        {label}
+      </div>
+    </div>
+  );
+}
 
 
 export default function FahrerListe() {
@@ -354,117 +424,25 @@ for (const k of Object.keys(groupsByDate)) {
       {!auth ? (
         <div
           style={{
-            width: "100%",
-            background: "linear-gradient(#f1f1f1,#e7e7e7)",
-            fontFamily: "Arial, Helvetica, sans-serif",
-            margin: "0 auto",
-            minHeight: "100vh",
-            overflowX: "hidden"
+            maxWidth: 1440,
+            minWidth: 1440,
+            background: "#fff",
+            borderRadius: 12,
+            padding: 32,
+            boxShadow: "0 2px 12px #0002",
+            fontFamily: "Arial",
+            overflowX: "hidden",
+            margin: "0 auto"
           }}>
-          {/* Top black bar like the screenshot */}
-          <div
-            style={{
-              width: "100%",
-              background: "linear-gradient(#000,#111)",
-              borderBottom: "1.5px solid #444"
-            }}
-          >
-            <div
-              style={{
-                maxWidth: 1440,
-                minWidth: 1440,
-                margin: "0 auto",
-                height: 56,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#fff",
-                fontSize: 24,
-                fontWeight: "bold",
-                letterSpacing: 0.4
-              }}
-            >
-              ValetXpress iPAD-Liste
-            </div>
-          </div>
-
-          {/* Login panel */}
-          <div style={{ maxWidth: 1440, minWidth: 1440, margin: "0 auto" }}>
-            <div
-              style={{
-                width: 480,
-                marginLeft: 28,
-                marginTop: 36,
-                background: "#efefef",
-                border: "1px solid #bfbfbf",
-                borderRadius: 12,
-                boxShadow: "0 1px 2px rgba(0,0,0,.15) inset, 0 1px 2px rgba(0,0,0,.08)",
-                padding: 24
-              }}
-            >
-              <div style={{ fontSize: 36, fontWeight: "bold", color: "#333", marginBottom: 14 }}>Fahrerliste Login</div>
-              <form onSubmit={handleLogin}>
-                <input
-                  type="text"
-                  placeholder="Username"
-                  value={usernameInput}
-                  onChange={(e) => setUsernameInput(e.target.value)}
-                  required
-                  style={{
-                    width: "100%",
-                    marginBottom: 10,
-                    lineHeight: "30px",
-                    fontSize: 16,
-                    borderRadius: 4,
-                    border: "1px solid #aaa",
-                    padding: "0 8px",
-                    background: "#fff"
-                  }}
-                />
-                <input
-                  type="password"
-                  placeholder="Password"
-                  value={passwordInput}
-                  onChange={(e) => setPasswordInput(e.target.value)}
-                  required
-                  style={{
-                    width: "100%",
-                    marginBottom: 14,
-                    lineHeight: "30px",
-                    fontSize: 16,
-                    borderRadius: 4,
-                    border: "1px solid #aaa",
-                    padding: "0 8px",
-                    background: "#fff"
-                  }}
-                />
-                <button
-                  type="submit"
-                  style={{
-                    width: 420,
-                    height: 36,
-                    display: "block",
-                    background: "linear-gradient(#555,#222)",
-                    color: "#fff",
-                    fontWeight: "bold",
-                    border: "1px solid #333",
-                    borderRadius: 16,
-                    marginLeft: 6,
-                    boxShadow: "inset 0 1px 0 rgba(255,255,255,.25), 0 1px 2px rgba(0,0,0,.25)",
-                    cursor: "pointer"
-                  }}
-                >
-                  Login
-                </button>
-              </form>
-              {error && <div style={{ color: "red", marginTop: 10 }}>{error}</div>}
-            </div>
-          </div>
-
-          {/* Footer directly under the login panel without spacing */}
-          <PXFooter />
+          <h2>Fahrer-Login</h2>
+          <form onSubmit={handleLogin}>
+            <input type="text" placeholder="Benutzername" value={login.user} onChange={e => setLogin({ ...login, user: e.target.value })} required style={{ width: "100%", marginBottom: 8 }} />
+            <input type="password" placeholder="Passwort" value={login.pass} onChange={e => setLogin({ ...login, pass: e.target.value })} required style={{ width: "100%", marginBottom: 16 }} />
+            <button type="submit" style={{ width: "100%", padding: "10px 0", background: "#1db954", color: "#fff", border: "none", borderRadius: 8, fontWeight: "bold" }}>Login</button>
+          </form>
+          {error && <div style={{ color: "red", marginTop: 10 }}>{error}</div>}
         </div>
-      ) : () : (
+      ) : (
         <div
           style={{
             maxWidth: 1440,
@@ -590,7 +568,11 @@ for (const k of Object.keys(groupsByDate)) {
             </div>
           </div>
 
-          {editBuchung && (
+          
+
+<PXFooter />
+
+{editBuchung && (
             <div style={{
               position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
               background: "#fff", zIndex: 10000, overflowY: "auto"
@@ -793,7 +775,9 @@ for (const k of Object.keys(groupsByDate)) {
                     </button>
                   </div>
                 </form>
-              </div>
+              <PXEditFooter name={`${(editBuchung.vorname || "").trim()} ${(editBuchung.nachname || "").trim()}`.trim()} />
+            </div>
+            
             </div>
           )}
         </div>
