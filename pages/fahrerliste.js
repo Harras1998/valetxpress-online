@@ -775,8 +775,9 @@ for (const k of Object.keys(groupsByDate)) {
                     </button>
                   </div>
                 </form>
-              </div>
-            <PXEditFooter name={`${(editBuchung.vorname || "").trim()} ${(editBuchung.nachname || "").trim()}`.trim()} />
+              <PXEditFooter name={`${(editBuchung.vorname || \"\").trim()} ${(editBuchung.nachname || \"\").trim()}`.trim()} />
+            </div>
+            
             </div>
           )}
         </div>
