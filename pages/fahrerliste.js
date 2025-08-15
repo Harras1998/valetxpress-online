@@ -455,7 +455,7 @@ for (const k of Object.keys(groupsByDate)) {
           <div style={{ background: "#ededed", borderBottom: "1.5px solid #dedede" }}>
             <div style={{ padding: "24px 28px 30px 28px" }}>
               <div style={{ fontSize: 36, fontWeight: "bold", color: "#333", marginBottom: 16 }}>
-                Fahrer<span style={{ display: "inline-block", width: 6 }}></span>liste Login
+                Fahrerliste Login
               </div>
               <form onSubmit={handleLogin} style={{ maxWidth: 420 }}>
                 <div style={{ marginBottom: 12 }}>
@@ -466,7 +466,7 @@ for (const k of Object.keys(groupsByDate)) {
                     onChange={e => setLogin({ ...login, user: e.target.value })}
                     required
                     style={{
-                      width: 260,
+                      width: 216,
                       fontSize: 18,
                       padding: "8px 10px",
                       borderRadius: 4,
@@ -484,7 +484,7 @@ for (const k of Object.keys(groupsByDate)) {
                     onChange={e => setLogin({ ...login, pass: e.target.value })}
                     required
                     style={{
-                      width: 260,
+                      width: 216,
                       fontSize: 18,
                       padding: "8px 10px",
                       borderRadius: 4,
