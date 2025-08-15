@@ -10,40 +10,8 @@ function PXHeader({
   sort,
   setSort,
   onLogout,
-}
+}) {
 
-function PXFooter() {
-  return (
-    <div
-      style={{
-        width: "100%",
-        background: "linear-gradient(#000,#111)",
-        borderTop: "1.5px solid #444",
-        marginTop: 0
-      }}
-    >
-      <div
-        style={{
-          maxWidth: 1440,
-          minWidth: 1440,
-          margin: "0 auto",
-          height: 56,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#fff",
-          fontSize: 28,
-          fontWeight: "bold",
-          letterSpacing: 0.5,
-          fontFamily: "Arial, Helvetica, sans-serif"
-        }}
-      >
-        ValetXpress Fahrerliste
-      </div>
-    </div>
-  );
-}
-) {
   return (
     <div style={{
       width: "100%",
@@ -212,6 +180,40 @@ function isRueckHeuteOder2(b) {
 }
 
 
+
+
+
+function PXFooter() {
+  return (
+    <div
+      style={{
+        width: "100%",
+        background: "linear-gradient(#000,#111)",
+        borderTop: "1.5px solid #444",
+        marginTop: 0
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 1440,
+          minWidth: 1440,
+          margin: "0 auto",
+          height: 56,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#fff",
+          fontSize: 28,
+          fontWeight: "bold",
+          letterSpacing: 0.5,
+          fontFamily: "Arial, Helvetica, sans-serif"
+        }}
+      >
+        ValetXpress Fahrerliste
+      </div>
+    </div>
+  );
+}
 
 export default function FahrerListe() {
   const [tab, setTab] = useState("alle");
