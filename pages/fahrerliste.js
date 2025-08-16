@@ -465,7 +465,7 @@ for (const k of Object.keys(groupsByDate)) {
                     value={login.user}
                     onChange={e => setLogin({ ...login, user: e.target.value })}
                     required
-                     onTouchStart={e=>{if(window.innerWidth<=768){const el=e.currentTarget;try{el.focus({preventScroll:true});}catch(_){el.focus();}const w=(el.parentElement||el);w.style.transition="transform 0.2s ease";w.style.transformOrigin="left center";w.style.transform="scale(1.25)";w.style.position="relative";w.style.zIndex="10";requestAnimationFrame(()=>{try{el.scrollIntoView({behavior: "smooth", block: "center"});}catch(_){}});}}} onFocus={e=>{if(window.innerWidth<=768){const el=e.currentTarget;const w=(el.parentElement||el);w.style.transition="transform 0.2s ease";w.style.transformOrigin="left center";w.style.transform="scale(1.25)";w.style.position="relative";w.style.zIndex="10";}}} onBlur={e=>{const el=e.currentTarget;const w=(el.parentElement||el);w.style.transform="";w.style.zIndex="";w.style.position="";}}style={{
+                    style={{
                       width: 260,
                       fontSize: 18,
                       padding: "8px 10px",
@@ -483,7 +483,7 @@ for (const k of Object.keys(groupsByDate)) {
                     value={login.pass}
                     onChange={e => setLogin({ ...login, pass: e.target.value })}
                     required
-                     onTouchStart={e=>{if(window.innerWidth<=768){const el=e.currentTarget;try{el.focus({preventScroll:true});}catch(_){el.focus();}const w=(el.parentElement||el);w.style.transition="transform 0.2s ease";w.style.transformOrigin="left center";w.style.transform="scale(1.25)";w.style.position="relative";w.style.zIndex="10";requestAnimationFrame(()=>{try{el.scrollIntoView({behavior: "smooth", block: "center"});}catch(_){}});}}} onFocus={e=>{if(window.innerWidth<=768){const el=e.currentTarget;const w=(el.parentElement||el);w.style.transition="transform 0.2s ease";w.style.transformOrigin="left center";w.style.transform="scale(1.25)";w.style.position="relative";w.style.zIndex="10";}}} onBlur={e=>{const el=e.currentTarget;const w=(el.parentElement||el);w.style.transform="";w.style.zIndex="";w.style.position="";}}style={{
+                    style={{
                       width: 260,
                       fontSize: 18,
                       padding: "8px 10px",
@@ -497,7 +497,8 @@ for (const k of Object.keys(groupsByDate)) {
                 <button
                   type="submit"
                   style={{
-                    display: "inline-block",
+                    display: "block",
+                    width: "100%",
                     padding: "10px 32px",
                     fontSize: 18,
                     fontWeight: "bold",
@@ -506,6 +507,7 @@ for (const k of Object.keys(groupsByDate)) {
                     border: "1px solid #333",
                     borderRadius: 24,
                     boxShadow: "inset 0 1px 0 #777, 0 2px 6px #0002",
+                    boxSizing: "border-box",
                     cursor: "pointer"
                   }}
                 >
