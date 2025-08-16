@@ -109,7 +109,7 @@ function PXHeader({
               cursor: setTab ? "pointer" : "default"
             }}>Alle</button>
         </div>
-        <div style={{ flex: 1, display: "flex", alignItems: "center", margin: "0 26px", maxWidth: 620 }}>
+        <div style={{ flex: 1, display: tab === "alle" ? "none" : "flex", alignItems: "center", margin: "0 26px", maxWidth: 620 }}>
           <input
             type="text"
             value={suchtext || ""}
@@ -269,6 +269,7 @@ export default function FahrerListe() {
   const [username, setUsername] = useState("");
   const [editBuchung, setEditBuchung] = useState(null);
   const [editSaving, setEditSaving] = useState(false);
+  const [alleShowAll, setAlleShowAll] = useState(false);
 
   const rueckModus = tab === "heute" || tab === "2tage";
 
@@ -295,6 +296,8 @@ export default function FahrerListe() {
       .catch(() => { setError("Fehler beim Laden"); setLoading(false); });
   }, [auth, suchtext, sort]);
 
+  useEffect(() => { if (tab !== "alle") setAlleShowAll(false); }, [tab]);
+
   let filtered = list;
   const today = new Date();
   if (tab === "heute") {
@@ -320,7 +323,17 @@ export default function FahrerListe() {
     );
   });
 }
-  if (suchtext) {
+  
+if (tab === "alle" && !alleShowAll) {
+  const isoToday = today.toISOString().slice(0, 10);
+  filtered = filtered.filter(b => {
+    const abflug = b.abflugdatum?.slice(0, 10);
+    const rueck = b.rueckflugdatum?.slice(0, 10);
+    return abflug === isoToday || rueck === isoToday;
+  });
+}
+
+if (suchtext) {
     const search = suchtext.toLowerCase();
     filtered = filtered.filter(b =>
       (b.vorname + " " + b.nachname).toLowerCase().includes(search) ||
@@ -346,6 +359,7 @@ export default function FahrerListe() {
   });
 
   function cardColor(b) {
+  if (tab === "alle") return "#e0e0e0";
   // Immer nur mit reinen Datumsanteilen rechnen (Zeitzonen-sicherer)
   const today = new Date(); today.setHours(0,0,0,0);
   const abflug = new Date((b.abflugdatum || "").slice(0,10)); abflug.setHours(0,0,0,0);
@@ -547,6 +561,28 @@ for (const k of Object.keys(groupsByDate)) {
             marginTop: "auto",
             overflowX: "hidden"
           }}>
+
+{tab === "alle" && (
+  <div style={{ background: "#A6F4A5", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", margin: 0 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
+      <input
+        type="text"
+        value={suchtext || ""}
+        onChange={e => setSuchtext(e.target.value)}
+        placeholder="Suche nach Kennzeichen"
+        style={{ width: "100%", fontSize: 18, padding: "7px 15px", borderRadius: 8, border: "1px solid #7cc67c" }}
+      />
+      <button
+        onClick={() => setAlleShowAll(true)}
+        style={{ fontSize: 16, fontWeight: "bold", padding: "8px 14px", borderRadius: 8, border: "1px solid #5ea35e", background: "#69d169", cursor: "pointer" }}
+      >
+        Alle Buchungen
+      </button>
+    </div>
+    <span style={{ fontSize: 24, marginLeft: 12 }} title="Bearbeiten">✏️</span>
+  </div>
+)}
+
             <div style={{ padding: 12, color: "#777", fontSize: 18, marginLeft: 10 }}>
               {loading ? "Lade Daten..." : ""}
               <b> Anzahl Kunden: {filtered.length}</b>
