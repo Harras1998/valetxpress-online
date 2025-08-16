@@ -466,7 +466,7 @@ for (const k of Object.keys(groupsByDate)) {
                     onChange={e => setLogin({ ...login, user: e.target.value })}
                     required
                     style={{
-                      width: 216,
+                      width: 260,
                       fontSize: 18,
                       padding: "8px 10px",
                       borderRadius: 4,
@@ -484,7 +484,7 @@ for (const k of Object.keys(groupsByDate)) {
                     onChange={e => setLogin({ ...login, pass: e.target.value })}
                     required
                     style={{
-                      width: 216,
+                      width: 260,
                       fontSize: 18,
                       padding: "8px 10px",
                       borderRadius: 4,
