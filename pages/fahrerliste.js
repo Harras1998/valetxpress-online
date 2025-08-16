@@ -323,17 +323,15 @@ export default function FahrerListe() {
     );
   });
 }
-  
-if (tab === "alle" && !alleShowAll) {
-  const isoToday = today.toISOString().slice(0, 10);
-  filtered = filtered.filter(b => {
-    const abflug = b.abflugdatum?.slice(0, 10);
-    const rueck = b.rueckflugdatum?.slice(0, 10);
-    return abflug === isoToday || rueck === isoToday;
-  });
-}
-
-if (suchtext) {
+  if (tab === "alle" && !alleShowAll) {
+    const isoToday = today.toISOString().slice(0, 10);
+    filtered = filtered.filter(b => {
+      const abflug = (b.abflugdatum || "").slice(0, 10);
+      const rueck = (b.rueckflugdatum || "").slice(0, 10);
+      return abflug === isoToday || rueck === isoToday;
+    });
+  }
+  if (suchtext) {
     const search = suchtext.toLowerCase();
     filtered = filtered.filter(b =>
       (b.vorname + " " + b.nachname).toLowerCase().includes(search) ||
@@ -563,23 +561,23 @@ for (const k of Object.keys(groupsByDate)) {
           }}>
 
 {tab === "alle" && (
-  <div style={{ background: "#A6F4A5", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", margin: 0 }}>
-    <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
+  <div style={{ background: "#b8f2b8", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", margin: 0 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "nowrap" }}>
       <input
         type="text"
         value={suchtext || ""}
-        onChange={e => setSuchtext(e.target.value)}
+        onChange={e => setSuchtext && setSuchtext(e.target.value)}
         placeholder="Suche nach Kennzeichen"
-        style={{ width: "100%", fontSize: 18, padding: "7px 15px", borderRadius: 8, border: "1px solid #7cc67c" }}
+        style={{ flex: "0 0 300px", width: 300, fontSize: 18, padding: "7px 15px", height: 44, borderRadius: 8, border: "1px solid #7cc67c" }}
       />
       <button
         onClick={() => setAlleShowAll(true)}
-        style={{ fontSize: 16, fontWeight: "bold", padding: "8px 14px", borderRadius: 8, border: "1px solid #5ea35e", background: "#69d169", cursor: "pointer" }}
+        style={{ fontSize: 16, fontWeight: "bold", padding: "0 12px", height: 44, lineHeight: "44px", borderRadius: 8, border: "1px solid #5ea35e", background: "#69d169", cursor: "pointer", whiteSpace: "nowrap", width: "fit-content" }}
       >
         Alle Buchungen
       </button>
     </div>
-    <span style={{ fontSize: 24, marginLeft: 12 }} title="Bearbeiten">✏️</span>
+    <span style={{ fontSize: 20, marginLeft: 12, transform: "translateY(6px)" }} title="Bearbeiten">✏️</span>
   </div>
 )}
 
