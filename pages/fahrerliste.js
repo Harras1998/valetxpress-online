@@ -497,7 +497,8 @@ for (const k of Object.keys(groupsByDate)) {
                 <button
                   type="submit"
                   style={{
-                    display: "inline-block",
+                    display: "block",
+                    width: "100%",
                     padding: "10px 32px",
                     fontSize: 18,
                     fontWeight: "bold",
@@ -506,6 +507,7 @@ for (const k of Object.keys(groupsByDate)) {
                     border: "1px solid #333",
                     borderRadius: 24,
                     boxShadow: "inset 0 1px 0 #777, 0 2px 6px #0002",
+                    boxSizing: "border-box",
                     cursor: "pointer"
                   }}
                 >
