@@ -273,11 +273,26 @@ export default function FahrerListe() {
 
   const rueckModus = tab === "heute" || tab === "2tage";
 
-  function handleLogin(e) {
+  async function handleLogin(e) {
     e.preventDefault();
-    const encoded = btoa(`${login.user}:${login.pass}`);
-    setAuth(encoded);
-    setUsername(login.user);
+    setLoading(true);
+    setError("");
+    try {
+      const encoded = btoa(`${login.user}:${login.pass}`);
+      const testUrl = `/api/proxy?path=api/admin/buchungen&sort=abflugdatum&dir=asc&limit=1`;
+      const res = await fetch(testUrl, { headers: { Authorization: `Basic ${encoded}` } });
+      if (!res.ok) {
+        setLoading(false);
+        setError(res.status === 401 ? "Benutzername oder Passwort ist falsch." : `Login fehlgeschlagen (HTTP ${res.status}).`);
+        return;
+      }
+      setAuth(encoded);
+      setUsername(login.user);
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+      setError("Netzwerkfehler beim Login.");
+    }
   }
   function handleLogout() {
     setAuth("");
