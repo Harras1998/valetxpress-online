@@ -583,7 +583,7 @@ for (const k of Object.keys(groupsByDate)) {
         Alle Buchungen
       </button>
     </div>
-    <span style={{ position: "absolute", right: 120, top: "50%", transform: "translateY(-50%)", fontSize: 24, cursor: "pointer" }} title="Bearbeiten">✏️</span>
+    <span style={{ position: "absolute", right: 150, top: "50%", transform: "translateY(-50%)", fontSize: 20, cursor: "pointer" }} title="Bearbeiten">✏️</span>
   </div>
 )}
 
