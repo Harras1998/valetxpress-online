@@ -398,7 +398,13 @@ function keyForTab(b) {
   } else if (tab === "2tage") {
     if (rue === isoTomorrow || rue === isoDayAfter) return rue;
     return abf;
-  } else {
+  } else { // tab === "alle"
+    // Gleiche Logik wie "Heute" (nur für die standard-Ansicht, nicht bei "Alle Buchungen")
+    if (!alleShowAll) {
+      if (rue === isoToday) return rue;
+      return abf;
+    }
+    // Bei "Alle Buchungen" unverändert nach Abflugdatum gruppieren
     return abf;
   }
 }

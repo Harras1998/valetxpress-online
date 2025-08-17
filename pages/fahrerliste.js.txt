@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import Head from "next/head";
 
@@ -10,7 +11,9 @@ function PXHeader({
   sort,
   setSort,
   onLogout,
+  hideControls = false,
 }) {
+
   return (
     <div style={{
       width: "100%",
@@ -40,7 +43,7 @@ function PXHeader({
           <span style={{ color: "#fff" }}>press-</span>
           <span style={{ color: "#fff", fontWeight: 400, fontSize: 24 }}>Fahrerliste</span>
         </div>
-        <div style={{ minWidth: 50, textAlign: "right", paddingRight: 28 }}>
+        <div style={{ minWidth: 50, textAlign: "right", paddingRight: 28, display: onLogout ? "block" : "none" }}>
           <span
             style={{
               fontSize: 36,
@@ -59,14 +62,14 @@ function PXHeader({
         background: "#ededed",
         width: "100%",
         minHeight: 68,
-        display: "flex",
+        display: hideControls ? "none" : "flex",
         alignItems: "center",
         justifyContent: "space-between",
         borderBottom: "1.5px solid #dedede"
       }}>
         <div style={{ display: "flex", alignItems: "center", marginLeft: 14, gap: 0 }}>
           <button
-            onClick={() => setTab("heute")}
+            onClick={() => setTab && setTab("heute")}
             style={{
               background: tab === "heute" ? "#6DB6E2" : "#fff",
               color: tab === "heute" ? "#fff" : "#222",
@@ -75,10 +78,11 @@ function PXHeader({
               padding: "7px 36px",
               border: "1px solid #ccc",
               borderRight: "none",
-              borderRadius: "16px 0 0 16px"
+              borderRadius: "16px 0 0 16px",
+              cursor: setTab ? "pointer" : "default"
             }}>Heute</button>
           <button
-            onClick={() => setTab("2tage")}
+            onClick={() => setTab && setTab("2tage")}
             style={{
               background: tab === "2tage" ? "#6DB6E2" : "#fff",
               color: tab === "2tage" ? "#fff" : "#222",
@@ -88,10 +92,11 @@ function PXHeader({
               border: "1px solid #ccc",
               borderRight: "none",
               borderLeft: "none",
-              borderRadius: 0
+              borderRadius: 0,
+              cursor: setTab ? "pointer" : "default"
             }}>2-Tage</button>
           <button
-            onClick={() => setTab("alle")}
+            onClick={() => setTab && setTab("alle")}
             style={{
               background: tab === "alle" ? "#6DB6E2" : "#fff",
               color: tab === "alle" ? "#fff" : "#222",
@@ -100,14 +105,15 @@ function PXHeader({
               padding: "7px 36px",
               border: "1px solid #ccc",
               borderLeft: "none",
-              borderRadius: "0 16px 16px 0"
+              borderRadius: "0 16px 16px 0",
+              cursor: setTab ? "pointer" : "default"
             }}>Alle</button>
         </div>
-        <div style={{ flex: 1, display: "flex", alignItems: "center", margin: "0 26px", maxWidth: 620 }}>
+        <div style={{ flex: 1, display: tab === "alle" ? "none" : "flex", alignItems: "center", margin: "0 26px", maxWidth: 620 }}>
           <input
             type="text"
-            value={suchtext}
-            onChange={e => setSuchtext(e.target.value)}
+            value={suchtext || ""}
+            onChange={e => setSuchtext && setSuchtext(e.target.value)}
             placeholder="Suche nach Kennzeichen"
             style={{
               width: "100%",
@@ -118,12 +124,13 @@ function PXHeader({
               marginLeft: 16,
               marginRight: 16
             }}
+            disabled={!setSuchtext}
           />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 32, marginRight: 38 }}>
           <select
-            value={sort}
-            onChange={e => setSort(e.target.value)}
+            value={sort || "abflugdatum"}
+            onChange={e => setSort && setSort(e.target.value)}
             style={{
               color: "#1689ca",
               fontSize: 22,
@@ -131,9 +138,10 @@ function PXHeader({
               border: "none",
               background: "none",
               textDecoration: "underline",
-              cursor: "pointer",
+              cursor: setSort ? "pointer" : "default",
               marginRight: 20
             }}
+            disabled={!setSort}
           >
             <option value="abflugdatum">Sortieren: Abflugdatum</option>
             <option value="rueckflugdatum">Sortieren: Rückflugdatum</option>
@@ -164,7 +172,90 @@ function priceDisplay(row) {
   if (!val) return "";
   if (typeof val === "string") val = val.replace(",", ".");
   return `${parseFloat(val).toFixed(0)} €`;
+}function dateOnlyISO(dt) {
+  return (dt || "").slice(0, 10);
 }
+function isRueckHeuteOder2(b) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const rStr = dateOnlyISO(b.rueckflugdatum);
+  if (!rStr) return false;
+  const r = new Date(rStr);
+  if (isNaN(r)) return false;
+  r.setHours(0,0,0,0);
+  const diffDays = Math.floor((r - today) / (1000*60*60*24));
+  return diffDays >= 0 && diffDays <= 2;
+}
+
+
+
+
+
+function PXFooter() {
+  return (
+    <div
+      style={{
+        width: "100%",
+        background: "linear-gradient(#000,#111)",
+        borderTop: "1.5px solid #444",
+        marginTop: 0
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 1440,
+          minWidth: 1440,
+          margin: "0 auto",
+          height: 56,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#fff",
+          fontSize: 28,
+          fontWeight: "bold",
+          letterSpacing: 0.5,
+          fontFamily: "Arial, Helvetica, sans-serif"
+        }}
+      >
+        ValetXpress Fahrerliste
+      </div>
+    </div>
+  );
+}
+
+
+function PXEditFooter({ name }) {
+  const label = (`Buchung ${name || ""}`).trim();
+  return (
+    <div
+      style={{
+        width: "100%",
+        background: "linear-gradient(#000,#111)",
+        borderTop: "1.5px solid #444",
+        marginTop: 0
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 1440,
+          minWidth: 1440,
+          margin: "0 auto",
+          height: 56,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#fff",
+          fontSize: 28,
+          fontWeight: "bold",
+          letterSpacing: 0.5,
+          fontFamily: "Arial, Helvetica, sans-serif"
+        }}
+      >
+        {label}
+      </div>
+    </div>
+  );
+}
+
 
 export default function FahrerListe() {
   const [tab, setTab] = useState("alle");
@@ -178,6 +269,9 @@ export default function FahrerListe() {
   const [username, setUsername] = useState("");
   const [editBuchung, setEditBuchung] = useState(null);
   const [editSaving, setEditSaving] = useState(false);
+  const [alleShowAll, setAlleShowAll] = useState(false);
+
+  const rueckModus = tab === "heute" || tab === "2tage";
 
   function handleLogin(e) {
     e.preventDefault();
@@ -201,6 +295,8 @@ export default function FahrerListe() {
       .then(data => { setList(data.buchungen || []); setLoading(false); })
       .catch(() => { setError("Fehler beim Laden"); setLoading(false); });
   }, [auth, suchtext, sort]);
+
+  useEffect(() => { if (tab !== "alle") setAlleShowAll(false); }, [tab]);
 
   let filtered = list;
   const today = new Date();
@@ -227,6 +323,14 @@ export default function FahrerListe() {
     );
   });
 }
+  if (tab === "alle" && !alleShowAll) {
+    const isoToday = today.toISOString().slice(0, 10);
+    filtered = filtered.filter(b => {
+      const abflug = (b.abflugdatum || "").slice(0, 10);
+      const rueck = (b.rueckflugdatum || "").slice(0, 10);
+      return abflug === isoToday || rueck === isoToday;
+    });
+  }
   if (suchtext) {
     const search = suchtext.toLowerCase();
     filtered = filtered.filter(b =>
@@ -253,36 +357,83 @@ export default function FahrerListe() {
   });
 
   function cardColor(b) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  if (tab === "alle") return "#e0e0e0";
+  // Immer nur mit reinen Datumsanteilen rechnen (Zeitzonen-sicherer)
+  const today = new Date(); today.setHours(0,0,0,0);
+  const abflug = new Date((b.abflugdatum || "").slice(0,10)); abflug.setHours(0,0,0,0);
+  const rueck  = new Date((b.rueckflugdatum || "").slice(0,10)); rueck.setHours(0,0,0,0);
 
-  // Nur Datum, Uhrzeit ignorieren
-  const abflug = new Date(b.abflugdatum);
-  abflug.setHours(0, 0, 0, 0);
+  // Wie bisher: "heute/morgen/übermorgen" relativ zum Abflug -> weiß
+  const diffTage = Math.floor((abflug - today) / (1000*60*60*24));
+  if (diffTage >= 0 && diffTage <= 2) return "#fff";
 
-  const diffTage = Math.floor((abflug - today) / (1000 * 60 * 60 * 24));
-
-  if (diffTage >= 0 && diffTage <= 2) {
-    return "#fff"; // heute, morgen, übermorgen
+  // In Heute- und 2-Tage-Tab nach dem Abflug immer dunkleres Grau,
+  // damit die Karte dort konsistent so aussieht wie gewünscht.
+  if (tab === "heute" || tab === "2tage") {
+    if (today >= abflug) return "#e0e0e0";
   }
 
-  const rueck = new Date(b.rueckflugdatum);
-  rueck.setHours(0, 0, 0, 0);
-
-  const now = new Date();
-  if (now < abflug) return "#fff";
-  if (now >= abflug && now < rueck) return "#eee";
+  // Fallback (z.B. Tab "Alle"): alte Logik beibehalten
+  if (today < abflug) return "#fff";
+  if (today >= abflug && today < rueck) return "#eee";
   return "#e0e0e0";
 }
 
-  // NEU: Gruppierung nach Abflug-Datum (YYYY-MM-DD)
+  // Gruppierung pro Tab: 
+// - Heute: nach dem Datum gruppieren, das HEUTE ist (Rückflug ODER Abflug)
+// - 2-Tage: nach dem Datum gruppieren, das in den beiden Tagen liegt (Rückflug bevorzugt, sonst Abflug)
+// - Alle: immer nach Abflugdatum
+const isoToday = new Date().toISOString().slice(0, 10);
+const tomorrow = new Date(); tomorrow.setDate(new Date().getDate() + 1);
+const dayAfter = new Date(); dayAfter.setDate(new Date().getDate() + 2);
+const isoTomorrow = tomorrow.toISOString().slice(0, 10);
+const isoDayAfter = dayAfter.toISOString().slice(0, 10);
+
+function keyForTab(b) {
+  const abf = dateOnlyISO(b.abflugdatum);
+  const rue = dateOnlyISO(b.rueckflugdatum);
+  if (tab === "heute") {
+    if (rue === isoToday) return rue;
+    return abf;
+  } else if (tab === "2tage") {
+    if (rue === isoTomorrow || rue === isoDayAfter) return rue;
+    return abf;
+  } else {
+    return abf;
+  }
+}
+
 const groupsByDate = filtered.reduce((acc, b) => {
-  const key = (b.abflugdatum || "").slice(0, 10);
+  const key = keyForTab(b);
   if (!key) return acc;
   (acc[key] ||= []).push(b);
   return acc;
 }, {});
 const dayKeys = Object.keys(groupsByDate).sort();
+
+
+// --- Helper: Zeit für die jeweilige Tagesgruppe bestimmen (entspricht der Anzeige links) ---
+function displayTimeForDay(row, dayKey) {
+  // Wenn der Tagesheader dem Rückflugdatum entspricht -> Rückflug-Uhrzeit,
+  // sonst (Abflug-Tag) -> Ankunftszeit am Parkplatz
+  if (dateOnlyISO(row.rueckflugdatum) === dayKey) {
+    return row.rueckflugUhrzeit || "";
+  }
+  return row.ankunftUhrzeit || "";
+}
+function timeToMinutes(t) {
+  if (!t || typeof t !== "string") return 24*60+1; // fehlende Zeit -> ganz ans Ende
+  const m = t.match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return 24*60+1;
+  const hh = parseInt(m[1], 10);
+  const mm = parseInt(m[2], 10);
+  return hh*60 + mm;
+}
+// Alle Gruppen nach der oben definierten Anzeige-Zeit sortieren (00:00 -> 23:59)
+for (const k of Object.keys(groupsByDate)) {
+  groupsByDate[k].sort((a, b) => timeToMinutes(displayTimeForDay(a, k)) - timeToMinutes(displayTimeForDay(b, k)));
+}
+
 
   return (
     <>
@@ -295,20 +446,91 @@ const dayKeys = Object.keys(groupsByDate).sort();
             maxWidth: 1440,
             minWidth: 1440,
             background: "#fff",
-            borderRadius: 12,
-            padding: 32,
-            boxShadow: "0 2px 12px #0002",
             fontFamily: "Arial",
-            overflowX: "hidden",
-            margin: "0 auto"
+            margin: "0 auto",
+            minHeight: "100vh",
+            overflowX: "hidden"
           }}>
-          <h2>Fahrer-Login</h2>
-          <form onSubmit={handleLogin}>
-            <input type="text" placeholder="Benutzername" value={login.user} onChange={e => setLogin({ ...login, user: e.target.value })} required style={{ width: "100%", marginBottom: 8 }} />
-            <input type="password" placeholder="Passwort" value={login.pass} onChange={e => setLogin({ ...login, pass: e.target.value })} required style={{ width: "100%", marginBottom: 16 }} />
-            <button type="submit" style={{ width: "100%", padding: "10px 0", background: "#1db954", color: "#fff", border: "none", borderRadius: 8, fontWeight: "bold" }}>Login</button>
-          </form>
-          {error && <div style={{ color: "red", marginTop: 10 }}>{error}</div>}
+          <PXHeader
+            username=""
+            tab={tab}
+            setTab={setTab}
+            suchtext={suchtext}
+            setSuchtext={setSuchtext}
+            sort={sort}
+            setSort={setSort}
+            onLogout={() => setLogin({ user: "", pass: "" })} 
+            hideControls={false}
+          />
+
+          {/* Login-Bereich im grauen Streifen wie im Screenshot */}
+          <div style={{ background: "#ededed", borderBottom: "1.5px solid #dedede" }}>
+            <div style={{ padding: "24px 28px 30px 28px" }}>
+              <div style={{ fontSize: 36, fontWeight: "bold", color: "#333", marginBottom: 16 }}>
+                Fahrerliste Login
+              </div>
+              <form onSubmit={handleLogin} style={{ maxWidth: 420 }}>
+                <div style={{ marginBottom: 12 }}>
+                  <input
+                    type="text"
+                    placeholder="Username"
+                    value={login.user}
+                    onChange={e => setLogin({ ...login, user: e.target.value })}
+                    required
+                    style={{
+                      width: 260,
+                      fontSize: 18,
+                      padding: "8px 10px",
+                      borderRadius: 4,
+                      border: "1px solid #999",
+                      boxShadow: "inset 0 1px 2px #0001",
+                      background: "#fff"
+                    }}
+                  />
+                </div>
+                <div style={{ marginBottom: 20 }}>
+                  <input
+                    type="password"
+                    placeholder="Password"
+                    value={login.pass}
+                    onChange={e => setLogin({ ...login, pass: e.target.value })}
+                    required
+                    style={{
+                      width: 260,
+                      fontSize: 18,
+                      padding: "8px 10px",
+                      borderRadius: 4,
+                      border: "1px solid #999",
+                      boxShadow: "inset 0 1px 2px #0001",
+                      background: "#fff"
+                    }}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    padding: "10px 32px",
+                    fontSize: 18,
+                    fontWeight: "bold",
+                    color: "#fff",
+                    background: "linear-gradient(#444,#222)",
+                    border: "1px solid #333",
+                    borderRadius: 24,
+                    boxShadow: "inset 0 1px 0 #777, 0 2px 6px #0002",
+                    boxSizing: "border-box",
+                    cursor: "pointer"
+                  }}
+                >
+                  Login
+                </button>
+              </form>
+              {error && <div style={{ color: "red", marginTop: 12 }}>{error}</div>}
+            </div>
+          </div>
+
+          <PXFooter />
         </div>
       ) : (
         <div
@@ -337,6 +559,28 @@ const dayKeys = Object.keys(groupsByDate).sort();
             marginTop: "auto",
             overflowX: "hidden"
           }}>
+
+{tab === "alle" && (
+  <div style={{ background: "#A6F4A5", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", margin: 0 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
+      <input
+        type="text"
+        value={suchtext || ""}
+        onChange={e => setSuchtext(e.target.value)}
+        placeholder="Suche nach Kennzeichen"
+        style={{ width: 250, fontSize: 18, padding: "7px 15px", borderRadius: 8, border: "1px solid #7cc67c" }}
+      />
+      <button
+        onClick={() => setAlleShowAll(true)}
+        style={{ fontSize: 18, padding: "7px 15px", fontWeight: "bold", borderRadius: 8, border: "1px solid #5ea35e", background: "#69d169", cursor: "pointer", width: "fit-content" }}
+      >
+        Alle Buchungen
+      </button>
+    </div>
+    <span style={{ fontSize: 24 }} title="Bearbeiten">✏️</span>
+  </div>
+)}
+
             <div style={{ padding: 12, color: "#777", fontSize: 18, marginLeft: 10 }}>
               {loading ? "Lade Daten..." : ""}
               <b> Anzahl Kunden: {filtered.length}</b>
@@ -350,7 +594,7 @@ const dayKeys = Object.keys(groupsByDate).sort();
 
               {dayKeys.map(day => (
                 <div key={day}>
-                  {/* Blauer Balken (kräftig/dunkel wie im 2. Screenshot) */}
+                  {/* Blauer Balken */}
                   <div
                     style={{
                       background: "linear-gradient(#6E97BF, #4F7FA9)",
@@ -386,7 +630,7 @@ const dayKeys = Object.keys(groupsByDate).sort();
                     >
                       <div style={{ flex: 1, marginLeft: 18 }}>
                         <div className="fahrer-card-title" style={{ fontWeight: "bold", marginBottom: 0, fontSize: "20px" }}>
-                          {row.ankunftUhrzeit} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
+                          {(dateOnlyISO(row.rueckflugdatum) === day ? row.rueckflugUhrzeit : row.ankunftUhrzeit) || ""} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
                             ? "All"
                             : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
                           <a className="telefon-link" href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
@@ -436,7 +680,11 @@ const dayKeys = Object.keys(groupsByDate).sort();
             </div>
           </div>
 
-          {editBuchung && (
+          
+
+<PXFooter />
+
+{editBuchung && (
             <div style={{
               position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
               background: "#fff", zIndex: 10000, overflowY: "auto"
@@ -639,7 +887,9 @@ const dayKeys = Object.keys(groupsByDate).sort();
                     </button>
                   </div>
                 </form>
-              </div>
+              <PXEditFooter name={`${(editBuchung.vorname || "").trim()} ${(editBuchung.nachname || "").trim()}`.trim()} />
+            </div>
+            
             </div>
           )}
         </div>
