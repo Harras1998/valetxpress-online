@@ -568,7 +568,7 @@ for (const k of Object.keys(groupsByDate)) {
         value={suchtext || ""}
         onChange={e => setSuchtext(e.target.value)}
         placeholder="Suche nach Kennzeichen"
-        style={{ width: 300, fontSize: 18, padding: "7px 15px", borderRadius: 8, border: "1px solid #7cc67c" }}
+        style={{ width: 250, fontSize: 18, padding: "7px 15px", borderRadius: 8, border: "1px solid #7cc67c" }}
       />
       <button
         onClick={() => setAlleShowAll(true)}
