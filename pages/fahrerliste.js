@@ -572,7 +572,7 @@ for (const k of Object.keys(groupsByDate)) {
       />
       <button
         onClick={() => setAlleShowAll(true)}
-        style={{ fontSize: 16, fontWeight: "bold", borderRadius: 8, border: "1px solid #5ea35e", background: "#69d169", cursor: "pointer", width: "fit-content" }}
+        style={{ fontSize: 16, padding: "7px 15px", fontWeight: "bold", borderRadius: 8, border: "1px solid #5ea35e", background: "#69d169", cursor: "pointer", width: "fit-content" }}
       >
         Alle Buchungen
       </button>
