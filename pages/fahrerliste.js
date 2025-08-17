@@ -399,12 +399,12 @@ function keyForTab(b) {
     if (rue === isoTomorrow || rue === isoDayAfter) return rue;
     return abf;
   } else { // tab === "alle"
-    // Gleiche Logik wie "Heute" (nur für die standard-Ansicht, nicht bei "Alle Buchungen")
+    // Gleiche Logik wie im Tab "Heute" (nur in der Standardansicht ohne "Alle Buchungen")
     if (!alleShowAll) {
       if (rue === isoToday) return rue;
       return abf;
     }
-    // Bei "Alle Buchungen" unverändert nach Abflugdatum gruppieren
+    // Bei "Alle Buchungen" weiterhin nach Abflugdatum gruppieren
     return abf;
   }
 }
@@ -567,7 +567,7 @@ for (const k of Object.keys(groupsByDate)) {
           }}>
 
 {tab === "alle" && (
-  <div style={{ background: "#A6F4A5", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", margin: 0 }}>
+  <div style={{ background: "#A6F4A5", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", margin: 0, position: "relative"}}>
     <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
       <input
         type="text"
@@ -583,7 +583,7 @@ for (const k of Object.keys(groupsByDate)) {
         Alle Buchungen
       </button>
     </div>
-    <span style={{ fontSize: 24 }} title="Bearbeiten">✏️</span>
+    <span style={{ position: "absolute", right: 120, top: "50%", transform: "translateY(-50%)", fontSize: 24, cursor: "pointer" }} title="Bearbeiten">✏️</span>
   </div>
 )}
 
