@@ -651,10 +651,23 @@ for (const k of Object.keys(groupsByDate)) {
                     >
                       <div style={{ flex: 1, marginLeft: 18 }}>
                         <div className="fahrer-card-title" style={{ fontWeight: "bold", marginBottom: 0, fontSize: "20px" }}>
-                          {(dateOnlyISO(row.rueckflugdatum) === day ? row.rueckflugUhrzeit : row.ankunftUhrzeit) || ""} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
+                          {tab === "2tage" ? (
+  <>
+    {(dateOnlyISO(row.rueckflugdatum) === day ? row.rueckflugUhrzeit : row.ankunftUhrzeit) || ""} | {row.vorname} {row.nachname} | {row.anzahl_personen ? (row.anzahl_personen + "/ ") : ""} | {row.reiseziel} |{" "}
+    <a className="telefon-link" href={`tel:${row.telefon}`} style={{ textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a> |{" "}
+    {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
+      ? "All"
+      : row.typ.charAt(0).toUpperCase() + row.typ.slice(1).toLowerCase()
+    }
+  </>
+) : (
+  <>
+    {(dateOnlyISO(row.rueckflugdatum) === day ? row.rueckflugUhrzeit : row.ankunftUhrzeit) || ""} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
                             ? "All"
-                            : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.anzahl_personen ? (row.anzahl_personen + "/ ") : ""} | {row.reiseziel} |{" "}
-                          <a className="telefon-link" href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a> | 
+                            : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
+                          <a className="telefon-link" href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
+  </>
+)}
                         </div>
                         <div className="info-zeile" style={{
                           fontSize: 17, margin: "12px 0 0 0", color: "#444", display: "flex", alignItems: "center", fontWeight: 700
