@@ -713,7 +713,7 @@ for (const k of Object.keys(groupsByDate)) {
                         <a href={`tel:${row.telefon}`}>
                           <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Anrufen">📞</span>
                         </a>
-</> }
+</>)}
 
                       </div>
                     </div>
