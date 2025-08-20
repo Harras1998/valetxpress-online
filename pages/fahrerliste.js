@@ -702,18 +702,15 @@ for (const k of Object.keys(groupsByDate)) {
                           title="Bearbeiten"
                           onClick={() => setEditBuchung({ ...row })}
                         >✏️</span>
-                        {tab !== "2tage" && (
-
-                          <>
-
-                        <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
+                        {tab !== "2tage" ? (<>
+<span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
                         <a href={`tel:${row.telefon}`}>
                           <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Anrufen">📞</span>
                         </a>
-
-                          </>
-
-                        )}
+</>) : (<>
+<span style={{ fontSize: 20, color: "#444", cursor: "default", visibility: "hidden" }}>✔️</span>
+<span style={{ fontSize: 20, color: "#444", cursor: "default", visibility: "hidden" }}>📞</span>
+</>)}
 
                       </div>
                     </div>
