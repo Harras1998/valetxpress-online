@@ -705,15 +705,15 @@ for (const k of Object.keys(groupsByDate)) {
                         {tab === "2tage" ? (<>
 <span style={{ fontSize: 20, color: "#444", cursor: "default", visibility: "hidden" }}>✔️</span>
 <span style={{ fontSize: 20, color: "#444", cursor: "default", visibility: "hidden" }}>📞</span>
-) : tab === "alle" ? (<>
+</>) : tab === "alle" ? (<>
 <span style={{ fontSize: 20, color: "#444", cursor: "default", visibility: "hidden" }}>📞</span>
 <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
-) : (<>
+</>) : (<>
 <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
                         <a href={`tel:${row.telefon}`}>
                           <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Anrufen">📞</span>
                         </a>
-) }
+</> }
 
                       </div>
                     </div>
