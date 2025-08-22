@@ -7,11 +7,12 @@ export default async function handler(req, res) {
   // Welche Route soll angesprochen werden? (z.B. /api/buchung)
   // Query-Parameter (außer "path") werden korrekt übergeben!
   const { path, ...query } = req.query;
+  const cleanPath = String(path || "").replace(/^\/+/ , "");
   const queryString = Object.entries(query)
     .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
     .join("&");
 
-  const url = `${backendUrl}/${path}${queryString ? `?${queryString}` : ""}`;
+  const url = `${backendUrl}/${cleanPath}${queryString ? `?${queryString}` : ""}`;
 
   // Header übernehmen – authorization explizit weitergeben
   const { authorization, ...headers } = req.headers;
@@ -20,7 +21,8 @@ export default async function handler(req, res) {
     method: req.method,
     headers: {
       ...headers,
-      ...(authorization ? { authorization } : {})
+      ...(authorization ? { authorization } : {}),
+      ...((["POST","PUT","PATCH","DELETE"].includes(req.method) && !headers["content-type"]) ? { "content-type": "application/json" } : {})
     },
     body: ["POST", "PUT", "PATCH", "DELETE"].includes(req.method)    // <--- HIER!
       ? JSON.stringify(req.body)
