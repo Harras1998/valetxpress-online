@@ -266,25 +266,35 @@ export default function FahrerListe() {
   const [error, setError] = useState("");
   const [sort, setSort] = useState("abflugdatum");
   const [username, setUsername] = useState("");
-  
-// Persistentes Login aus localStorage laden
-useEffect(() => {
-  try {
-    const savedAuth = localStorage.getItem("vx_auth");
-    const savedUser = localStorage.getItem("vx_user") || "";
-    if (savedAuth) {
-      setAuth(savedAuth);
-      setUsername(savedUser);
-    }
-  } catch {}
-}, []);
-const [editBuchung, setEditBuchung] = useState(null);
+  const [editBuchung, setEditBuchung] = useState(null);
   const [editSaving, setEditSaving] = useState(false);
   const [alleShowAll, setAlleShowAll] = useState(false);
 
   const rueckModus = tab === "heute" || tab === "2tage";
   // --- Timer/Call state for "Heute"-Tab ---
-  const [callTimers, setCallTimers] = useState({}); // { [buchungId]: startTimestampMs }
+  const [callTimers, setCallTimers] = useState({});
+  // Persistenz der Anruf-Timer über Reloads (global)
+  useEffect(() => {
+    try {
+      const keyUser = "vx_callTimers";
+      const raw = localStorage.getItem(keyUser);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object") {
+          setCallTimers(parsed);
+        }
+      }
+    } catch {}
+    // Nur laden, wenn sich der Benutzer ändert / bekannt wird
+  }, []);
+
+  useEffect(() => {
+    try {
+      const keyUser = "vx_callTimers";
+      localStorage.setItem(keyUser, JSON.stringify(callTimers));
+    } catch {}
+  }, [callTimers]);
+ // { [buchungId]: startTimestampMs }
   const [timerTick, setTimerTick] = useState(0);
   useEffect(() => {
     const iv = setInterval(() => {
@@ -321,9 +331,7 @@ const [editBuchung, setEditBuchung] = useState(null);
       }
       setAuth(encoded);
       setUsername(login.user);
-      
-  try { localStorage.setItem("vx_auth", encoded); localStorage.setItem("vx_user", login.user); } catch {}
-setLoading(false);
+      setLoading(false);
     } catch (err) {
       setLoading(false);
       setError("Netzwerkfehler beim Login.");
@@ -333,9 +341,7 @@ setLoading(false);
     setAuth("");
     setUsername("");
     setLogin({ user: "", pass: "" });
-  
-  try { localStorage.removeItem("vx_auth"); localStorage.removeItem("vx_user"); } catch {}
-}
+  }
 
   useEffect(() => {
     if (!auth) return;
@@ -766,16 +772,12 @@ for (const k of Object.keys(groupsByDate)) {
                             {formatMMSS(timerElapsedSec(row.id))}
                           </span>
                         ) : (
-                          <a href={`tel:${row.telefon}`} onClick={() => {
-                            setCallTimers(prev => {
+                          <span onClick={() => { setCallTimers(prev => {
                               const next = { ...prev };
                               if (next[row.id]) delete next[row.id];
                               else next[row.id] = Date.now();
                               return next;
-                            });
-                          }}>
-                            <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Anrufen">📞</span>
-                          </a>
+                            }); }} style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Anrufen">📞</span>
                         )}
 </>)}
 
@@ -847,21 +849,8 @@ for (const k of Object.keys(groupsByDate)) {
     let url = `/api/proxy?path=api/admin/buchungen&sort=${sort}&dir=asc`;
     if (suchtext) url += `&suchtext=${encodeURIComponent(suchtext)}`;
     fetch(url, { headers: { Authorization: `Basic ${auth}` } })
-      .then(async (r) => {
-        if (!r.ok) {
-          if (r.status === 401) {
-            setError("Sitzung abgelaufen. Bitte neu einloggen.");
-            try { localStorage.removeItem("vx_auth"); localStorage.removeItem("vx_user"); } catch {}
-            setAuth("");
-            setUsername("");
-          }
-          setLoading(false);
-          return { buchungen: [] };
-        }
-        return r.json();
-      })
-      .then((data) => { setList(data.buchungen || []); setLoading(false); })
-      .catch(() => { setError("Fehler beim Laden"); setLoading(false); });
+      .then(r => r.json())
+      .then(data => { setList(data.buchungen || []); setLoading(false); });
   }}
                   style={{
                     margin: "0 auto", maxWidth: 1300, background: "#f8f8f8",
