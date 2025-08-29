@@ -781,7 +781,19 @@ for (const k of Object.keys(groupsByDate)) {
 <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
                         {callTimers[row.id] ? (
                           <span
-                            onClick={() => { setCallTimers(prev => { const p = { ...prev }; delete p[row.id]; return p; }); (async () => { try { const newBem = stripCallTimer(row.bemerkung); await fetch(`/api/proxy?path=api/admin/buchung/${row.id}`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` }, body: JSON.stringify({ bemerkung: newBem }) }); } catch {} })(); }}
+                            onClick={() => { setCallTimers(prev => { const p = { ...prev }; delete p[row.id]; return p; }); (async () => { try {
+              const newBem = stripCallTimer(row.bemerkung);
+              const payload = { ...row, bemerkung: newBem };
+                              ["abflugdatum","rueckflugdatum","start","end"].forEach(f => {
+                                if (payload[f]) payload[f] = (typeof payload[f] === "string" ? payload[f].split("T")[0] : payload[f]);
+                              });
+
+              await fetch(`/api/proxy?path=api/admin/buchung/${row.id}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` },
+                body: JSON.stringify(payload)
+              });
+            } catch {} })(); }}
                             style={{
                               fontSize: 36,
                               fontWeight: 900,
@@ -798,7 +810,20 @@ for (const k of Object.keys(groupsByDate)) {
                             {formatMMSS(timerElapsedSec(row.id))}
                           </span>
                         ) : (
-                          <span onClick={() => { setCallTimers(prev => { const next = { ...prev }; if (next[row.id]) delete next[row.id]; else next[row.id] = Date.now(); return next; }); (async () => { try { const ts = Date.now(); const newBem = withCallTimer(row.bemerkung, ts); await fetch(`/api/proxy?path=api/admin/buchung/${row.id}`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` }, body: JSON.stringify({ bemerkung: newBem }) }); } catch {} })(); }} style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Anrufen">📞</span>
+                          <span onClick={() => { setCallTimers(prev => { const next = { ...prev }; if (next[row.id]) delete next[row.id]; else next[row.id] = Date.now(); return next; }); (async () => { try {
+              const ts = Date.now();
+              const newBem = withCallTimer(row.bemerkung, ts);
+              const payload = { ...row, bemerkung: newBem };
+                              ["abflugdatum","rueckflugdatum","start","end"].forEach(f => {
+                                if (payload[f]) payload[f] = (typeof payload[f] === "string" ? payload[f].split("T")[0] : payload[f]);
+                              });
+
+              await fetch(`/api/proxy?path=api/admin/buchung/${row.id}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` },
+                body: JSON.stringify(payload)
+              });
+            } catch {} })(); }} style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Anrufen">📞</span>
                         )}
 </>)}
 
