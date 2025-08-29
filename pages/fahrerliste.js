@@ -693,14 +693,14 @@ for (const k of Object.keys(groupsByDate)) {
                         <div className="info-zeile" style={{
                           fontSize: 17, margin: "12px 0 0 0", color: (tab === "heute" && callTimers[row.id]) ? "#fff" : "#444", display: "flex", alignItems: "center", fontWeight: 700
                         }}>
-                          <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#444" : "inherit" }}>{formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin}</span>
+                          <span style={{ color: "#000" }}>{formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin}</span>
                           <span style={{ margin: "0 5px", fontWeight: 500 }}>|</span>
                           <span className="notiz-label"><b>Notizen:</b> {row.bemerkung}</span>
                         </div>
                         <div className="info-zeile" style={{
                           display: "flex", alignItems: "center", gap: 0, fontSize: 17, marginTop: 0, fontWeight: 700
                         }}>
-                          <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#0a5a00" : "#16b000" }}>
+                          <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#053700" : "#16b000" }}>
                             {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
                           </span>
                           <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#fff" : "#888", margin: "0 5px" }}>|</span>
