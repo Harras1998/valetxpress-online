@@ -667,11 +667,11 @@ for (const k of Object.keys(groupsByDate)) {
                         display: "flex",
                         alignItems: "flex-start",
                         fontSize: "32px",
-                        fontFamily: "Arial, Helvetica, sans-serif"
+                        fontFamily: "Arial, Helvetica, sans-serif", color: (tab === "heute" && callTimers[row.id]) ? "#fff" : undefined
                       }}
                     >
                       <div style={{ flex: 1, marginLeft: 18 }}>
-                        <div className="fahrer-card-title" style={{ fontWeight: "bold", marginBottom: 0, fontSize: "20px" }}>{tab === "2tage" ? (
+                        <div className="fahrer-card-title" style={{ color: (tab === "heute" && callTimers[row.id]) ? "#fff" : "#222",  fontWeight: "bold", marginBottom: 0, fontSize: "20px" }}>{tab === "2tage" ? (
   <>
     {(dateOnlyISO(row.rueckflugdatum) === day ? row.rueckflugUhrzeit : row.ankunftUhrzeit) || ""} | {row.vorname} {row.nachname} | {row.anzahl_personen ? (row.anzahl_personen + "/ ") : ""} | {row.reiseziel} |{" "}
     <a className="telefon-link" href={`tel:${row.telefon}`} style={{ textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a> |{" "}
@@ -691,7 +691,7 @@ for (const k of Object.keys(groupsByDate)) {
   </>
 )}</div>
                         <div className="info-zeile" style={{
-                          fontSize: 17, margin: "12px 0 0 0", color: "#444", display: "flex", alignItems: "center", fontWeight: 700
+                          fontSize: 17, margin: "12px 0 0 0", color: (tab === "heute" && callTimers[row.id]) ? "#fff" : "#444", display: "flex", alignItems: "center", fontWeight: 700
                         }}>
                           <span>{formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin}</span>
                           <span style={{ margin: "0 5px", fontWeight: 500 }}>|</span>
@@ -704,7 +704,7 @@ for (const k of Object.keys(groupsByDate)) {
                             {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
                           </span>
                           <span style={{ color: "#888", margin: "0 5px" }}>|</span>
-                          <span style={{ color: "#111" }}>{row.kennzeichen}</span>
+                          <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#fff" : "#111" }}>{row.kennzeichen}</span>
                           <span style={{ color: "#888", margin: "0 5px" }}>|</span>
                           <span style={{ color: "red" }}>{priceDisplay(row)}</span>
                         </div>
@@ -750,7 +750,7 @@ for (const k of Object.keys(groupsByDate)) {
                             {formatMMSS(timerElapsedSec(row.id))}
                           </span>
                         ) : (
-                          <a href={`tel:${row.telefon}`} onClick={(e) => {
+                          <a href={`tel:${row.telefon}`} onClick={() => {
                             setCallTimers(prev => {
                               const next = { ...prev };
                               if (next[row.id]) delete next[row.id];
