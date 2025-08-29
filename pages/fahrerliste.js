@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import Head from "next/head";
 
@@ -270,6 +269,28 @@ export default function FahrerListe() {
   const [editBuchung, setEditBuchung] = useState(null);
   const [editSaving, setEditSaving] = useState(false);
   const [alleShowAll, setAlleShowAll] = useState(false);
+  // --- Timer/Call state for "Heute"-Tab ---
+  const [callTimers, setCallTimers] = useState({}); // { [buchungId]: startTimestampMs }
+  const [timerTick, setTimerTick] = useState(0);
+  useEffect(() => {
+    const iv = setInterval(() => {
+      setTimerTick(t => (t + 1) % 3600); // trigger re-render each second
+    }, 1000);
+    return () => clearInterval(iv);
+  }, []);
+
+  function timerElapsedSec(id) {
+    const start = callTimers[id];
+    if (!start) return 0;
+    const diff = Math.floor((Date.now() - start) / 1000);
+    return diff % 3600; // loop every hour
+  }
+  function formatMMSS(totalSec) {
+    const mm = Math.floor(totalSec / 60);
+    const ss = totalSec % 60;
+    return String(mm).padStart(1, "0") + ":" + String(ss).padStart(2, "0");
+  }
+
 
   const rueckModus = tab === "heute" || tab === "2tage";
 
@@ -638,7 +659,7 @@ for (const k of Object.keys(groupsByDate)) {
                       style={{
                         marginBottom: 0,
                         borderRadius: 0,
-                        background: cardColor(row),
+                        background: (tab === "heute" && callTimers[row.id] ? (cardColor(row) === "#fff" ? "linear-gradient(#79D25D,#2F8B0F)" : "linear-gradient(#6DB6E2,#3C87C8)") : cardColor(row)),
                         padding: "16px 0 8px 0",
                         boxShadow: "none",
                         border: "none",
@@ -710,9 +731,36 @@ for (const k of Object.keys(groupsByDate)) {
 <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
 </>) : (<>
 <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
-                        <a href={`tel:${row.telefon}`}>
-                          <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Anrufen">📞</span>
-                        </a>
+                        {callTimers[row.id] ? (
+                          <span
+                            onClick={() => setCallTimers(prev => { const p = { ...prev }; delete p[row.id]; return p; })}
+                            style={{
+                              fontSize: 36,
+                              fontWeight: 900,
+                              color: (timerElapsedSec(row.id) >= 600) ? "red" : "#fff",
+                              minWidth: 96,
+                              textAlign: "right",
+                              letterSpacing: 1,
+                              userSelect: "none",
+                              textShadow: "0 1px 3px #000a",
+                              cursor: "pointer"
+                            }}
+                            title="Timer läuft – tippen zum Beenden"
+                          >
+                            {formatMMSS(timerElapsedSec(row.id))}
+                          </span>
+                        ) : (
+                          <a href={`tel:${row.telefon}`} onClick={(e) => {
+                            setCallTimers(prev => {
+                              const next = { ...prev };
+                              if (next[row.id]) delete next[row.id];
+                              else next[row.id] = Date.now();
+                              return next;
+                            });
+                          }}>
+                            <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Anrufen">📞</span>
+                          </a>
+                        )}
 </>)}
 
                       </div>
