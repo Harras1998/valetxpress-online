@@ -273,11 +273,26 @@ export default function FahrerListe() {
 
   const rueckModus = tab === "heute" || tab === "2tage";
 
-  function handleLogin(e) {
+  async function handleLogin(e) {
     e.preventDefault();
-    const encoded = btoa(`${login.user}:${login.pass}`);
-    setAuth(encoded);
-    setUsername(login.user);
+    setLoading(true);
+    setError("");
+    try {
+      const encoded = btoa(`${login.user}:${login.pass}`);
+      const testUrl = `/api/proxy?path=api/admin/buchungen&sort=abflugdatum&dir=asc&limit=1`;
+      const res = await fetch(testUrl, { headers: { Authorization: `Basic ${encoded}` } });
+      if (!res.ok) {
+        setLoading(false);
+        setError(res.status === 401 ? "Benutzername oder Passwort ist falsch." : `Login fehlgeschlagen (HTTP ${res.status}).`);
+        return;
+      }
+      setAuth(encoded);
+      setUsername(login.user);
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+      setError("Netzwerkfehler beim Login.");
+    }
   }
   function handleLogout() {
     setAuth("");
@@ -398,7 +413,13 @@ function keyForTab(b) {
   } else if (tab === "2tage") {
     if (rue === isoTomorrow || rue === isoDayAfter) return rue;
     return abf;
-  } else {
+  } else { // tab === "alle"
+    // Gleiche Logik wie im Tab "Heute" (nur in der Standardansicht ohne "Alle Buchungen")
+    if (!alleShowAll) {
+      if (rue === isoToday) return rue;
+      return abf;
+    }
+    // Bei "Alle Buchungen" weiterhin nach Abflugdatum gruppieren
     return abf;
   }
 }
@@ -561,7 +582,7 @@ for (const k of Object.keys(groupsByDate)) {
           }}>
 
 {tab === "alle" && (
-  <div style={{ background: "#A6F4A5", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", margin: 0 }}>
+  <div style={{ background: "#A6F4A5", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", margin: 0, position: "relative"}}>
     <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
       <input
         type="text"
@@ -577,7 +598,7 @@ for (const k of Object.keys(groupsByDate)) {
         Alle Buchungen
       </button>
     </div>
-    <span style={{ fontSize: 24 }} title="Bearbeiten">✏️</span>
+    <span style={{ position: "absolute", right: 180, top: "50%", transform: "translateY(-50%)", fontSize: 20, cursor: "pointer" }} title="Bearbeiten">✏️</span>
   </div>
 )}
 
@@ -629,12 +650,25 @@ for (const k of Object.keys(groupsByDate)) {
                       }}
                     >
                       <div style={{ flex: 1, marginLeft: 18 }}>
-                        <div className="fahrer-card-title" style={{ fontWeight: "bold", marginBottom: 0, fontSize: "20px" }}>
+                        <div className="fahrer-card-title" style={{ fontWeight: "bold", marginBottom: 0, fontSize: "20px" }}>{tab === "2tage" ? (
+  <>
+    {(dateOnlyISO(row.rueckflugdatum) === day ? row.rueckflugUhrzeit : row.ankunftUhrzeit) || ""} | {row.vorname} {row.nachname} | {row.anzahl_personen ? (row.anzahl_personen + "/ ") : ""} | {row.reiseziel} |{" "}
+    <a className="telefon-link" href={`tel:${row.telefon}`} style={{ textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a> |{" "}
+    {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
+      ? "All"
+      : (row.typ && row.typ.charAt ? (row.typ.charAt(0).toUpperCase() + row.typ.slice(1)) : row.typ)
+    }
+  </>
+) : (
+  <>
+    
                           {(dateOnlyISO(row.rueckflugdatum) === day ? row.rueckflugUhrzeit : row.ankunftUhrzeit) || ""} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
                             ? "All"
-                            : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.reiseziel} |{" "}
-                          <a className="telefon-link" href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a>
-                        </div>
+                            : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.anzahl_personen ? (row.anzahl_personen + "/ ") : ""} | {row.reiseziel} |{" "}
+                          <a className="telefon-link" href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a> | 
+                        
+  </>
+)}</div>
                         <div className="info-zeile" style={{
                           fontSize: 17, margin: "12px 0 0 0", color: "#444", display: "flex", alignItems: "center", fontWeight: 700
                         }}>
@@ -668,10 +702,19 @@ for (const k of Object.keys(groupsByDate)) {
                           title="Bearbeiten"
                           onClick={() => setEditBuchung({ ...row })}
                         >✏️</span>
-                        <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
+                        {tab === "2tage" ? (<>
+<span style={{ fontSize: 20, color: "#444", cursor: "default", visibility: "hidden" }}>✔️</span>
+<span style={{ fontSize: 20, color: "#444", cursor: "default", visibility: "hidden" }}>📞</span>
+</>) : tab === "alle" ? (<>
+<span style={{ fontSize: 20, color: "#444", cursor: "default", visibility: "hidden" }}>📞</span>
+<span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
+</>) : (<>
+<span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
                         <a href={`tel:${row.telefon}`}>
                           <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Anrufen">📞</span>
                         </a>
+</>)}
+
                       </div>
                     </div>
                   ))}
