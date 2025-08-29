@@ -266,7 +266,19 @@ export default function FahrerListe() {
   const [error, setError] = useState("");
   const [sort, setSort] = useState("abflugdatum");
   const [username, setUsername] = useState("");
-  const [editBuchung, setEditBuchung] = useState(null);
+  
+// Persistentes Login aus localStorage laden
+useEffect(() => {
+  try {
+    const savedAuth = localStorage.getItem("vx_auth");
+    const savedUser = localStorage.getItem("vx_user") || "";
+    if (savedAuth) {
+      setAuth(savedAuth);
+      setUsername(savedUser);
+    }
+  } catch {}
+}, []);
+const [editBuchung, setEditBuchung] = useState(null);
   const [editSaving, setEditSaving] = useState(false);
   const [alleShowAll, setAlleShowAll] = useState(false);
 
@@ -309,7 +321,9 @@ export default function FahrerListe() {
       }
       setAuth(encoded);
       setUsername(login.user);
-      setLoading(false);
+      
+  try { localStorage.setItem("vx_auth", encoded); localStorage.setItem("vx_user", login.user); } catch {}
+setLoading(false);
     } catch (err) {
       setLoading(false);
       setError("Netzwerkfehler beim Login.");
@@ -319,7 +333,9 @@ export default function FahrerListe() {
     setAuth("");
     setUsername("");
     setLogin({ user: "", pass: "" });
-  }
+  
+  try { localStorage.removeItem("vx_auth"); localStorage.removeItem("vx_user"); } catch {}
+}
 
   useEffect(() => {
     if (!auth) return;
@@ -831,8 +847,21 @@ for (const k of Object.keys(groupsByDate)) {
     let url = `/api/proxy?path=api/admin/buchungen&sort=${sort}&dir=asc`;
     if (suchtext) url += `&suchtext=${encodeURIComponent(suchtext)}`;
     fetch(url, { headers: { Authorization: `Basic ${auth}` } })
-      .then(r => r.json())
-      .then(data => { setList(data.buchungen || []); setLoading(false); });
+      .then(async (r) => {
+        if (!r.ok) {
+          if (r.status === 401) {
+            setError("Sitzung abgelaufen. Bitte neu einloggen.");
+            try { localStorage.removeItem("vx_auth"); localStorage.removeItem("vx_user"); } catch {}
+            setAuth("");
+            setUsername("");
+          }
+          setLoading(false);
+          return { buchungen: [] };
+        }
+        return r.json();
+      })
+      .then((data) => { setList(data.buchungen || []); setLoading(false); })
+      .catch(() => { setError("Fehler beim Laden"); setLoading(false); });
   }}
                   style={{
                     margin: "0 auto", maxWidth: 1300, background: "#f8f8f8",
