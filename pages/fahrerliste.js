@@ -561,23 +561,16 @@ function keyForTab(b) {
   const abf = dateOnlyISO(b.abflugdatum);
   const rue = dateOnlyISO(b.rueckflugdatum);
   if (tab === "heute") {
-    if (rue === isoToday) return rue;
-    return abf;
-  });
-} else if (tab === "2tage") {
-    if (rue === isoTomorrow || rue === isoDayAfter) return rue;
-    return abf;
+    return (rue === isoToday) ? rue : abf;
+  } else if (tab === "2tage") {
+    return ((rue === isoTomorrow) || (rue === isoDayAfter)) ? rue : abf;
   } else { // tab === "alle"
-    // Gleiche Logik wie im Tab "Heute" (nur in der Standardansicht ohne "Alle Buchungen")
     if (!alleShowAll) {
-      if (rue === isoToday) return rue;
-      return abf;
+      return (rue === isoToday) ? rue : abf;
     }
-    // Bei "Alle Buchungen" weiterhin nach Abflugdatum gruppieren
     return abf;
   }
 }
-
 const groupsByDate = filtered.reduce((acc, b) => {
   const key = keyForTab(b);
   if (!key) return acc;
@@ -865,27 +858,27 @@ for (const k of Object.keys(groupsByDate)) {
   <span
     style={{ fontSize: 20, color: "#fff", cursor: "pointer" }}
     title="Zurücksetzen"
-    onClick={() => setDoneByUser(prev => { const p = { prev }; delete p[row.id]; return p; })}
+    onClick={() => { setDoneByUser(prev => { const p = { ...prev }; delete p[row.id]; return p; }); setDoneGlobal(prev => { const p = { ...prev }; delete p[row.id]; return p; }); (async () => { try { const newBem = stripDoneFromBem(row.bemerkung); const payload = { ...row, bemerkung: newBem }; ["abflugdatum","rueckflugdatum","start","end"].forEach(f => { if (payload[f]) payload[f] = (typeof payload[f] === "string" ? payload[f].split("T")[0] : payload[f]); }); await fetch(`/api/proxy?path=api/admin/buchung/${row.id}`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` }, body: JSON.stringify(payload) }); setList(prev => prev.map(b => b.id === row.id ? { ...b, bemerkung: newBem } : b)); setTab("heute"); } catch {} })(); }}
   >↻</span>
 ) : (
   <span
     style={{ fontSize: 20, color: "#444", cursor: "pointer" }}
     title="Status"
-    onClick={() => setDoneByUser(prev => ({ prev, [row.id]: true }))}
+    onClick={() => setDoneByUser(prev => ({ ...prev, [row.id]: true }))}
   >✔️</span>
 )}
 </>) : (<>
 <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status"
-      onClick={() => { setDoneByUser(prev => ({ prev, [row.id]: true })); setDoneGlobal(prev => ({ prev, [row.id]: username || "" })); (async () => { try {
+      onClick={() => { setDoneByUser(prev => ({ ...prev, [row.id]: true })); setDoneGlobal(prev => ({ ...prev, [row.id]: username || "" })); (async () => { try {
         const newBem = withDoneInBem(row.bemerkung, username || "");
-        const payload = { row, bemerkung: newBem };
+        const payload = { ...row, bemerkung: newBem };
         ["abflugdatum","rueckflugdatum","start","end"].forEach(f => { if (payload[f]) payload[f] = (typeof payload[f] === "string" ? payload[f].split("T")[0] : payload[f]); });
         await fetch(`/api/proxy?path=api/admin/buchung/${row.id}`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` }, body: JSON.stringify(payload) });
   // Optimistisch auch die lokale Liste aktualisieren
-  setList(prev => prev.map(b => b.id === row.id ? { b, bemerkung: newBem } : b));
+  setList(prev => prev.map(b => b.id === row.id ? { ...b, bemerkung: newBem } : b));
         setTab("heute");
         // Optimistisch auch die lokale Liste aktualisieren
-        setList(prev => prev.map(b => b.id === row.id ? { b, bemerkung: newBem } : b));
+        setList(prev => prev.map(b => b.id === row.id ? { ...b, bemerkung: newBem } : b));
       } catch {} })(); }}
 >✔️</span>
                         {callTimers[row.id] ? (
@@ -905,10 +898,10 @@ for (const k of Object.keys(groupsByDate)) {
                             {formatMMSS(timerElapsedSec(row.id))}
                           </span>
                         ) : (
-                          <span onClick={() => { setCallTimers(prev => { const next = { prev }; if (next[row.id]) delete next[row.id]; else next[row.id] = Date.now(); return next; }); (async () => { try {
+                          <span onClick={() => { setCallTimers(prev => { const next = { ...prev }; if (next[row.id]) delete next[row.id]; else next[row.id] = Date.now(); return next; }); (async () => { try {
               const ts = Date.now();
               const newBem = withCallTimer(row.bemerkung, ts);
-              const payload = { row, bemerkung: newBem };
+              const payload = { ...row, bemerkung: newBem };
                               ["abflugdatum","rueckflugdatum","start","end"].forEach(f => {
                                 if (payload[f]) payload[f] = (typeof payload[f] === "string" ? payload[f].split("T")[0] : payload[f]);
                               });
