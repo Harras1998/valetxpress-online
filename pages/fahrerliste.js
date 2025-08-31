@@ -805,7 +805,7 @@ for (const k of Object.keys(groupsByDate)) {
     onClick={() => setDoneByUser(prev => ({ ...prev, [row.id]: true }))}
   >✔️</span>
 )}
-</>) : (<
+</>) : (<>
 <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status" onClick={() => setDoneByUser(prev => ({ ...prev, [row.id]: true }))}>✔️</span>
                         {callTimers[row.id] ? (
                           <span
