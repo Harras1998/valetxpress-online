@@ -260,12 +260,12 @@ export default function FahrerListe() {
   const [tab, setTab] = useState("heute");
   const [list, setList] = useState([]);
   const [auth, setAuth] = useState("");
-  
   // Beim Einloggen immer zuerst den "heute"-Tab zeigen
   useEffect(() => {
     if (auth) setTab("heute");
   }, [auth]);
-const [login, setLogin] = useState({ user: "", pass: "" });
+
+  const [login, setLogin] = useState({ user: "", pass: "" });
   const [suchtext, setSuchtext] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -792,24 +792,23 @@ for (const k of Object.keys(groupsByDate)) {
 <span style={{ fontSize: 20, color: "#444", cursor: "default", visibility: "hidden" }}>📞</span>
 </>) : tab === "alle" ? (<>
 <span style={{ fontSize: 20, color: "#444", cursor: "default", visibility: "hidden" }}>📞</span>
-<span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
-</>) : (<>
-<span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
+{doneByUser && doneByUser[row.id] ? (
+  <span
+    style={{ fontSize: 20, color: "#fff", cursor: "pointer" }}
+    title="Zurücksetzen"
+    onClick={() => setDoneByUser(prev => { const p = { ...prev }; delete p[row.id]; return p; })}
+  >↻</span>
+) : (
+  <span
+    style={{ fontSize: 20, color: "#444", cursor: "pointer" }}
+    title="Status"
+    onClick={() => setDoneByUser(prev => ({ ...prev, [row.id]: true }))}
+  >✔️</span>
+)}
+</>) : (<
+<span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status" onClick={() => setDoneByUser(prev => ({ ...prev, [row.id]: true }))}>✔️</span>
                         {callTimers[row.id] ? (
                           <span
-                            onClick={() => { setCallTimers(prev => { const p = { ...prev }; delete p[row.id]; return p; }); (async () => { try {
-              const newBem = stripCallTimer(row.bemerkung);
-              const payload = { ...row, bemerkung: newBem };
-                              ["abflugdatum","rueckflugdatum","start","end"].forEach(f => {
-                                if (payload[f]) payload[f] = (typeof payload[f] === "string" ? payload[f].split("T")[0] : payload[f]);
-                              });
-
-              await fetch(`/api/proxy?path=api/admin/buchung/${row.id}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` },
-                body: JSON.stringify(payload)
-              });
-            } catch {} })(); }}
                             style={{
                               fontSize: 36,
                               fontWeight: 900,
@@ -819,9 +818,8 @@ for (const k of Object.keys(groupsByDate)) {
                               letterSpacing: 1,
                               userSelect: "none",
                               textShadow: "0 1px 3px #000a",
-                              cursor: "pointer"
-                            }}
-                            title="Timer läuft – tippen zum Beenden"
+                              cursor: "default" }}
+                            title="Timer läuft"
                           >
                             {formatMMSS(timerElapsedSec(row.id))}
                           </span>
