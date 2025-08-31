@@ -448,40 +448,38 @@ setLoading(false);
   let filtered = list;
   const today = new Date();
   if (tab === "heute") {
-  const isoToday = today.toISOString().slice(0, 10);
-  filtered = filtered.filter(b => {
-    const abflug = b.abflugdatum?.slice(0, 10);
-    const rueck = b.rueckflugdatum?.slice(0, 10);
-    return abflug === isoToday || rueck === isoToday;
-  });
-  // Globale Done-Tickets ausblenden (für alle Nutzer)
-  filtered = filtered.filter(b => !parseDoneFromBem(b.bemerkung));
-} else if (tab === "2tage") {
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
-  const dayAfter = new Date(today);
-  dayAfter.setDate(today.getDate() + 2);
-  const isoTomorrow = tomorrow.toISOString().slice(0, 10);
-  const isoDayAfter = dayAfter.toISOString().slice(0, 10);
-  filtered = filtered.filter(b => {
-    const abflug = b.abflugdatum?.slice(0, 10);
-    const rueck = b.rueckflugdatum?.slice(0, 10);
-    return (
-      abflug === isoTomorrow || abflug === isoDayAfter ||
-      rueck === isoTomorrow || rueck === isoDayAfter
-    );
+    const isoToday = today.toISOString().slice(0, 10);
+    filtered = filtered.filter(b => {
+      const abflug = b.abflugdatum?.slice(0, 10);
+      const rueck = b.rueckflugdatum?.slice(0, 10);
+      return abflug === isoToday || rueck === isoToday;
+    });
+    // Globale Done-Tickets ausblenden (für alle Nutzer)
+    filtered = filtered.filter(b => !parseDoneFromBem(b.bemerkung));
+  } else if (tab === "2tage") {
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    const dayAfter = new Date(today);
+    dayAfter.setDate(today.getDate() + 2);
+    const isoTomorrow = tomorrow.toISOString().slice(0, 10);
+    const isoDayAfter = dayAfter.toISOString().slice(0, 10);
+    filtered = filtered.filter(b => {
+      const abflug = b.abflugdatum?.slice(0, 10);
+      const rueck = b.rueckflugdatum?.slice(0, 10);
+      return (
+        abflug === isoTomorrow || abflug === isoDayAfter ||
+        rueck === isoTomorrow || rueck === isoDayAfter
+      );
+    });
+  } else if (tab === "alle") {
+    // Globale Done-Tickets verbergen – außer die eigenen (damit man sie zurücksetzen kann)
+    filtered = filtered.filter(b => {
+      const by = parseDoneFromBem(b.bemerkung);
+      if (!by) return true;
+      return username && by === username;
+    });
   }
-else if (tab === "alle") {
-  // Globale Done-Tickets verbergen – außer die eigenen (damit man sie zurücksetzen kann)
-  filtered = filtered.filter(b => {
-    const by = parseDoneFromBem(b.bemerkung);
-    if (!by) return true;
-    return username && by === username;
-  });
-}
-);
-}
-  if (tab === "alle" && !alleShowAll) {
+if (tab === "alle" && !alleShowAll) {
     const isoToday = today.toISOString().slice(0, 10);
     filtered = filtered.filter(b => {
       const abflug = (b.abflugdatum || "").slice(0, 10);
