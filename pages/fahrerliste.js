@@ -376,7 +376,19 @@ setLoading(false);
     if (suchtext) url += `&suchtext=${encodeURIComponent(suchtext)}`;
     fetch(url, { headers: { Authorization: `Basic ${auth}` } })
       .then(r => r.json())
-      .then(data => { setList(data.buchungen || []); setLoading(false); })
+      .then(data => {
+        const rows = data.buchungen || [];
+        setList(rows);
+        // Universal-CallTimer: aus Bemerkung [CT:...] in lokalen Zustand übernehmen
+        const timers = {};
+        for (const r of rows) {
+          const ts = parseCallTimerFromBem(r.bemerkung);
+          if (ts) timers[r.id] = ts;
+        }
+        setCallTimers(timers);
+        setLoading(false);
+      })
+      .catch(() => { setError("Fehler beim Laden"); setLoading(false); });
       .catch(() => { setError("Fehler beim Laden"); setLoading(false); });
   }, [auth, suchtext, sort]);
 
@@ -896,7 +908,17 @@ for (const k of Object.keys(groupsByDate)) {
     if (suchtext) url += `&suchtext=${encodeURIComponent(suchtext)}`;
     fetch(url, { headers: { Authorization: `Basic ${auth}` } })
       .then(r => r.json())
-      .then(data => { setList(data.buchungen || []); setLoading(false); });
+      .then(data => {
+        const rows = data.buchungen || [];
+        setList(rows);
+        const timers = {};
+        for (const r of rows) {
+          const ts = parseCallTimerFromBem(r.bemerkung);
+          if (ts) timers[r.id] = ts;
+        }
+        setCallTimers(timers);
+        setLoading(false);
+      });
   }}
                   style={{
                     margin: "0 auto", maxWidth: 1300, background: "#f8f8f8",
