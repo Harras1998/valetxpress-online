@@ -305,18 +305,9 @@ const [editBuchung, setEditBuchung] = useState(null);
   }, [callTimers]);
  // { [buchungId]: startTimestampMs }
   const [timerTick, setTimerTick] = useState(0);
-  const [refreshTick, setRefreshTick] = useState(0);
-
   useEffect(() => {
     const iv = setInterval(() => {
-      setTimerTick
-  // Auto-Refresh auf dem "Heute"-Tab für geräteübergreifende Timer-Synchronisierung
-  useEffect(() => {
-    if (!auth || tab !== "heute") return;
-    const iv = setInterval(() => setRefreshTick(t => (t + 1) % 1000000000), 15000);
-    return () => clearInterval(iv);
-  }, [auth, tab]);
-(t => (t + 1) % 3600); // trigger re-render each second
+      setTimerTick(t => (t + 1) % 3600); // trigger re-render each second
     }, 1000);
     return () => clearInterval(iv);
   }, []);
@@ -383,12 +374,11 @@ setLoading(false);
     setLoading(true);
     let url = `/api/proxy?path=api/admin/buchungen&sort=${sort}&dir=asc`;
     if (suchtext) url += `&suchtext=${encodeURIComponent(suchtext)}`;
-    url += `&t=${refreshTick}`;
-  fetch(url, { headers: { Authorization: `Basic ${auth}` } })
+    fetch(url, { headers: { Authorization: `Basic ${auth}` } })
       .then(r => r.json())
       .then(data => { setList(data.buchungen || []); setLoading(false); })
       .catch(() => { setError("Fehler beim Laden"); setLoading(false); });
-  }, [auth, suchtext, sort, refreshTick]);
+  }, [auth, suchtext, sort]);
 
   useEffect(() => { if (tab !== "alle") setAlleShowAll(false); }, [tab]);
 
