@@ -271,6 +271,9 @@ export default function FahrerListe() {
   const [error, setError] = useState("");
   const [sort, setSort] = useState("abflugdatum");
   const [username, setUsername] = useState("");
+  // Global-Status der abgehakten Buchungen (id -> username der markiert hat)
+  const [doneGlobal, setDoneGlobal] = useState({});
+
   // Pro-Benutzer "abgehakt"-Status (nur lokal sichtbar)
   const [doneByUser, setDoneByUser] = useState({});
   useEffect(() => {
@@ -392,6 +395,20 @@ setLoading(false);
   try { localStorage.removeItem("vx_auth"); localStorage.removeItem("vx_user"); } catch {}
 }
 
+  // ---- Universal "Done" via [DX:<username>] Tag in bemerkung ----
+  function parseDoneFromBem(bem) {
+    const m = (bem || "").match(/\[DX:([^\]]+)\]/);
+    return m ? (m[1] || "").trim() : null; // returns username who marked done, or null
+  }
+  function stripDoneFromBem(bem) {
+    return (bem || "").replace(/\s*\[DX:[^\]]+\]\s*/g, "").trim();
+  }
+  function withDoneInBem(bem, user) {
+    const base = stripDoneFromBem(bem);
+    return `${base}${base ? " " : ""}[DX:${user}]`;
+  }
+
+
   useEffect(() => {
     if (!auth) return;
     setLoading(true);
@@ -409,6 +426,18 @@ setLoading(false);
           if (ts) timers[r.id] = ts;
         }
         setCallTimers(timers);
+        // Universal-Done: global und benutzerbezogen aus Bemerkung parsen
+        const doneAny = {};
+        const doneMine = {};
+        for (const r of rows) {
+          const by = parseDoneFromBem(r.bemerkung);
+          if (by) {
+            doneAny[r.id] = by;
+            if (username && by === username) doneMine[r.id] = true;
+          }
+        }
+        setDoneByUser(doneMine);
+        setDoneGlobal(doneAny);
         setLoading(false);
       })
       .catch(() => { setError("Fehler beim Laden"); setLoading(false); });
@@ -425,8 +454,8 @@ setLoading(false);
     const rueck = b.rueckflugdatum?.slice(0, 10);
     return abflug === isoToday || rueck === isoToday;
   });
-
-  filtered = filtered.filter(b => !(doneByUser && doneByUser[b.id]));
+  // Globale Done-Tickets ausblenden (für alle Nutzer)
+  filtered = filtered.filter(b => !parseDoneFromBem(b.bemerkung));
 } else if (tab === "2tage") {
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
@@ -441,7 +470,16 @@ setLoading(false);
       abflug === isoTomorrow || abflug === isoDayAfter ||
       rueck === isoTomorrow || rueck === isoDayAfter
     );
+  }
+else if (tab === "alle") {
+  // Globale Done-Tickets verbergen – außer die eigenen (damit man sie zurücksetzen kann)
+  filtered = filtered.filter(b => {
+    const by = parseDoneFromBem(b.bemerkung);
+    if (!by) return true;
+    return username && by === username;
   });
+}
+);
 }
   if (tab === "alle" && !alleShowAll) {
     const isoToday = today.toISOString().slice(0, 10);
@@ -477,7 +515,10 @@ setLoading(false);
   });
 
   function cardColor(b) {
-  if (tab === "alle") return (doneByUser && doneByUser[b.id]) ? "#666666" : "#e0e0e0";
+  if (tab === "alle") {
+    const by = parseDoneFromBem(b.bemerkung);
+    return (by && username && by === username) ? "#666666" : "#e0e0e0";
+  }
   // Immer nur mit reinen Datumsanteilen rechnen (Zeitzonen-sicherer)
   const today = new Date(); today.setHours(0,0,0,0);
   const abflug = new Date((b.abflugdatum || "").slice(0,10)); abflug.setHours(0,0,0,0);
@@ -751,7 +792,7 @@ for (const k of Object.keys(groupsByDate)) {
                         display: "flex",
                         alignItems: "flex-start",
                         fontSize: "32px",
-                        fontFamily: "Arial, Helvetica, sans-serif", color: (tab === "heute" && callTimers[row.id]) ? "#fff" : ((tab === "alle" && doneByUser && doneByUser[row.id]) ? "#fff" : undefined)
+                        fontFamily: "Arial, Helvetica, sans-serif", color: (tab === "heute" && callTimers[row.id]) ? "#fff" : ((tab === "alle" && username && parseDoneFromBem(row.bemerkung) === username) ? "#fff" : undefined)
                       }}
                     >
                       <div style={{ flex: 1, marginLeft: 18 }}>
@@ -775,7 +816,7 @@ for (const k of Object.keys(groupsByDate)) {
   </>
 )}</div>
                         <div className="info-zeile" style={{
-                          fontSize: 17, margin: "12px 0 0 0", color: (tab === "heute" && callTimers[row.id]) ? "#fff" : ((tab === "alle" && doneByUser && doneByUser[row.id]) ? "#fff" : "#444"), display: "flex", alignItems: "center", fontWeight: 700
+                          fontSize: 17, margin: "12px 0 0 0", color: (tab === "heute" && callTimers[row.id]) ? "#fff" : ((tab === "alle" && username && parseDoneFromBem(row.bemerkung) === username) ? "#fff" : "#444"), display: "flex", alignItems: "center", fontWeight: 700
                         }}>
                           <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#000" : "inherit" }}>{formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin}</span>
                           <span style={{ margin: "0 5px", fontWeight: 500 }}>|</span>
@@ -826,7 +867,14 @@ for (const k of Object.keys(groupsByDate)) {
   >✔️</span>
 )}
 </>) : (<>
-<span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status" onClick={() => setDoneByUser(prev => ({ ...prev, [row.id]: true }))}>✔️</span>
+<span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status"
+      onClick={() => { setDoneByUser(prev => ({ ...prev, [row.id]: true })); setDoneGlobal(prev => ({ ...prev, [row.id]: username || "" })); (async () => { try {
+        const newBem = withDoneInBem(row.bemerkung, username || "");
+        const payload = { ...row, bemerkung: newBem };
+        ["abflugdatum","rueckflugdatum","start","end"].forEach(f => { if (payload[f]) payload[f] = (typeof payload[f] === "string" ? payload[f].split("T")[0] : payload[f]); });
+        await fetch(`/api/proxy?path=api/admin/buchung/${row.id}`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` }, body: JSON.stringify(payload) });
+      } catch {} })(); }}
+>✔️</span>
                         {callTimers[row.id] ? (
                           <span
                             style={{
