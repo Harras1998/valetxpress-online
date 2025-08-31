@@ -260,7 +260,12 @@ export default function FahrerListe() {
   const [tab, setTab] = useState("alle");
   const [list, setList] = useState([]);
   const [auth, setAuth] = useState("");
-  const [login, setLogin] = useState({ user: "", pass: "" });
+  
+  // Beim Einloggen immer zuerst den "heute"-Tab zeigen
+  useEffect(() => {
+    if (auth) setTab("heute");
+  }, [auth]);
+const [login, setLogin] = useState({ user: "", pass: "" });
   const [suchtext, setSuchtext] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
