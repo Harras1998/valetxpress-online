@@ -271,6 +271,24 @@ export default function FahrerListe() {
   const [error, setError] = useState("");
   const [sort, setSort] = useState("abflugdatum");
   const [username, setUsername] = useState("");
+  // Pro-Benutzer "abgehakt"-Status (nur lokal sichtbar)
+  const [doneByUser, setDoneByUser] = useState({});
+  useEffect(() => {
+    try {
+      if (!username) return;
+      const key = `vx_done_${username}`;
+      const raw = localStorage.getItem(key);
+      setDoneByUser(raw ? JSON.parse(raw) : {});
+    } catch {}
+  }, [username]);
+  useEffect(() => {
+    try {
+      if (!username) return;
+      const key = `vx_done_${username}`;
+      localStorage.setItem(key, JSON.stringify(doneByUser || {}));
+    } catch {}
+  }, [username, doneByUser]);
+
   
   // Login aus localStorage wiederherstellen
   useEffect(() => {
@@ -407,6 +425,8 @@ setLoading(false);
     const rueck = b.rueckflugdatum?.slice(0, 10);
     return abflug === isoToday || rueck === isoToday;
   });
+
+  filtered = filtered.filter(b => !(doneByUser && doneByUser[b.id]));
 } else if (tab === "2tage") {
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
@@ -457,7 +477,7 @@ setLoading(false);
   });
 
   function cardColor(b) {
-  if (tab === "alle") return "#e0e0e0";
+  if (tab === "alle") return (doneByUser && doneByUser[b.id]) ? "#666666" : "#e0e0e0";
   // Immer nur mit reinen Datumsanteilen rechnen (Zeitzonen-sicherer)
   const today = new Date(); today.setHours(0,0,0,0);
   const abflug = new Date((b.abflugdatum || "").slice(0,10)); abflug.setHours(0,0,0,0);
@@ -731,7 +751,7 @@ for (const k of Object.keys(groupsByDate)) {
                         display: "flex",
                         alignItems: "flex-start",
                         fontSize: "32px",
-                        fontFamily: "Arial, Helvetica, sans-serif", color: (tab === "heute" && callTimers[row.id]) ? "#fff" : undefined
+                        fontFamily: "Arial, Helvetica, sans-serif", color: (tab === "heute" && callTimers[row.id]) ? "#fff" : ((tab === "alle" && doneByUser && doneByUser[row.id]) ? "#fff" : undefined)
                       }}
                     >
                       <div style={{ flex: 1, marginLeft: 18 }}>
@@ -755,7 +775,7 @@ for (const k of Object.keys(groupsByDate)) {
   </>
 )}</div>
                         <div className="info-zeile" style={{
-                          fontSize: 17, margin: "12px 0 0 0", color: (tab === "heute" && callTimers[row.id]) ? "#fff" : "#444", display: "flex", alignItems: "center", fontWeight: 700
+                          fontSize: 17, margin: "12px 0 0 0", color: (tab === "heute" && callTimers[row.id]) ? "#fff" : ((tab === "alle" && doneByUser && doneByUser[row.id]) ? "#fff" : "#444"), display: "flex", alignItems: "center", fontWeight: 700
                         }}>
                           <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#000" : "inherit" }}>{formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin}</span>
                           <span style={{ margin: "0 5px", fontWeight: 500 }}>|</span>
