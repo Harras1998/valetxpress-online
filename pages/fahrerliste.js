@@ -389,7 +389,6 @@ setLoading(false);
         setLoading(false);
       })
       .catch(() => { setError("Fehler beim Laden"); setLoading(false); });
-      .catch(() => { setError("Fehler beim Laden"); setLoading(false); });
   }, [auth, suchtext, sort]);
 
   useEffect(() => { if (tab !== "alle") setAlleShowAll(false); }, [tab]);
