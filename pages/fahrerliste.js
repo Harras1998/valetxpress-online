@@ -881,7 +881,6 @@ for (const k of Object.keys(groupsByDate)) {
         await fetch(`/api/proxy?path=api/admin/buchung/${row.id}`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` }, body: JSON.stringify(payload) });
   // Optimistisch auch die lokale Liste aktualisieren
   setList(prev => prev.map(b => b.id === row.id ? { ...b, bemerkung: newBem } : b));
-        setTab("heute");
         // Optimistisch auch die lokale Liste aktualisieren
         setList(prev => prev.map(b => b.id === row.id ? { ...b, bemerkung: newBem } : b));
       } catch {} })(); }}
