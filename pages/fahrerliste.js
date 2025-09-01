@@ -448,46 +448,40 @@ setLoading(false);
   let filtered = list;
   const today = new Date();
   if (tab === "heute") {
-    const isoToday = today.toISOString().slice(0, 10);
-    filtered = filtered.filter(b => {
-      const abflug = b.abflugdatum?.slice(0, 10);
-      const rueck = b.rueckflugdatum?.slice(0, 10);
-      return abflug === isoToday || rueck === isoToday;
-    });
-    // Globale Done-Tickets ausblenden (für alle Nutzer)
-    filtered = filtered.filter(b => {
-  const by = parseDoneFromBem(b.bemerkung) || (doneGlobal && doneGlobal[b.id]);
-  return !by;
+  const isoToday = today.toISOString().slice(0, 10);
+  filtered = filtered.filter(b => {
+    const abflug = b.abflugdatum?.slice(0, 10);
+    const rueck = b.rueckflugdatum?.slice(0, 10);
+    return abflug === isoToday || rueck === isoToday;
+  });
+  // Globale Done-Tickets ausblenden (für alle Nutzer)
+  filtered = filtered.filter(b => !parseDoneFromBem(b.bemerkung));
+} else if (tab === "2tage") {
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  const dayAfter = new Date(today);
+  dayAfter.setDate(today.getDate() + 2);
+  const isoTomorrow = tomorrow.toISOString().slice(0, 10);
+  const isoDayAfter = dayAfter.toISOString().slice(0, 10);
+  filtered = filtered.filter(b => {
+    const abflug = b.abflugdatum?.slice(0, 10);
+    const rueck = b.rueckflugdatum?.slice(0, 10);
+    return (
+      abflug === isoTomorrow || abflug === isoDayAfter ||
+      rueck === isoTomorrow || rueck === isoDayAfter
+    );
+  }
+else if (tab === "alle") {
+  // Globale Done-Tickets verbergen – außer die eigenen (damit man sie zurücksetzen kann)
+  filtered = filtered.filter(b => {
+    const by = parseDoneFromBem(b.bemerkung);
+    if (!by) return true;
+    return username && by === username;
+  });
 }
-  // Anzeige-Helfer: entfernt sowohl Timer-Tag [CT:...] als auch Done-Tag [DX:...]
-  function stripAllTags(bem) {
-    return stripDoneFromBem(stripCallTimer(bem));
-  }
 );
-  } else if (tab === "2tage") {
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
-    const dayAfter = new Date(today);
-    dayAfter.setDate(today.getDate() + 2);
-    const isoTomorrow = tomorrow.toISOString().slice(0, 10);
-    const isoDayAfter = dayAfter.toISOString().slice(0, 10);
-    filtered = filtered.filter(b => {
-      const abflug = b.abflugdatum?.slice(0, 10);
-      const rueck = b.rueckflugdatum?.slice(0, 10);
-      return (
-        abflug === isoTomorrow || abflug === isoDayAfter ||
-        rueck === isoTomorrow || rueck === isoDayAfter
-      );
-    });
-  } else if (tab === "alle") {
-    // Globale Done-Tickets verbergen – außer die eigenen (damit man sie zurücksetzen kann)
-    filtered = filtered.filter(b => {
-  const by = parseDoneFromBem(b.bemerkung) || (doneGlobal && doneGlobal[b.id]);
-  if (!by) return true;
-  return username && by === username;
-});
-  }
-if (tab === "alle" && !alleShowAll) {
+}
+  if (tab === "alle" && !alleShowAll) {
     const isoToday = today.toISOString().slice(0, 10);
     filtered = filtered.filter(b => {
       const abflug = (b.abflugdatum || "").slice(0, 10);
@@ -522,7 +516,7 @@ if (tab === "alle" && !alleShowAll) {
 
   function cardColor(b) {
   if (tab === "alle") {
-    const by = parseDoneFromBem(b.bemerkung) || (doneGlobal && doneGlobal[b.id]);
+    const by = parseDoneFromBem(b.bemerkung);
     return (by && username && by === username) ? "#666666" : "#e0e0e0";
   }
   // Immer nur mit reinen Datumsanteilen rechnen (Zeitzonen-sicherer)
@@ -798,7 +792,7 @@ for (const k of Object.keys(groupsByDate)) {
                         display: "flex",
                         alignItems: "flex-start",
                         fontSize: "32px",
-                        fontFamily: "Arial, Helvetica, sans-serif", color: (tab === "heute" && callTimers[row.id]) ? "#fff" : ((tab === "alle" && username && (parseDoneFromBem(row.bemerkung) || (doneGlobal && doneGlobal[row.id])) === username) ? "#fff" : undefined)
+                        fontFamily: "Arial, Helvetica, sans-serif", color: (tab === "heute" && callTimers[row.id]) ? "#fff" : ((tab === "alle" && username && parseDoneFromBem(row.bemerkung) === username) ? "#fff" : undefined)
                       }}
                     >
                       <div style={{ flex: 1, marginLeft: 18 }}>
@@ -822,11 +816,11 @@ for (const k of Object.keys(groupsByDate)) {
   </>
 )}</div>
                         <div className="info-zeile" style={{
-                          fontSize: 17, margin: "12px 0 0 0", color: (tab === "heute" && callTimers[row.id]) ? "#fff" : ((tab === "alle" && username && (parseDoneFromBem(row.bemerkung) || (doneGlobal && doneGlobal[row.id])) === username) ? "#fff" : "#444"), display: "flex", alignItems: "center", fontWeight: 700
+                          fontSize: 17, margin: "12px 0 0 0", color: (tab === "heute" && callTimers[row.id]) ? "#fff" : ((tab === "alle" && username && parseDoneFromBem(row.bemerkung) === username) ? "#fff" : "#444"), display: "flex", alignItems: "center", fontWeight: 700
                         }}>
                           <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#000" : "inherit" }}>{formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin}</span>
                           <span style={{ margin: "0 5px", fontWeight: 500 }}>|</span>
-                          <span className="notiz-label"><b>Notizen:</b> {stripAllTags(row.bemerkung)}</span>
+                          <span className="notiz-label"><b>Notizen:</b> {stripCallTimer(row.bemerkung)}</span>
                         </div>
                         <div className="info-zeile" style={{
                           display: "flex", alignItems: "center", gap: 0, fontSize: 17, marginTop: 0, fontWeight: 700
@@ -879,10 +873,6 @@ for (const k of Object.keys(groupsByDate)) {
         const payload = { ...row, bemerkung: newBem };
         ["abflugdatum","rueckflugdatum","start","end"].forEach(f => { if (payload[f]) payload[f] = (typeof payload[f] === "string" ? payload[f].split("T")[0] : payload[f]); });
         await fetch(`/api/proxy?path=api/admin/buchung/${row.id}`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` }, body: JSON.stringify(payload) });
-  // Optimistisch auch die lokale Liste aktualisieren
-  setList(prev => prev.map(b => b.id === row.id ? { ...b, bemerkung: newBem } : b));
-        // Optimistisch auch die lokale Liste aktualisieren
-        setList(prev => prev.map(b => b.id === row.id ? { ...b, bemerkung: newBem } : b));
       } catch {} })(); }}
 >✔️</span>
                         {callTimers[row.id] ? (
