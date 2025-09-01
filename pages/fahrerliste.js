@@ -357,68 +357,6 @@ const [editBuchung, setEditBuchung] = useState(null);
   function withCallTimer(bem, ts) {
     const base = stripCallTimer(bem);
     return `${base}${base ? " " : ""}[CT:${ts}]`;
-
-  // ---- Universal "Done" via [DX:username] Tag in bemerkung ----
-  function parseDXOwnerFromBem(bem) {
-    const m = (bem || "").match(/\[DX:([^\]]+)\]/);
-    return m ? m[1] : null;
-  }
-  function stripDXTag(bem) {
-    return (bem || "").replace(/\s*\[DX:[^\]]+\]\s*/g, "").trim();
-  }
-  function withDXTag(bem, user) {
-    const base = stripDXTag(bem);
-    return `${base}${base ? " " : ""}[DX:${user}]`;
-  }
-  // Helper: alle Steuer-Tags ausblenden für die Anzeige
-  function stripAllTags(bem) {
-    return stripDXTag(stripCallTimer(bem));
-  }
-
-  // ---- Server actions for Done/Reset ----
-  async function markDone(row, username, auth, sort, suchtext, setLoading, setList) {
-    try {
-      const newBem = withDXTag(row.bemerkung, username);
-      const payload = { ...row, bemerkung: newBem };
-      ["abflugdatum","rueckflugdatum","start","end"].forEach(f => {
-        if (payload[f]) payload[f] = (typeof payload[f] === "string" ? payload[f].split("T")[0] : payload[f]);
-      });
-      await fetch(`/api/proxy?path=api/admin/buchung/${row.id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` },
-        body: JSON.stringify(payload)
-      });
-      setLoading && setLoading(true);
-      let url = `/api/proxy?path=api/admin/buchungen&sort=${sort}&dir=asc`;
-      if (suchtext) url += `&suchtext=${encodeURIComponent(suchtext)}`;
-      const r = await fetch(url, { headers: { Authorization: `Basic ${auth}` } });
-      const data = await r.json();
-      setList && setList(data.buchungen || []);
-    } catch {}
-  }
-
-  async function resetDone(row, auth, sort, suchtext, setLoading, setList, setCallTimers, setTab) {
-    try {
-      const cleanedBem = stripDXTag(stripAllTags(row.bemerkung));
-      const payload = { ...row, bemerkung: cleanedBem };
-      ["abflugdatum","rueckflugdatum","start","end"].forEach(f => {
-        if (payload[f]) payload[f] = (typeof payload[f] === "string" ? payload[f].split("T")[0] : payload[f]);
-      });
-      await fetch(`/api/proxy?path=api/admin/buchung/${row.id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` },
-        body: JSON.stringify(payload)
-      });
-      setCallTimers && setCallTimers(prev => { const p = { ...prev }; delete p[row.id]; return p; });
-      setLoading && setLoading(true);
-      let url = `/api/proxy?path=api/admin/buchungen&sort=${sort}&dir=asc`;
-      if (suchtext) url += `&suchtext=${encodeURIComponent(suchtext)}`;
-      const r = await fetch(url, { headers: { Authorization: `Basic ${auth}` } });
-      const data = await r.json();
-      setList && setList(data.buchungen || []);
-      setTab && setTab("heute");
-    } catch {}
-  }
   }
 
 
@@ -454,6 +392,24 @@ setLoading(false);
   try { localStorage.removeItem("vx_auth"); localStorage.removeItem("vx_user"); } catch {}
 }
 
+// ---- Universal "Done" via [DX:username] Tag in bemerkung ----
+function parseDXOwnerFromBem(bem) {
+  const m = (bem || "").match(/\[DX:([^\]]+)\]/);
+  return m ? m[1] : null;
+}
+function stripDXTag(bem) {
+  return (bem || "").replace(/\s*\[DX:[^\]]+\]\s*/g, "").trim();
+}
+function withDXTag(bem, user) {
+  const base = stripDXTag(bem);
+  return `${base}${base ? " " : ""}[DX:${user}]`;
+}
+// Helper: alle Steuer-Tags (CT + DX) für die Anzeige ausblenden
+function stripAllTags(bem) {
+  return stripDXTag(stripCallTimer(bem));
+}
+
+
   useEffect(() => {
     if (!auth) return;
     setLoading(true);
@@ -488,10 +444,14 @@ setLoading(false);
     return abflug === isoToday || rueck === isoToday;
   });
 
-  filtered = filtered.filter(b => {
+  filtered = filtered.filter(b => !(doneByUser && doneByUser[b.id]));
+
+  
+filtered = filtered.filter(b => {
   const owner = parseDXOwnerFromBem(b.bemerkung);
   return !owner || owner === username;
 });
+
 } else if (tab === "2tage") {
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
@@ -514,17 +474,17 @@ setLoading(false);
       const abflug = (b.abflugdatum || "").slice(0, 10);
       const rueck = (b.rueckflugdatum || "").slice(0, 10);
       return abflug === isoToday || rueck === isoToday;
-    }
-
-  // Universal: Abgehakte Buchungen [DX:*] nur für den Ersteller sichtbar
-  if (tab === "alle") {
-    filtered = filtered.filter(b => {
-      const owner = parseDXOwnerFromBem(b.bemerkung);
-      return !owner || owner === username;
     });
   }
-);
-  }
+
+// Universal: Abgehakte Buchungen [DX:*] nur für den Ersteller sichtbar
+if (tab === "alle") {
+  filtered = filtered.filter(b => {
+    const owner = parseDXOwnerFromBem(b.bemerkung);
+    return !owner || owner === username;
+  });
+}
+
   if (suchtext) {
     const search = suchtext.toLowerCase();
     filtered = filtered.filter(b =>
@@ -551,7 +511,7 @@ setLoading(false);
   });
 
   function cardColor(b) {
-  if (tab === "alle") { const owner = parseDXOwnerFromBem(b.bemerkung); return owner ? "#666666" : "#e0e0e0"; }
+  if (tab === "alle") return (doneByUser && doneByUser[b.id]) ? "#666666" : "#e0e0e0";
   // Immer nur mit reinen Datumsanteilen rechnen (Zeitzonen-sicherer)
   const today = new Date(); today.setHours(0,0,0,0);
   const abflug = new Date((b.abflugdatum || "").slice(0,10)); abflug.setHours(0,0,0,0);
@@ -825,7 +785,7 @@ for (const k of Object.keys(groupsByDate)) {
                         display: "flex",
                         alignItems: "flex-start",
                         fontSize: "32px",
-                        fontFamily: "Arial, Helvetica, sans-serif", color: (tab === \"heute\" && callTimers[row.id]) ? \"#fff\" : ((tab === \"alle\" && parseDXOwnerFromBem(row.bemerkung)) ? \"#fff\" : undefined)
+                        fontFamily: "Arial, Helvetica, sans-serif", color: (tab === "heute" && callTimers[row.id]) ? "#fff" : ((tab === "alle" && doneByUser && doneByUser[row.id]) ? "#fff" : undefined)
                       }}
                     >
                       <div style={{ flex: 1, marginLeft: 18 }}>
@@ -849,7 +809,7 @@ for (const k of Object.keys(groupsByDate)) {
   </>
 )}</div>
                         <div className="info-zeile" style={{
-                          fontSize: 17, margin: "12px 0 0 0", color: (tab === \"heute\" && callTimers[row.id]) ? \"#fff\" : ((tab === \"alle\" && parseDXOwnerFromBem(row.bemerkung)) ? \"#fff\" : \"#444\"), display: "flex", alignItems: "center", fontWeight: 700
+                          fontSize: 17, margin: "12px 0 0 0", color: (tab === "heute" && callTimers[row.id]) ? "#fff" : ((tab === "alle" && doneByUser && doneByUser[row.id]) ? "#fff" : "#444"), display: "flex", alignItems: "center", fontWeight: 700
                         }}>
                           <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#000" : "inherit" }}>{formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin}</span>
                           <span style={{ margin: "0 5px", fontWeight: 500 }}>|</span>
@@ -886,21 +846,109 @@ for (const k of Object.keys(groupsByDate)) {
 <span style={{ fontSize: 20, color: "#444", cursor: "default", visibility: "hidden" }}>📞</span>
 </>) : tab === "alle" ? (<>
 <span style={{ fontSize: 20, color: "#444", cursor: "default", visibility: "hidden" }}>📞</span>
-{doneByUser && doneByUser[row.id] ? (
+{(doneByUser && doneByUser[row.id]) || parseDXOwnerFromBem(row.bemerkung) === username ? (
   <span
     style={{ fontSize: 20, color: "#fff", cursor: "pointer" }}
     title="Zurücksetzen"
-    onClick={() => resetDone(row, auth, sort, suchtext, setLoading, setList, setCallTimers, setTab)}
+    
+onClick={() => { 
+  setDoneByUser(prev => { const p = { ...prev }; delete p[row.id]; return p; });
+  // Timer lokal entfernen
+  try { setCallTimers(prev => { const next = { ...prev }; if (next[row.id]) delete next[row.id]; return next; }); } catch {}
+  (async () => { try {
+    const cleanedBem = stripDXTag(stripCallTimer(row.bemerkung));
+    const payload = { ...row, bemerkung: cleanedBem };
+    ["abflugdatum","rueckflugdatum","start","end"].forEach(f => {
+      if (payload[f]) payload[f] = (typeof payload[f] === "string" ? payload[f].split("T")[0] : payload[f]);
+    });
+    await fetch(`/api/proxy?path=api/admin/buchung/${row.id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` },
+      body: JSON.stringify(payload)
+    });
+    // Liste neu laden & Timer-Stände aus Backend neu aufbauen
+    setLoading(true);
+    let url = `/api/proxy?path=api/admin/buchungen&sort=${sort}&dir=asc`;
+    if (suchtext) url += `&suchtext=${encodeURIComponent(suchtext)}`;
+    const r = await fetch(url, { headers: { Authorization: `Basic ${auth}` } });
+    const data = await r.json();
+    setList(data.buchungen || []);
+    const timers = {};
+    for (const r2 of (data.buchungen || [])) {
+      const ts = parseCallTimerFromBem(r2.bemerkung);
+      if (ts) timers[r2.id] = ts;
+    }
+    setCallTimers(timers);
+    setLoading(false);
+    // Nach Reset in den Tab "heute" springen
+    setTab("heute");
+  } catch {} })();
+}}
+
   >↻</span>
 ) : (
   <span
     style={{ fontSize: 20, color: "#444", cursor: "pointer" }}
     title="Status"
-    onClick={() => markDone(row, username, auth, sort, suchtext, setLoading, setList)}
+    onClick={() => { 
+  setDoneByUser(prev => ({ ...prev, [row.id]: true }));
+  (async () => { try {
+    const newBem = withDXTag(row.bemerkung, username);
+    const payload = { ...row, bemerkung: newBem };
+    ["abflugdatum","rueckflugdatum","start","end"].forEach(f => {
+      if (payload[f]) payload[f] = (typeof payload[f] === "string" ? payload[f].split("T")[0] : payload[f]);
+    });
+    await fetch(`/api/proxy?path=api/admin/buchung/${row.id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` },
+      body: JSON.stringify(payload)
+    });
+    setLoading(true);
+    let url = `/api/proxy?path=api/admin/buchungen&sort=${sort}&dir=asc`;
+    if (suchtext) url += `&suchtext=${encodeURIComponent(suchtext)}`;
+    const r = await fetch(url, { headers: { Authorization: `Basic ${auth}` } });
+    const data = await r.json();
+    setList(data.buchungen || []);
+    const timers = {};
+    for (const r2 of (data.buchungen || [])) {
+      const ts = parseCallTimerFromBem(r2.bemerkung);
+      if (ts) timers[r2.id] = ts;
+    }
+    setCallTimers(timers);
+    setLoading(false);
+  } catch {} })();
+}}
   >✔️</span>
 )}
 </>) : (<>
-<span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status" onClick={() => markDone(row, username, auth, sort, suchtext, setLoading, setList)}>✔️</span>
+<span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status" onClick={() => { 
+  setDoneByUser(prev => ({ ...prev, [row.id]: true }));
+  (async () => { try {
+    const newBem = withDXTag(row.bemerkung, username);
+    const payload = { ...row, bemerkung: newBem };
+    ["abflugdatum","rueckflugdatum","start","end"].forEach(f => {
+      if (payload[f]) payload[f] = (typeof payload[f] === "string" ? payload[f].split("T")[0] : payload[f]);
+    });
+    await fetch(`/api/proxy?path=api/admin/buchung/${row.id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` },
+      body: JSON.stringify(payload)
+    });
+    setLoading(true);
+    let url = `/api/proxy?path=api/admin/buchungen&sort=${sort}&dir=asc`;
+    if (suchtext) url += `&suchtext=${encodeURIComponent(suchtext)}`;
+    const r = await fetch(url, { headers: { Authorization: `Basic ${auth}` } });
+    const data = await r.json();
+    setList(data.buchungen || []);
+    const timers = {};
+    for (const r2 of (data.buchungen || [])) {
+      const ts = parseCallTimerFromBem(r2.bemerkung);
+      if (ts) timers[r2.id] = ts;
+    }
+    setCallTimers(timers);
+    setLoading(false);
+  } catch {} })();
+}}>✔️</span>
                         {callTimers[row.id] ? (
                           <span
                             style={{
