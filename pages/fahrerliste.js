@@ -796,7 +796,7 @@ for (const k of Object.keys(groupsByDate)) {
                         <div className="fahrer-card-title" style={{ fontWeight: "bold", marginBottom: 0, fontSize: "20px" }}>{tab === "2tage" ? (
   <>
     {(dateOnlyISO(row.rueckflugdatum) === day ? row.rueckflugUhrzeit : row.ankunftUhrzeit) || ""} | <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#222" : "inherit" }}>{row.vorname} {row.nachname}</span> | {row.anzahl_personen ? (row.anzahl_personen + "/ ") : ""} | {row.reiseziel} |{" "}
-    <a className="telefon-link" href={`tel:${row.telefon}`} style={{ textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a> |{" "}
+    <a className="telefon-link" href={`tel:${row.telefon}`} style={{ color: (tab === "alle" && ((doneByUser && doneByUser[row.id]) || parseDXOwnerFromBem(row.bemerkung))) ? "#fff" : "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a> |{" "}
     {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
       ? "All"
       : (row.typ && row.typ.charAt ? (row.typ.charAt(0).toUpperCase() + row.typ.slice(1)) : row.typ)
@@ -808,14 +808,14 @@ for (const k of Object.keys(groupsByDate)) {
                           {(dateOnlyISO(row.rueckflugdatum) === day ? row.rueckflugUhrzeit : row.ankunftUhrzeit) || ""} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
                             ? "All"
                             : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#222" : "inherit" }}>{row.vorname} {row.nachname}</span> | {row.anzahl_personen ? (row.anzahl_personen + "/ ") : ""} | {row.reiseziel} |{" "}
-                          <a className="telefon-link" href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a> | 
+                          <a className="telefon-link" href={`tel:${row.telefon}`} style={{ color: (tab === "alle" && ((doneByUser && doneByUser[row.id]) || parseDXOwnerFromBem(row.bemerkung))) ? "#fff" : "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a> | 
                         
   </>
 )}</div>
                         <div className="info-zeile" style={{
                           fontSize: 17, margin: "12px 0 0 0", color: (tab === "heute" && callTimers[row.id]) ? "#fff" : ((tab === "alle" && doneByUser && doneByUser[row.id]) ? "#fff" : "#444"), display: "flex", alignItems: "center", fontWeight: 700
                         }}>
-                          <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#000" : "inherit" }}>{formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin}</span>
+                          <span style={{ color: (tab === "alle" && ((doneByUser && doneByUser[row.id]) || parseDXOwnerFromBem(row.bemerkung))) ? "#000" : (tab === "heute" && callTimers[row.id]) ? "#000" : "inherit" }}>{formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin}</span>
                           <span style={{ margin: "0 5px", fontWeight: 500 }}>|</span>
                           <span className="notiz-label"><b>Notizen:</b> {stripAllTags(row.bemerkung)}</span>
                         </div>
@@ -826,7 +826,7 @@ for (const k of Object.keys(groupsByDate)) {
                             {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
                           </span>
                           <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#fff" : "#888", margin: "0 5px" }}>|</span>
-                          <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#fff" : "#111" }}>{row.kennzeichen}</span>
+                          <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#fff" : ((tab === "alle" && ((doneByUser && doneByUser[row.id]) || parseDXOwnerFromBem(row.bemerkung))) ? "#fff" : "#111") }}>{row.kennzeichen}</span>
                           <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#fff" : "#888", margin: "0 5px" }}>|</span>
                           <span style={{ color: "red" }}>{priceDisplay(row)}</span>
                         </div>
