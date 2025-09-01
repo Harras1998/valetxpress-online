@@ -403,12 +403,7 @@ setLoading(false);
   function stripDoneFromBem(bem) {
     return (bem || "").replace(/\s*\[DX:[^\]]+\]\s*/g, "").trim();
   }
-  
-  // Anzeige-Helfer: entfernt sowohl Timer-Tag [CT:] als auch Done-Tag [DX:]
-  function stripAllTags(bem) {
-    return stripDoneFromBem(stripCallTimer(bem));
-  }
-function withDoneInBem(bem, user) {
+  function withDoneInBem(bem, user) {
     const base = stripDoneFromBem(bem);
     return `${base}${base ? " " : ""}[DX:${user}]`;
   }
@@ -424,7 +419,7 @@ function withDoneInBem(bem, user) {
       .then(data => {
         const rows = data.buchungen || [];
         setList(rows);
-        // Universal-CallTimer: aus Bemerkung [CT:] in lokalen Zustand übernehmen
+        // Universal-CallTimer: aus Bemerkung [CT:...] in lokalen Zustand übernehmen
         const timers = {};
         for (const r of rows) {
           const ts = parseCallTimerFromBem(r.bemerkung);
@@ -450,8 +445,7 @@ function withDoneInBem(bem, user) {
 
   useEffect(() => { if (tab !== "alle") setAlleShowAll(false); }, [tab]);
 
-  
-let filtered = list;
+  let filtered = list;
   const today = new Date();
   if (tab === "heute") {
     const isoToday = today.toISOString().slice(0, 10);
@@ -462,9 +456,14 @@ let filtered = list;
     });
     // Globale Done-Tickets ausblenden (für alle Nutzer)
     filtered = filtered.filter(b => {
-      const by = parseDoneFromBem(b.bemerkung) || (doneGlobal && doneGlobal[b.id]);
-      return !by;
-    });
+  const by = parseDoneFromBem(b.bemerkung) || (doneGlobal && doneGlobal[b.id]);
+  return !by;
+}
+  // Anzeige-Helfer: entfernt sowohl Timer-Tag [CT:...] als auch Done-Tag [DX:...]
+  function stripAllTags(bem) {
+    return stripDoneFromBem(stripCallTimer(bem));
+  }
+);
   } else if (tab === "2tage") {
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
@@ -483,10 +482,10 @@ let filtered = list;
   } else if (tab === "alle") {
     // Globale Done-Tickets verbergen – außer die eigenen (damit man sie zurücksetzen kann)
     filtered = filtered.filter(b => {
-      const by = parseDoneFromBem(b.bemerkung) || (doneGlobal && doneGlobal[b.id]);
-      if (!by) return true;
-      return username && by === username;
-    });
+  const by = parseDoneFromBem(b.bemerkung) || (doneGlobal && doneGlobal[b.id]);
+  if (!by) return true;
+  return username && by === username;
+});
   }
 if (tab === "alle" && !alleShowAll) {
     const isoToday = today.toISOString().slice(0, 10);
@@ -505,7 +504,7 @@ if (tab === "alle" && !alleShowAll) {
       (b.flugnummerRueck || "").toLowerCase().includes(search)
     );
   }
-  filtered = [filtered].sort((a, b) => {
+  filtered = [...filtered].sort((a, b) => {
     if (sort === "name") {
       const an = (a.nachname + a.vorname).toLowerCase();
       const bn = (b.nachname + b.vorname).toLowerCase();
@@ -561,16 +560,22 @@ function keyForTab(b) {
   const abf = dateOnlyISO(b.abflugdatum);
   const rue = dateOnlyISO(b.rueckflugdatum);
   if (tab === "heute") {
-    return (rue === isoToday) ? rue : abf;
+    if (rue === isoToday) return rue;
+    return abf;
   } else if (tab === "2tage") {
-    return ((rue === isoTomorrow) || (rue === isoDayAfter)) ? rue : abf;
+    if (rue === isoTomorrow || rue === isoDayAfter) return rue;
+    return abf;
   } else { // tab === "alle"
+    // Gleiche Logik wie im Tab "Heute" (nur in der Standardansicht ohne "Alle Buchungen")
     if (!alleShowAll) {
-      return (rue === isoToday) ? rue : abf;
+      if (rue === isoToday) return rue;
+      return abf;
     }
+    // Bei "Alle Buchungen" weiterhin nach Abflugdatum gruppieren
     return abf;
   }
 }
+
 const groupsByDate = filtered.reduce((acc, b) => {
   const key = keyForTab(b);
   if (!key) return acc;
@@ -643,7 +648,7 @@ for (const k of Object.keys(groupsByDate)) {
                     type="text"
                     placeholder="Username"
                     value={login.user}
-                    onChange={e => setLogin({ login, user: e.target.value })}
+                    onChange={e => setLogin({ ...login, user: e.target.value })}
                     required
                     style={{
                       width: 260,
@@ -661,7 +666,7 @@ for (const k of Object.keys(groupsByDate)) {
                     type="password"
                     placeholder="Password"
                     value={login.pass}
-                    onChange={e => setLogin({ login, pass: e.target.value })}
+                    onChange={e => setLogin({ ...login, pass: e.target.value })}
                     required
                     style={{
                       width: 260,
@@ -750,7 +755,7 @@ for (const k of Object.keys(groupsByDate)) {
 )}
 
             <div style={{ padding: 12, color: "#777", fontSize: 18, marginLeft: 10 }}>
-              {loading ? "Lade Daten" : ""}
+              {loading ? "Lade Daten..." : ""}
               <b> Anzahl Kunden: {filtered.length}</b>
             </div>
 
@@ -847,7 +852,7 @@ for (const k of Object.keys(groupsByDate)) {
                         <span
                           style={{ fontSize: 20, color: "#444", cursor: "pointer" }}
                           title="Bearbeiten"
-                          onClick={() => setEditBuchung({ row })}
+                          onClick={() => setEditBuchung({ ...row })}
                         >✏️</span>
                         {tab === "2tage" ? (<>
 <span style={{ fontSize: 20, color: "#444", cursor: "default", visibility: "hidden" }}>✔️</span>
@@ -858,7 +863,7 @@ for (const k of Object.keys(groupsByDate)) {
   <span
     style={{ fontSize: 20, color: "#fff", cursor: "pointer" }}
     title="Zurücksetzen"
-    onClick={() => { setDoneByUser(prev => { const p = { ...prev }; delete p[row.id]; return p; }); setDoneGlobal(prev => { const p = { ...prev }; delete p[row.id]; return p; }); (async () => { try { const newBem = stripDoneFromBem(row.bemerkung); const payload = { ...row, bemerkung: newBem }; ["abflugdatum","rueckflugdatum","start","end"].forEach(f => { if (payload[f]) payload[f] = (typeof payload[f] === "string" ? payload[f].split("T")[0] : payload[f]); }); await fetch(`/api/proxy?path=api/admin/buchung/${row.id}`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` }, body: JSON.stringify(payload) }); setList(prev => prev.map(b => b.id === row.id ? { ...b, bemerkung: newBem } : b)); setTab("heute"); } catch {} })(); }}
+    onClick={() => setDoneByUser(prev => { const p = { ...prev }; delete p[row.id]; return p; })}
   >↻</span>
 ) : (
   <span
@@ -963,7 +968,7 @@ for (const k of Object.keys(groupsByDate)) {
       return dateString.split("T")[0];
     }
     // Kopie von editBuchung bearbeiten:
-    const dataToSend = { editBuchung };
+    const dataToSend = { ...editBuchung };
     ["abflugdatum", "rueckflugdatum", "start", "end"].forEach(field => {
       if (dataToSend[field]) dataToSend[field] = toDateString(dataToSend[field]);
     });
@@ -1005,51 +1010,51 @@ for (const k of Object.keys(groupsByDate)) {
                   {/* Alle Felder wie im Screenshot */}
                   <div style={{ marginBottom: 10 }}>
                     <label>Firma:</label><br />
-                    <input value={editBuchung.firma || ""} onChange={e => setEditBuchung({ editBuchung, firma: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                    <input value={editBuchung.firma || ""} onChange={e => setEditBuchung({ ...editBuchung, firma: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
                   </div>
                   <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
                     <div style={{ flex: 1 }}>
                       <label>Vorname:</label><br />
-                      <input value={editBuchung.vorname || ""} onChange={e => setEditBuchung({ editBuchung, vorname: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                      <input value={editBuchung.vorname || ""} onChange={e => setEditBuchung({ ...editBuchung, vorname: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
                     </div>
                     <div style={{ flex: 1 }}>
                       <label>Nachname:</label><br />
-                      <input value={editBuchung.nachname || ""} onChange={e => setEditBuchung({ editBuchung, nachname: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                      <input value={editBuchung.nachname || ""} onChange={e => setEditBuchung({ ...editBuchung, nachname: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
                     </div>
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label>Straße / Hausnr.:</label><br />
-                    <input value={editBuchung.strasse || ""} onChange={e => setEditBuchung({ editBuchung, strasse: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                    <input value={editBuchung.strasse || ""} onChange={e => setEditBuchung({ ...editBuchung, strasse: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
                   </div>
                   <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
                     <div style={{ flex: 1 }}>
                       <label>PLZ:</label><br />
-                      <input value={editBuchung.plz || ""} onChange={e => setEditBuchung({ editBuchung, plz: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                      <input value={editBuchung.plz || ""} onChange={e => setEditBuchung({ ...editBuchung, plz: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
                     </div>
                     <div style={{ flex: 2 }}>
                       <label>Ort:</label><br />
-                      <input value={editBuchung.ort || ""} onChange={e => setEditBuchung({ editBuchung, ort: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                      <input value={editBuchung.ort || ""} onChange={e => setEditBuchung({ ...editBuchung, ort: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
                     </div>
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label>Email:</label><br />
-                    <input value={editBuchung.email || ""} onChange={e => setEditBuchung({ editBuchung, email: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                    <input value={editBuchung.email || ""} onChange={e => setEditBuchung({ ...editBuchung, email: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label>Telefon:</label><br />
-                    <input value={editBuchung.telefon || ""} onChange={e => setEditBuchung({ editBuchung, telefon: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                    <input value={editBuchung.telefon || ""} onChange={e => setEditBuchung({ ...editBuchung, telefon: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label>Fahrzeugtyp/Modell:</label><br />
-                    <input value={editBuchung.auto || ""} onChange={e => setEditBuchung({ editBuchung, auto: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                    <input value={editBuchung.auto || ""} onChange={e => setEditBuchung({ ...editBuchung, auto: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label>KFZ-Kennzeichen:</label><br />
-                    <input value={editBuchung.kennzeichen || ""} onChange={e => setEditBuchung({ editBuchung, kennzeichen: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                    <input value={editBuchung.kennzeichen || ""} onChange={e => setEditBuchung({ ...editBuchung, kennzeichen: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label>Ankft Parkpl.:</label><br />
-                    <input value={editBuchung.ankunftUhrzeit || ""} onChange={e => setEditBuchung({ editBuchung, ankunftUhrzeit: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                    <input value={editBuchung.ankunftUhrzeit || ""} onChange={e => setEditBuchung({ ...editBuchung, ankunftUhrzeit: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
                   </div>
                   {/* Abflugdatum und Uhrzeit */}
                   <div style={{ marginBottom: 10 }}>
@@ -1057,13 +1062,13 @@ for (const k of Object.keys(groupsByDate)) {
                     <input
                       type="date"
                       value={editBuchung.abflugdatum ? editBuchung.abflugdatum.slice(0, 10) : ""}
-                      onChange={e => setEditBuchung({ editBuchung, abflugdatum: e.target.value })}
+                      onChange={e => setEditBuchung({ ...editBuchung, abflugdatum: e.target.value })}
                       style={{ fontSize: 20 }}
                     />
                     <input
                       type="time"
                       value={editBuchung.abflugUhrzeit || ""}
-                      onChange={e => setEditBuchung({ editBuchung, abflugUhrzeit: e.target.value })}
+                      onChange={e => setEditBuchung({ ...editBuchung, abflugUhrzeit: e.target.value })}
                       style={{ fontSize: 20, marginLeft: 8 }}
                     />
                   </div>
@@ -1073,57 +1078,57 @@ for (const k of Object.keys(groupsByDate)) {
                     <input
                       type="date"
                       value={editBuchung.rueckflugdatum ? editBuchung.rueckflugdatum.slice(0, 10) : ""}
-                      onChange={e => setEditBuchung({ editBuchung, rueckflugdatum: e.target.value })}
+                      onChange={e => setEditBuchung({ ...editBuchung, rueckflugdatum: e.target.value })}
                       style={{ fontSize: 20 }}
                     />
                     <input
                       type="time"
                       value={editBuchung.rueckflugUhrzeit || ""}
-                      onChange={e => setEditBuchung({ editBuchung, rueckflugUhrzeit: e.target.value })}
+                      onChange={e => setEditBuchung({ ...editBuchung, rueckflugUhrzeit: e.target.value })}
                       style={{ fontSize: 20, marginLeft: 8 }}
                     />
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label>Reiseziel:</label><br />
-                    <input value={editBuchung.reiseziel || ""} onChange={e => setEditBuchung({ editBuchung, reiseziel: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                    <input value={editBuchung.reiseziel || ""} onChange={e => setEditBuchung({ ...editBuchung, reiseziel: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label>Fluggesellschaft:</label><br />
-                    <input value={editBuchung.fluggesellschaft || ""} onChange={e => setEditBuchung({ editBuchung, fluggesellschaft: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                    <input value={editBuchung.fluggesellschaft || ""} onChange={e => setEditBuchung({ ...editBuchung, fluggesellschaft: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label>Flugnr. Abflug:</label><br />
-                    <input value={editBuchung.flugnummerHin || ""} onChange={e => setEditBuchung({ editBuchung, flugnummerHin: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                    <input value={editBuchung.flugnummerHin || ""} onChange={e => setEditBuchung({ ...editBuchung, flugnummerHin: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label>Flugnr. Rückflug:</label><br />
-                    <input value={editBuchung.flugnummerRueck || ""} onChange={e => setEditBuchung({ editBuchung, flugnummerRueck: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                    <input value={editBuchung.flugnummerRueck || ""} onChange={e => setEditBuchung({ ...editBuchung, flugnummerRueck: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label>Terminal:</label><br />
-                    <input value={editBuchung.terminal || ""} onChange={e => setEditBuchung({ editBuchung, terminal: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                    <input value={editBuchung.terminal || ""} onChange={e => setEditBuchung({ ...editBuchung, terminal: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label>Anzahl Personen:</label><br />
-                    <input type="number" min="1" max="10" value={editBuchung.anzahl_personen || ""} onChange={e => setEditBuchung({ editBuchung, anzahl_personen: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                    <input type="number" min="1" max="10" value={editBuchung.anzahl_personen || ""} onChange={e => setEditBuchung({ ...editBuchung, anzahl_personen: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label>
-                      <input type="checkbox" checked={!!editBuchung.handgepaeck} onChange={e => setEditBuchung({ editBuchung, handgepaeck: e.target.checked ? 1 : 0 })} />
+                      <input type="checkbox" checked={!!editBuchung.handgepaeck} onChange={e => setEditBuchung({ ...editBuchung, handgepaeck: e.target.checked ? 1 : 0 })} />
                       {" "}Handgepäck
                     </label>
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label>Sperrgepäck/Notizen:</label><br />
-                    <textarea value={editBuchung.bemerkung || ""} onChange={e => setEditBuchung({ editBuchung, bemerkung: e.target.value })} style={{ width: "100%", fontSize: 18 }} />
+                    <textarea value={editBuchung.bemerkung || ""} onChange={e => setEditBuchung({ ...editBuchung, bemerkung: e.target.value })} style={{ width: "100%", fontSize: 18 }} />
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label>Typ (valet/allinclusive):</label><br />
-                    <input value={editBuchung.typ || ""} onChange={e => setEditBuchung({ editBuchung, typ: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                    <input value={editBuchung.typ || ""} onChange={e => setEditBuchung({ ...editBuchung, typ: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label>Preis (€):</label><br />
-                    <input value={editBuchung.preis || ""} onChange={e => setEditBuchung({ editBuchung, preis: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
+                    <input value={editBuchung.preis || ""} onChange={e => setEditBuchung({ ...editBuchung, preis: e.target.value })} style={{ width: "100%", fontSize: 20 }} />
                   </div>
 
                   <div>
@@ -1136,7 +1141,7 @@ for (const k of Object.keys(groupsByDate)) {
                         border: "none", borderRadius: 14, marginTop: 22
                       }}
                     >
-                      {editSaving ? "Speichere" : "Änderung speichern"}
+                      {editSaving ? "Speichere..." : "Änderung speichern"}
                     </button>
                   </div>
                 </form>
