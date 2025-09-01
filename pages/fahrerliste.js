@@ -458,12 +458,7 @@ setLoading(false);
     filtered = filtered.filter(b => {
   const by = parseDoneFromBem(b.bemerkung) || (doneGlobal && doneGlobal[b.id]);
   return !by;
-}
-  // Anzeige-Helfer: entfernt sowohl Timer-Tag [CT:...] als auch Done-Tag [DX:...]
-  function stripAllTags(bem) {
-    return stripDoneFromBem(stripCallTimer(bem));
-  }
-);
+});
   } else if (tab === "2tage") {
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
@@ -826,7 +821,7 @@ for (const k of Object.keys(groupsByDate)) {
                         }}>
                           <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#000" : "inherit" }}>{formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin}</span>
                           <span style={{ margin: "0 5px", fontWeight: 500 }}>|</span>
-                          <span className="notiz-label"><b>Notizen:</b> {stripAllTags(row.bemerkung)}</span>
+                          <span className="notiz-label"><b>Notizen:</b> {stripCallTimer(row.bemerkung)}</span>
                         </div>
                         <div className="info-zeile" style={{
                           display: "flex", alignItems: "center", gap: 0, fontSize: 17, marginTop: 0, fontWeight: 700
