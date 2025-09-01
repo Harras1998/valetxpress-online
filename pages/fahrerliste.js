@@ -741,7 +741,7 @@ for (const k of Object.keys(groupsByDate)) {
   </div>
 )}
 
-            <div style={{ padding: 12, color: "#777", fontSize: 18, marginLeft: 10 }}>
+            <div style={{ padding: 12, color: "#777", fontSize: 18, marginLeft: 10, display: "flex", alignItems: "center", height: 38, lineHeight: "22px" }}>
               {loading ? "Lade Daten..." : ""}
               <b> Anzahl Kunden: {filtered.length}</b>
             </div>
@@ -764,7 +764,11 @@ for (const k of Object.keys(groupsByDate)) {
                       padding: "8px 14px",
                       borderTop: "1px solid #4677A2",
                       borderBottom: "1px solid #4677A2",
-                      marginTop: 0
+                      marginTop: 0,
+                      lineHeight: "22px",
+                      height: 38,
+                      alignItems: "center",
+                      display: "flex",
                     }}
                   >
                     {formatDE(day)}
