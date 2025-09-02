@@ -291,14 +291,17 @@ export default function FahrerListe() {
 
   
   
-  // Dynamische Viewport-Anpassung: skaliert die Seite auf Handy/Tablet wie bei ParkXpress
+  // Dynamische Viewport-Auto-Fit (mobil/tablet)
   useEffect(() => {
     try {
       const meta = document.querySelector('meta[name="viewport"]');
+      const root = () => document.getElementById('vx-root');
       const apply = () => {
         const w = window.innerWidth || document.documentElement.clientWidth || 0;
         if (w <= 1023) {
-          const design = 1024; // Referenzbreite (ähnlich iPad/ParkXpress)
+          const minDesign = 1024;
+          const contentW = Math.max(minDesign, (root()?.scrollWidth || minDesign));
+          const design = contentW + 2; // 1–2px Sicherheit
           const scale = Math.max(0.2, Math.min(1, w / design));
           meta && meta.setAttribute('content',
             `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`
@@ -307,12 +310,16 @@ export default function FahrerListe() {
           meta && meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
         }
       };
-      apply();
+      const t = setTimeout(apply, 0);
       window.addEventListener('resize', apply);
       window.addEventListener('orientationchange', apply);
+      document.fonts && document.fonts.ready && document.fonts.ready.then(apply).catch(()=>{});
+      window.addEventListener('load', apply);
       return () => {
+        clearTimeout(t);
         window.removeEventListener('resize', apply);
         window.removeEventListener('orientationchange', apply);
+        window.removeEventListener('load', apply);
       };
     } catch {}
   }, []);
@@ -625,10 +632,15 @@ for (const k of Object.keys(groupsByDate)) {
   return (
     <>
       <Head>
-        <meta name="viewport" content="width=1440, user-scalable=no" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+              <style>{`
+          html, body, #__next { margin: 0; padding: 0; width: 100%; }
+          * { box-sizing: border-box; }
+          @media (min-width: 1024px) { html, body { overflow-x: hidden; } }
+        `}</style>
       </Head>
       {!auth ? (
-        <div
+        <div id="vx-root"
           style={{
             maxWidth: 1440,
             minWidth: 1440,
@@ -720,7 +732,7 @@ for (const k of Object.keys(groupsByDate)) {
           <PXFooter />
         </div>
       ) : (
-        <div
+        <div id="vx-root"
           style={{
             maxWidth: 1440,
             minWidth: 1440,
