@@ -19,13 +19,13 @@ function PXHeader({
       background: "linear-gradient(#222 85%,#eee 100%)",
       margin: 0,
       padding: 0,
-      overflowX: "visible"
+      overflowX: "hidden"
     }}>
       <div style={{
         width: "100%",
         display: "flex",
         alignItems: "center",
-        padding: "0 0 0 var(--vx-pad-left, 24px)",
+        padding: "0 0 0 24px",
         height: 56,
         background: "linear-gradient(#222,#222 85%,#222a 100%)",
         borderBottom: "1.5px solid #666",
@@ -201,7 +201,9 @@ function PXFooter() {
     >
       <div
         style={{
-          width: "100%", maxWidth: "100%", minWidth: 0, margin: 0,
+          maxWidth: 1440,
+          minWidth: 1440,
+          margin: "0 auto",
           height: 56,
           display: "flex",
           alignItems: "center",
@@ -233,7 +235,9 @@ function PXEditFooter({ name }) {
     >
       <div
         style={{
-          width: "100%", maxWidth: "100%", minWidth: 0, margin: 0,
+          maxWidth: 1440,
+          minWidth: 1440,
+          margin: "0 auto",
           height: 56,
           display: "flex",
           alignItems: "center",
@@ -286,6 +290,33 @@ export default function FahrerListe() {
   }, [username, doneByUser]);
 
   
+  
+  // Dynamische Viewport-Anpassung: skaliert die Seite auf Handy/Tablet wie bei ParkXpress
+  useEffect(() => {
+    try {
+      const meta = document.querySelector('meta[name="viewport"]');
+      const apply = () => {
+        const w = window.innerWidth || document.documentElement.clientWidth || 0;
+        if (w <= 1023) {
+          const design = 1024; // Referenzbreite (ähnlich iPad/ParkXpress)
+          const scale = Math.max(0.2, Math.min(1, w / design));
+          meta && meta.setAttribute('content',
+            `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`
+          );
+        } else {
+          meta && meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+        }
+      };
+      apply();
+      window.addEventListener('resize', apply);
+      window.addEventListener('orientationchange', apply);
+      return () => {
+        window.removeEventListener('resize', apply);
+        window.removeEventListener('orientationchange', apply);
+      };
+    } catch {}
+  }, []);
+
   // Login aus localStorage wiederherstellen
   useEffect(() => {
     try {
@@ -594,26 +625,18 @@ for (const k of Object.keys(groupsByDate)) {
   return (
     <>
       <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-              <style>{`
-          html, body, #__next { margin: 0; padding: 0; width: 100%; }
-          * { box-sizing: border-box; }
-          /* Desktop/TV: lock horizontal scroll */
-          @media (min-width: 1024px) { html, body { overflow-x: hidden; } }
-          /* Mobile/Tablet: allow horizontal scroll, and keep rows on one line */
-          @media (max-width: 1023px) {
-            #vx-root { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
-            #vx-root .fahrer-card-title { white-space: nowrap !important; }
-            #vx-root .info-zeile { white-space: nowrap !important; }
-          }
-        `}</style>
+        <meta name="viewport" content="width=1440, user-scalable=no" />
       </Head>
       {!auth ? (
-        <div id="vx-root"
+        <div
           style={{
-            width: "100%", maxWidth: "100%", minWidth: 0, background: "#fff", fontFamily: "Arial", margin: 0,
+            maxWidth: 1440,
+            minWidth: 1440,
+            background: "#fff",
+            fontFamily: "Arial",
+            margin: "0 auto",
             minHeight: "100vh",
-            overflowX: "visible"
+            overflowX: "hidden"
           }}>
           <PXHeader
             username=""
@@ -697,11 +720,15 @@ for (const k of Object.keys(groupsByDate)) {
           <PXFooter />
         </div>
       ) : (
-        <div id="vx-root"
+        <div
           style={{
-            width: "100%", maxWidth: "100%", minWidth: 0, background: "#fff", fontFamily: "Arial", margin: 0,
+            maxWidth: 1440,
+            minWidth: 1440,
+            background: "#fff",
+            fontFamily: "Arial",
+            margin: "0 auto",
             minHeight: "100vh",
-            overflowX: "visible"
+            overflowX: "hidden"
           }}>
           <PXHeader
             username={username}
@@ -717,7 +744,7 @@ for (const k of Object.keys(groupsByDate)) {
             maxWidth: "100%",
             margin: "auto",
             marginTop: "auto",
-            overflowX: "visible"
+            overflowX: "hidden"
           }}>
 
 {tab === "alle" && (
@@ -1005,7 +1032,7 @@ onClick={() => {
               background: "#fff", zIndex: 10000, overflowY: "auto"
             }}>
               <div style={{
-                width: "100%", margin: 0, minHeight: "100vh", fontFamily: "Arial"
+                width: 1440, margin: "0 auto", minHeight: "100vh", fontFamily: "Arial"
               }}>
                 {/* Header */}
                 <div style={{
