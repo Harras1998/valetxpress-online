@@ -199,7 +199,9 @@ function PXFooter() {
     >
       <div
         style={{
-          width: "100%", maxWidth: "100%", minWidth: 0, margin: 0,
+          maxWidth: 1440,
+          minWidth: 1440,
+          margin: "0 auto",
           height: 56,
           display: "flex",
           alignItems: "center",
@@ -231,7 +233,9 @@ function PXEditFooter({ name }) {
     >
       <div
         style={{
-          width: "100%", maxWidth: "100%", minWidth: 0, margin: 0,
+          maxWidth: 1440,
+          minWidth: 1440,
+          margin: "0 auto",
           height: 56,
           display: "flex",
           alignItems: "center",
@@ -285,32 +289,26 @@ export default function FahrerListe() {
 
   
   
-  // Dynamische Viewport-Auto-Fit (mobil/tablet) – wiederhergestellt
-  // Dynamische Viewport-Auto-Fit (mobil/tablet + 1024)
-  
-  
-  
-  // Viewport Auto-Fit (≤1440px): passt die Breite zuverlässig an (mit ResizeObserver & MutationObserver)
+  // Viewport Auto-Fit (≤1440px): passt Breite an tatsächliche Inhaltsbreite an (mit Sicherheitsmarge)
   useEffect(() => {
     try {
       const meta = document.querySelector('meta[name="viewport"]');
       const root = () => document.getElementById('vx-root') || document.body;
-      let raf = 0;
+      let raf = 0, t1 = 0, t2 = 0;
 
       const compute = () => {
         const w = window.innerWidth || document.documentElement.clientWidth || 0;
         if (w <= 1440) {
           const el = root();
-          const contentW = Math.max(
-            1024,
-            el ? el.scrollWidth : 1024,
+          const widths = [
+            el ? el.scrollWidth : 0,
             document.documentElement.scrollWidth || 0,
             document.body ? document.body.scrollWidth : 0
-          );
-          const design = contentW + 6; // Sicherheitsmarge gegen Rundungsfehler
+          ];
+          const contentW = Math.max(1024, ...widths);
+          const design = Math.ceil(contentW + 12); // großzügige Sicherheitsmarge gegen Rundungsfehler
           const scale = Math.max(0.2, Math.min(1, w / design));
-          meta && meta.setAttribute(
-            'content',
+          meta && meta.setAttribute('content',
             `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`
           );
         } else {
@@ -320,14 +318,16 @@ export default function FahrerListe() {
 
       const schedule = () => { if (raf) cancelAnimationFrame(raf); raf = requestAnimationFrame(compute); };
 
-      // Erstberechnung & Standard-Events
+      // erste Läufe
       schedule();
       window.addEventListener('resize', schedule);
       window.addEventListener('orientationchange', schedule);
       window.addEventListener('load', compute);
       document.fonts && document.fonts.ready && document.fonts.ready.then(compute).catch(()=>{});
+      t1 = window.setTimeout(compute, 80);
+      t2 = window.setTimeout(compute, 260);
 
-      // Beobachte Breitenänderungen der Inhalte
+      // dynamische Änderungen am Inhalt
       const el = root();
       const ro = ('ResizeObserver' in window) ? new ResizeObserver(schedule) : null;
       ro && el && ro.observe(el);
@@ -336,6 +336,7 @@ export default function FahrerListe() {
 
       return () => {
         if (raf) cancelAnimationFrame(raf);
+        clearTimeout(t1); clearTimeout(t2);
         window.removeEventListener('resize', schedule);
         window.removeEventListener('orientationchange', schedule);
         window.removeEventListener('load', compute);
@@ -344,7 +345,6 @@ export default function FahrerListe() {
       };
     } catch {}
   }, []);
-
 
   // Login aus localStorage wiederherstellen
   useEffect(() => {
@@ -655,16 +655,16 @@ for (const k of Object.keys(groupsByDate)) {
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-              <style>{`
-          html, body, #__next { margin: 0; padding: 0; width: 100%; }
-          * { box-sizing: border-box; }
-          html, body { overflow-x: hidden; }
-        `}</style>
       </Head>
       {!auth ? (
         <div id="vx-root"
           style={{
-            width: "100%", maxWidth: "100%", minWidth: 0, background: "#fff", fontFamily: "Arial", margin: 0, minHeight: "100vh", }}>
+            maxWidth: 1440,
+            minWidth: 1440,
+            background: "#fff",
+            fontFamily: "Arial",
+            margin: "0 auto",
+            minHeight: "100vh", }}>
           <PXHeader
             username=""
             tab={tab}
@@ -749,7 +749,12 @@ for (const k of Object.keys(groupsByDate)) {
       ) : (
         <div id="vx-root"
           style={{
-            width: "100%", maxWidth: "100%", minWidth: 0, background: "#fff", fontFamily: "Arial", margin: 0, minHeight: "100vh", }}>
+            maxWidth: 1440,
+            minWidth: 1440,
+            background: "#fff",
+            fontFamily: "Arial",
+            margin: "0 auto",
+            minHeight: "100vh", }}>
           <PXHeader
             username={username}
             tab={tab}
@@ -1050,7 +1055,7 @@ onClick={() => {
               background: "#fff", zIndex: 10000, overflowY: "auto"
             }}>
               <div style={{
-                width: "100%", margin: 0, minHeight: "100vh", fontFamily: "Arial"
+                width: 1440, margin: "0 auto", minHeight: "100vh", fontFamily: "Arial"
               }}>
                 {/* Header */}
                 <div style={{
