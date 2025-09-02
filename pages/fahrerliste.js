@@ -289,36 +289,62 @@ export default function FahrerListe() {
   // Dynamische Viewport-Auto-Fit (mobil/tablet + 1024)
   
   
-  // Viewport Auto-Fit (≤1440px): passt die Breite an die tatsächliche Inhaltsbreite an
+  
+  // Viewport Auto-Fit (≤1440px): passt die Breite zuverlässig an (mit ResizeObserver & MutationObserver)
   useEffect(() => {
     try {
       const meta = document.querySelector('meta[name="viewport"]');
-      const root = () => document.getElementById('vx-root');
-      const apply = () => {
+      const root = () => document.getElementById('vx-root') || document.body;
+      let raf = 0;
+
+      const compute = () => {
         const w = window.innerWidth || document.documentElement.clientWidth || 0;
         if (w <= 1440) {
-          const minDesign = 1024;
-          const contentW = Math.max(minDesign, (root()?.scrollWidth || minDesign));
-          const design = contentW + 4; // kleine Sicherheitsmarge
+          const el = root();
+          const contentW = Math.max(
+            1024,
+            el ? el.scrollWidth : 1024,
+            document.documentElement.scrollWidth || 0,
+            document.body ? document.body.scrollWidth : 0
+          );
+          const design = contentW + 6; // Sicherheitsmarge gegen Rundungsfehler
           const scale = Math.max(0.2, Math.min(1, w / design));
-          meta && meta.setAttribute('content', `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`);
+          meta && meta.setAttribute(
+            'content',
+            `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`
+          );
         } else {
           meta && meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
         }
       };
-      const t = setTimeout(apply, 0);
-      window.addEventListener('resize', apply);
-      window.addEventListener('orientationchange', apply);
-      document.fonts && document.fonts.ready && document.fonts.ready.then(apply).catch(()=>{});
-      window.addEventListener('load', apply);
+
+      const schedule = () => { if (raf) cancelAnimationFrame(raf); raf = requestAnimationFrame(compute); };
+
+      // Erstberechnung & Standard-Events
+      schedule();
+      window.addEventListener('resize', schedule);
+      window.addEventListener('orientationchange', schedule);
+      window.addEventListener('load', compute);
+      document.fonts && document.fonts.ready && document.fonts.ready.then(compute).catch(()=>{});
+
+      // Beobachte Breitenänderungen der Inhalte
+      const el = root();
+      const ro = ('ResizeObserver' in window) ? new ResizeObserver(schedule) : null;
+      ro && el && ro.observe(el);
+      const mo = ('MutationObserver' in window) ? new MutationObserver(schedule) : null;
+      mo && el && mo.observe(el, { subtree: true, childList: true, attributes: true, attributeFilter: ['class','style'] });
+
       return () => {
-        clearTimeout(t);
-        window.removeEventListener('resize', apply);
-        window.removeEventListener('orientationchange', apply);
-        window.removeEventListener('load', apply);
+        if (raf) cancelAnimationFrame(raf);
+        window.removeEventListener('resize', schedule);
+        window.removeEventListener('orientationchange', schedule);
+        window.removeEventListener('load', compute);
+        ro && ro.disconnect();
+        mo && mo.disconnect();
       };
     } catch {}
   }, []);
+
 
   // Login aus localStorage wiederherstellen
   useEffect(() => {
@@ -632,10 +658,7 @@ for (const k of Object.keys(groupsByDate)) {
               <style>{`
           html, body, #__next { margin: 0; padding: 0; width: 100%; }
           * { box-sizing: border-box; }
-          /* Large desktop/TV: lock horizontal scroll */
-          @media (min-width: 1441px) { html, body { overflow-x: hidden; } }
-          /* <=1440px: allow horizontal scroll if needed (Auto-Fit should already avoid it) */
-          @media (max-width: 1440px) { html, body { overflow-x: auto; -webkit-overflow-scrolling: touch; } }
+          html, body { overflow-x: hidden; }
         `}</style>
       </Head>
       {!auth ? (
