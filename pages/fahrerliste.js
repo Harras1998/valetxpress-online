@@ -288,54 +288,22 @@ export default function FahrerListe() {
   
   
   // Dynamische Viewport-Auto-Fit (mobil/tablet) – wiederhergestellt
-  useEffect(() => {
-    try {
-      const meta = document.querySelector('meta[name="viewport"]');
-      const root = () => document.getElementById('vx-root');
-      const apply = () => {
-        const w = window.innerWidth || document.documentElement.clientWidth || 0;
-        if (w <= 1023) {
-          const minDesign = 1024;
-          const contentW = Math.max(minDesign, (root()?.scrollWidth || minDesign));
-          const design = contentW + 2; // kleine Sicherheitsmarge gegen 1px-Überlauf
-          const scale = Math.max(0.2, Math.min(1, w / design));
-          meta && meta.setAttribute('content',
-            `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`
-          );
-        } else {
-          meta && meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
-        }
-      };
-      const t = setTimeout(apply, 0);
-      window.addEventListener('resize', apply);
-      window.addEventListener('orientationchange', apply);
-      document.fonts && document.fonts.ready && document.fonts.ready.then(apply).catch(()=>{});
-      window.addEventListener('load', apply);
-      return () => {
-        clearTimeout(t);
-        window.removeEventListener('resize', apply);
-        window.removeEventListener('orientationchange', apply);
-        window.removeEventListener('load', apply);
-      };
-    } catch {}
-  }, []);
-
-  
   // Dynamische Viewport-Auto-Fit (mobil/tablet + 1024)
+  
+  
+  // Viewport Auto-Fit (≤1440px): passt die Breite an die tatsächliche Inhaltsbreite an
   useEffect(() => {
     try {
       const meta = document.querySelector('meta[name="viewport"]');
       const root = () => document.getElementById('vx-root');
       const apply = () => {
         const w = window.innerWidth || document.documentElement.clientWidth || 0;
-        if (w <= 1024) {
+        if (w <= 1440) {
           const minDesign = 1024;
           const contentW = Math.max(minDesign, (root()?.scrollWidth || minDesign));
-          const design = contentW + 2; // 1–2px Sicherheitsmarge gegen Abschneiden
+          const design = contentW + 2; // kleine Sicherheitsmarge
           const scale = Math.max(0.2, Math.min(1, w / design));
-          meta && meta.setAttribute('content',
-            `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`
-          );
+          meta && meta.setAttribute('content', `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`);
         } else {
           meta && meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
         }
@@ -666,9 +634,10 @@ for (const k of Object.keys(groupsByDate)) {
               <style>{`
           html, body, #__next { margin: 0; padding: 0; width: 100%; }
           * { box-sizing: border-box; }
-          @media (max-width: 1023px) { #vx-root { overflow-x: auto; -webkit-overflow-scrolling: touch; } }
-          @media (min-width: 1024px) { html, body { overflow-x: hidden; } }
-          @media (max-width: 1024px) { #vx-root { overflow-x: auto; -webkit-overflow-scrolling: touch; } }
+          /* Large desktop/TV: lock horizontal scroll */
+          @media (min-width: 1441px) { html, body { overflow-x: hidden; } }
+          /* <=1440px: allow scroll if ever needed; usually hidden due to Auto-Fit */
+          @media (max-width: 1440px) { #vx-root { overflow-x: auto; -webkit-overflow-scrolling: touch; } }
         `}</style>
       </Head>
       {!auth ? (
