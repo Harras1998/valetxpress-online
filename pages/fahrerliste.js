@@ -290,62 +290,76 @@ export default function FahrerListe() {
   
   
   
-  // Viewport Auto-Fit (≤1440px): iterative & robust (breitenbasiert, mit Sicherheitsmarge)
+  
+  // Viewport Auto-Fit (DOM-Scan): garantiert kein Abschneiden von 1440 px bis 320 px
   useEffect(() => {
     try {
       const meta = document.querySelector('meta[name="viewport"]');
       const root = () => document.getElementById('vx-root') || document.body;
 
-      const measure = () => {
-        const el = root();
-        const widths = [
-          el ? el.scrollWidth : 0,
-          document.documentElement.scrollWidth || 0,
+      const measureVisualWidth = () => {
+        let minLeft = 0, maxRight = 0;
+        const nodes = document.querySelectorAll('body *');
+        for (let i = 0; i < nodes.length; i++) {
+          const el = nodes[i];
+          const rect = el.getBoundingClientRect();
+          if (!isFinite(rect.left) || !isFinite(rect.right)) continue;
+          if (i === 0) { minLeft = rect.left; maxRight = rect.right; }
+          else { if (rect.left < minLeft) minLeft = rect.left; if (rect.right > maxRight) maxRight = rect.right; }
+        }
+        const visual = Math.max(0, maxRight - minLeft);
+        const scroll = Math.max(
+          document.scrollingElement ? document.scrollingElement.scrollWidth : 0,
+          document.documentElement ? document.documentElement.scrollWidth : 0,
           document.body ? document.body.scrollWidth : 0
-        ];
-        return Math.max(1024, ...widths);
+        );
+        return Math.max(visual, scroll, 1024);
       };
 
-      const applyOnce = (w) => {
-        // großzügige Marge: 1% + 12 px
-        const contentW = measure();
-        const design = Math.ceil(contentW * 1.01 + 12);
-        const scale = Math.max(0.2, Math.min(1, w / design));
-        meta && meta.setAttribute('content', `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`);
-      };
-
-      const refine = () => {
-        const w = window.innerWidth || document.documentElement.clientWidth || 0;
-        if (w > 1440) {
+      let raf = 0;
+      const apply = () => {
+        const viewportW = window.innerWidth || document.documentElement.clientWidth || 0;
+        if (viewportW > 1440) {
           meta && meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
           return;
         }
-        // erster Versuch
-        applyOnce(w);
-        // zwei Nachläufe, um Rundungs-/Layout-Änderungen aufzufangen
-        setTimeout(() => applyOnce(w), 60);
-        setTimeout(() => applyOnce(w), 180);
+        const contentW = measureVisualWidth();
+        const margin = Math.max(24, Math.ceil(contentW * 0.015)); // 1.5% oder min 24px
+        const design = Math.ceil(contentW + margin);
+        const scale = Math.max(0.2, Math.min(1, viewportW / design));
+        const current = meta ? meta.getAttribute('content') || '' : '';
+        const next = `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`;
+        if (current !== next) {
+          meta && meta.setAttribute('content', next);
+        }
       };
 
-      // initial + Events
-      refine();
-      const onResize = () => refine();
-      window.addEventListener('resize', onResize);
-      window.addEventListener('orientationchange', onResize);
-      window.addEventListener('load', refine);
-      document.fonts && document.fonts.ready && document.fonts.ready.then(refine).catch(()=>{});
+      const schedule = () => { if (raf) cancelAnimationFrame(raf); raf = requestAnimationFrame(apply); };
 
-      // Beobachte inhaltliche Änderungen
+      // initial & retries
+      schedule();
+      setTimeout(schedule, 60);
+      setTimeout(schedule, 180);
+      setTimeout(schedule, 380);
+
+      // events
+      window.addEventListener('resize', schedule);
+      window.addEventListener('orientationchange', schedule);
+      window.addEventListener('load', apply);
+      document.fonts && document.fonts.ready && document.fonts.ready.then(apply).catch(()=>{});
+
+      // observers
       const el = root();
-      const ro = ('ResizeObserver' in window) ? new ResizeObserver(refine) : null;
+      const ro = ('ResizeObserver' in window) ? new ResizeObserver(schedule) : null;
       ro && el && ro.observe(el);
-      const mo = ('MutationObserver' in window) ? new MutationObserver(refine) : null;
+      const mo = ('MutationObserver' in window) ? new MutationObserver(schedule) : null;
       mo && el && mo.observe(el, { subtree: true, childList: true, attributes: true });
 
       return () => {
-        window.removeEventListener('resize', onResize);
-        window.removeEventListener('orientationchange', onResize);
-        window.removeEventListener('load', refine);
+        if (raf) cancelAnimationFrame(raf);
+        window.removeEventListener('resize', schedule);
+        window.removeEventListener('orientationchange', schedule);
+        window.removeEventListener('load', apply);
         ro && ro.disconnect();
         mo && mo.disconnect();
       };
