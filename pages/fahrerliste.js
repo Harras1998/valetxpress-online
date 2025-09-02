@@ -299,7 +299,7 @@ export default function FahrerListe() {
         if (w <= 1440) {
           const minDesign = 1024;
           const contentW = Math.max(minDesign, (root()?.scrollWidth || minDesign));
-          const design = contentW + 2; // kleine Sicherheitsmarge
+          const design = contentW + 4; // kleine Sicherheitsmarge
           const scale = Math.max(0.2, Math.min(1, w / design));
           meta && meta.setAttribute('content', `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`);
         } else {
@@ -633,9 +633,9 @@ for (const k of Object.keys(groupsByDate)) {
           html, body, #__next { margin: 0; padding: 0; width: 100%; }
           * { box-sizing: border-box; }
           /* Large desktop/TV: lock horizontal scroll */
-          @media (min-width: 1024px) { html, body { overflow-x: hidden; } }
-          /* <=1440px: allow scroll if ever needed; usually hidden due to Auto-Fit */
-          @media (max-width: 1023px) { #vx-root { overflow-x: auto; -webkit-overflow-scrolling: touch; } }
+          @media (min-width: 1441px) { html, body { overflow-x: hidden; } }
+          /* <=1440px: allow horizontal scroll if needed (Auto-Fit should already avoid it) */
+          @media (max-width: 1440px) { html, body { overflow-x: auto; -webkit-overflow-scrolling: touch; } }
         `}</style>
       </Head>
       {!auth ? (
