@@ -25,7 +25,7 @@ function PXHeader({
         width: "100%",
         display: "flex",
         alignItems: "center",
-        padding: "0 0 0 24px",
+        padding: "0 0 0 var(--vx-pad-left, 24px)",
         height: 56,
         background: "linear-gradient(#222,#222 85%,#222a 100%)",
         borderBottom: "1.5px solid #666",
@@ -598,11 +598,18 @@ for (const k of Object.keys(groupsByDate)) {
               <style>{`
           html, body, #__next { margin: 0; padding: 0; width: 100%; }
           * { box-sizing: border-box; }
+          /* Desktop/TV: lock horizontal scroll */
           @media (min-width: 1024px) { html, body { overflow-x: hidden; } }
+          /* Mobile/Tablet: allow horizontal scroll, and keep rows on one line */
+          @media (max-width: 1023px) {
+            #vx-root { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+            #vx-root .fahrer-card-title { white-space: nowrap !important; }
+            #vx-root .info-zeile { white-space: nowrap !important; }
+          }
         `}</style>
       </Head>
       {!auth ? (
-        <div
+        <div id="vx-root"
           style={{
             width: "100%", maxWidth: "100%", minWidth: 0, background: "#fff", fontFamily: "Arial", margin: 0,
             minHeight: "100vh",
@@ -690,7 +697,7 @@ for (const k of Object.keys(groupsByDate)) {
           <PXFooter />
         </div>
       ) : (
-        <div
+        <div id="vx-root"
           style={{
             width: "100%", maxWidth: "100%", minWidth: 0, background: "#fff", fontFamily: "Arial", margin: 0,
             minHeight: "100vh",
