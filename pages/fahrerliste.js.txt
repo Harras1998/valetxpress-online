@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import Head from "next/head";
 
@@ -258,20 +257,109 @@ function PXEditFooter({ name }) {
 
 
 export default function FahrerListe() {
-  const [tab, setTab] = useState("alle");
+  const [tab, setTab] = useState("heute");
   const [list, setList] = useState([]);
   const [auth, setAuth] = useState("");
+  // Beim Einloggen immer zuerst den "heute"-Tab zeigen
+  useEffect(() => {
+    if (auth) setTab("heute");
+  }, [auth]);
+
   const [login, setLogin] = useState({ user: "", pass: "" });
   const [suchtext, setSuchtext] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [sort, setSort] = useState("abflugdatum");
   const [username, setUsername] = useState("");
-  const [editBuchung, setEditBuchung] = useState(null);
+  // Pro-Benutzer "abgehakt"-Status (nur lokal sichtbar)
+  const [doneByUser, setDoneByUser] = useState({});
+  useEffect(() => {
+    try {
+      if (!username) return;
+      const key = `vx_done_${username}`;
+      const raw = localStorage.getItem(key);
+      setDoneByUser(raw ? JSON.parse(raw) : {});
+    } catch {}
+  }, [username]);
+  useEffect(() => {
+    try {
+      if (!username) return;
+      const key = `vx_done_${username}`;
+      localStorage.setItem(key, JSON.stringify(doneByUser || {}));
+    } catch {}
+  }, [username, doneByUser]);
+
+  
+  // Login aus localStorage wiederherstellen
+  useEffect(() => {
+    try {
+      const savedAuth = localStorage.getItem("vx_auth");
+      const savedUser = localStorage.getItem("vx_user") || "";
+      if (savedAuth) { setAuth(savedAuth); setUsername(savedUser); }
+    } catch {}
+  }, []);
+const [editBuchung, setEditBuchung] = useState(null);
   const [editSaving, setEditSaving] = useState(false);
   const [alleShowAll, setAlleShowAll] = useState(false);
 
   const rueckModus = tab === "heute" || tab === "2tage";
+  // --- Timer/Call state for "Heute"-Tab ---
+  const [callTimers, setCallTimers] = useState({});
+  // Persistenz der Anruf-Timer über Reloads (global)
+  useEffect(() => {
+    try {
+      const keyUser = "vx_callTimers";
+      const raw = localStorage.getItem(keyUser);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object") {
+          setCallTimers(parsed);
+        }
+      }
+    } catch {}
+    // Nur laden, wenn sich der Benutzer ändert / bekannt wird
+  }, []);
+
+  useEffect(() => {
+    try {
+      const keyUser = "vx_callTimers";
+      localStorage.setItem(keyUser, JSON.stringify(callTimers));
+    } catch {}
+  }, [callTimers]);
+ // { [buchungId]: startTimestampMs }
+  const [timerTick, setTimerTick] = useState(0);
+  useEffect(() => {
+    const iv = setInterval(() => {
+      setTimerTick(t => (t + 1) % 3600); // trigger re-render each second
+    }, 1000);
+    return () => clearInterval(iv);
+  }, []);
+
+  function timerElapsedSec(id) {
+    const start = callTimers[id];
+    if (!start) return 0;
+    const diff = Math.floor((Date.now() - start) / 1000);
+    return diff % 3600; // loop every hour
+  }
+  function formatMMSS(totalSec) {
+    const mm = Math.floor(totalSec / 60);
+    const ss = totalSec % 60;
+    return String(mm).padStart(1, "0") + ":" + String(ss).padStart(2, "0");
+  }
+  // ---- Universal Timer via [CT:timestamp] Tag in bemerkung ----
+  function parseCallTimerFromBem(bem) {
+    const m = (bem || "").match(/\[CT:(\d{10,})\]/);
+    return m ? parseInt(m[1], 10) : null;
+  }
+  function stripCallTimer(bem) {
+    return (bem || "").replace(/\s*\[CT:\d{10,}\]\s*/g, "").trim();
+  }
+  function withCallTimer(bem, ts) {
+    const base = stripCallTimer(bem);
+    return `${base}${base ? " " : ""}[CT:${ts}]`;
+  }
+
+
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -288,7 +376,9 @@ export default function FahrerListe() {
       }
       setAuth(encoded);
       setUsername(login.user);
-      setLoading(false);
+      
+      try { localStorage.setItem("vx_auth", encoded); localStorage.setItem("vx_user", login.user); } catch {}
+setLoading(false);
     } catch (err) {
       setLoading(false);
       setError("Netzwerkfehler beim Login.");
@@ -298,7 +388,27 @@ export default function FahrerListe() {
     setAuth("");
     setUsername("");
     setLogin({ user: "", pass: "" });
-  }
+  
+  try { localStorage.removeItem("vx_auth"); localStorage.removeItem("vx_user"); } catch {}
+}
+
+// ---- Universal "Done" via [DX:username] Tag in bemerkung ----
+function parseDXOwnerFromBem(bem) {
+  const m = (bem || "").match(/\[DX:([^\]]+)\]/);
+  return m ? m[1] : null;
+}
+function stripDXTag(bem) {
+  return (bem || "").replace(/\s*\[DX:[^\]]+\]\s*/g, "").trim();
+}
+function withDXTag(bem, user) {
+  const base = stripDXTag(bem);
+  return `${base}${base ? " " : ""}[DX:${user}]`;
+}
+// Helper: alle Steuer-Tags (CT + DX) für die Anzeige ausblenden
+function stripAllTags(bem) {
+  return stripDXTag(stripCallTimer(bem));
+}
+
 
   useEffect(() => {
     if (!auth) return;
@@ -307,7 +417,18 @@ export default function FahrerListe() {
     if (suchtext) url += `&suchtext=${encodeURIComponent(suchtext)}`;
     fetch(url, { headers: { Authorization: `Basic ${auth}` } })
       .then(r => r.json())
-      .then(data => { setList(data.buchungen || []); setLoading(false); })
+      .then(data => {
+        const rows = data.buchungen || [];
+        setList(rows);
+        // Universal-CallTimer: aus Bemerkung [CT:...] in lokalen Zustand übernehmen
+        const timers = {};
+        for (const r of rows) {
+          const ts = parseCallTimerFromBem(r.bemerkung);
+          if (ts) timers[r.id] = ts;
+        }
+        setCallTimers(timers);
+        setLoading(false);
+      })
       .catch(() => { setError("Fehler beim Laden"); setLoading(false); });
   }, [auth, suchtext, sort]);
 
@@ -322,6 +443,15 @@ export default function FahrerListe() {
     const rueck = b.rueckflugdatum?.slice(0, 10);
     return abflug === isoToday || rueck === isoToday;
   });
+
+  filtered = filtered.filter(b => !(doneByUser && doneByUser[b.id]));
+
+  
+filtered = filtered.filter(b => {
+  const owner = parseDXOwnerFromBem(b.bemerkung);
+  return !owner || owner === username;
+});
+
 } else if (tab === "2tage") {
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
@@ -346,6 +476,15 @@ export default function FahrerListe() {
       return abflug === isoToday || rueck === isoToday;
     });
   }
+
+// Universal: Abgehakte Buchungen [DX:*] nur für den Ersteller sichtbar
+if (tab === "alle") {
+  filtered = filtered.filter(b => {
+    const owner = parseDXOwnerFromBem(b.bemerkung);
+    return !owner || owner === username;
+  });
+}
+
   if (suchtext) {
     const search = suchtext.toLowerCase();
     filtered = filtered.filter(b =>
@@ -372,7 +511,7 @@ export default function FahrerListe() {
   });
 
   function cardColor(b) {
-  if (tab === "alle") return "#e0e0e0";
+  if (tab === "alle") return (doneByUser && doneByUser[b.id]) ? "#666666" : "#e0e0e0";
   // Immer nur mit reinen Datumsanteilen rechnen (Zeitzonen-sicherer)
   const today = new Date(); today.setHours(0,0,0,0);
   const abflug = new Date((b.abflugdatum || "").slice(0,10)); abflug.setHours(0,0,0,0);
@@ -602,7 +741,7 @@ for (const k of Object.keys(groupsByDate)) {
   </div>
 )}
 
-            <div style={{ padding: 12, color: "#777", fontSize: 18, marginLeft: 10 }}>
+            <div style={{ padding: 12, color: "#777", fontSize: 18, marginLeft: 10, display: "flex", alignItems: "center", height: 38, lineHeight: "22px" }}>
               {loading ? "Lade Daten..." : ""}
               <b> Anzahl Kunden: {filtered.length}</b>
             </div>
@@ -625,7 +764,11 @@ for (const k of Object.keys(groupsByDate)) {
                       padding: "8px 14px",
                       borderTop: "1px solid #4677A2",
                       borderBottom: "1px solid #4677A2",
-                      marginTop: 0
+                      marginTop: 0,
+                      lineHeight: "22px",
+                      height: 38,
+                      alignItems: "center",
+                      display: "flex",
                     }}
                   >
                     {formatDE(day)}
@@ -638,7 +781,7 @@ for (const k of Object.keys(groupsByDate)) {
                       style={{
                         marginBottom: 0,
                         borderRadius: 0,
-                        background: cardColor(row),
+                        background: (tab === "heute" && callTimers[row.id] ? (cardColor(row) === "#fff" ? "linear-gradient(#79D25D,#2F8B0F)" : "linear-gradient(#6DB6E2,#3C87C8)") : cardColor(row)),
                         padding: "16px 0 8px 0",
                         boxShadow: "none",
                         border: "none",
@@ -646,14 +789,14 @@ for (const k of Object.keys(groupsByDate)) {
                         display: "flex",
                         alignItems: "flex-start",
                         fontSize: "32px",
-                        fontFamily: "Arial, Helvetica, sans-serif"
+                        fontFamily: "Arial, Helvetica, sans-serif", color: (tab === "heute" && callTimers[row.id]) ? "#fff" : ((tab === "alle" && doneByUser && doneByUser[row.id]) ? "#fff" : undefined)
                       }}
                     >
                       <div style={{ flex: 1, marginLeft: 18 }}>
                         <div className="fahrer-card-title" style={{ fontWeight: "bold", marginBottom: 0, fontSize: "20px" }}>{tab === "2tage" ? (
   <>
-    {(dateOnlyISO(row.rueckflugdatum) === day ? row.rueckflugUhrzeit : row.ankunftUhrzeit) || ""} | {row.vorname} {row.nachname} | {row.anzahl_personen ? (row.anzahl_personen + "/ ") : ""} | {row.reiseziel} |{" "}
-    <a className="telefon-link" href={`tel:${row.telefon}`} style={{ textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a> |{" "}
+    {(dateOnlyISO(row.rueckflugdatum) === day ? row.rueckflugUhrzeit : row.ankunftUhrzeit) || ""} | <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#222" : "inherit" }}>{row.vorname} {row.nachname}</span> | {row.anzahl_personen ? (row.anzahl_personen + "/ ") : ""} | {row.reiseziel} |{" "}
+    <a className="telefon-link" href={`tel:${row.telefon}`} style={{ color: (tab === "alle" && ((doneByUser && doneByUser[row.id]) || parseDXOwnerFromBem(row.bemerkung))) ? "#fff" : "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a> |{" "}
     {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
       ? "All"
       : (row.typ && row.typ.charAt ? (row.typ.charAt(0).toUpperCase() + row.typ.slice(1)) : row.typ)
@@ -664,27 +807,27 @@ for (const k of Object.keys(groupsByDate)) {
     
                           {(dateOnlyISO(row.rueckflugdatum) === day ? row.rueckflugUhrzeit : row.ankunftUhrzeit) || ""} | {row.terminal} | {row.status || "geplant"} | {["allinclusive", "all-inclusive", "all_inclusive"].includes((row.typ || "").toLowerCase())
                             ? "All"
-                            : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | {row.vorname} {row.nachname} | {row.anzahl_personen ? (row.anzahl_personen + "/ ") : ""} | {row.reiseziel} |{" "}
-                          <a className="telefon-link" href={`tel:${row.telefon}`} style={{ color: "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a> | 
+                            : row.typ.charAt(0).toUpperCase() + row.typ.slice(1)} | <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#222" : "inherit" }}>{row.vorname} {row.nachname}</span> | {row.anzahl_personen ? (row.anzahl_personen + "/ ") : ""} | {row.reiseziel} |{" "}
+                          <a className="telefon-link" href={`tel:${row.telefon}`} style={{ color: (tab === "alle" && ((doneByUser && doneByUser[row.id]) || parseDXOwnerFromBem(row.bemerkung))) ? "#fff" : "#001cff", textDecoration: "underline", fontWeight: 600 }}>{row.telefon}</a> | 
                         
   </>
 )}</div>
                         <div className="info-zeile" style={{
-                          fontSize: 17, margin: "12px 0 0 0", color: "#444", display: "flex", alignItems: "center", fontWeight: 700
+                          fontSize: 17, margin: "12px 0 0 0", color: (tab === "heute" && callTimers[row.id]) ? "#fff" : ((tab === "alle" && doneByUser && doneByUser[row.id]) ? "#fff" : "#444"), display: "flex", alignItems: "center", fontWeight: 700
                         }}>
-                          <span>{formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin}</span>
+                          <span style={{ color: (tab === "alle" && ((doneByUser && doneByUser[row.id]) || parseDXOwnerFromBem(row.bemerkung))) ? "#000" : (tab === "heute" && callTimers[row.id]) ? "#000" : "inherit" }}>{formatDE(row.abflugdatum)} {row.abflugUhrzeit} {row.flugnummerHin}</span>
                           <span style={{ margin: "0 5px", fontWeight: 500 }}>|</span>
-                          <span className="notiz-label"><b>Notizen:</b> {row.bemerkung}</span>
+                          <span className="notiz-label"><b>Notizen:</b> {stripAllTags(row.bemerkung)}</span>
                         </div>
                         <div className="info-zeile" style={{
                           display: "flex", alignItems: "center", gap: 0, fontSize: 17, marginTop: 0, fontWeight: 700
                         }}>
-                          <span style={{ color: "#16b000" }}>
+                          <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#0a5a00" : "#16b000" }}>
                             {formatDE(row.rueckflugdatum)} {row.rueckflugUhrzeit} {row.flugnummerRueck}
                           </span>
-                          <span style={{ color: "#888", margin: "0 5px" }}>|</span>
-                          <span style={{ color: "#111" }}>{row.kennzeichen}</span>
-                          <span style={{ color: "#888", margin: "0 5px" }}>|</span>
+                          <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#fff" : "#888", margin: "0 5px" }}>|</span>
+                          <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#fff" : ((tab === "alle" && ((doneByUser && doneByUser[row.id]) || parseDXOwnerFromBem(row.bemerkung))) ? "#fff" : "#111") }}>{row.kennzeichen}</span>
+                          <span style={{ color: (tab === "heute" && callTimers[row.id]) ? "#fff" : "#888", margin: "0 5px" }}>|</span>
                           <span style={{ color: "red" }}>{priceDisplay(row)}</span>
                         </div>
                       </div>
@@ -707,12 +850,141 @@ for (const k of Object.keys(groupsByDate)) {
 <span style={{ fontSize: 20, color: "#444", cursor: "default", visibility: "hidden" }}>📞</span>
 </>) : tab === "alle" ? (<>
 <span style={{ fontSize: 20, color: "#444", cursor: "default", visibility: "hidden" }}>📞</span>
-<span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
+{(doneByUser && doneByUser[row.id]) || parseDXOwnerFromBem(row.bemerkung) === username ? (
+  <span
+    style={{ fontSize: 20, color: "#fff", cursor: "pointer" }}
+    title="Zurücksetzen"
+    
+onClick={() => { 
+  setDoneByUser(prev => { const p = { ...prev }; delete p[row.id]; return p; });
+  // Timer lokal entfernen
+  try { setCallTimers(prev => { const next = { ...prev }; if (next[row.id]) delete next[row.id]; return next; }); } catch {}
+  (async () => { try {
+    const cleanedBem = stripDXTag(stripCallTimer(row.bemerkung));
+    const payload = { ...row, bemerkung: cleanedBem };
+    ["abflugdatum","rueckflugdatum","start","end"].forEach(f => {
+      if (payload[f]) payload[f] = (typeof payload[f] === "string" ? payload[f].split("T")[0] : payload[f]);
+    });
+    await fetch(`/api/proxy?path=api/admin/buchung/${row.id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` },
+      body: JSON.stringify(payload)
+    });
+    // Liste neu laden & Timer-Stände aus Backend neu aufbauen
+    setLoading(true);
+    let url = `/api/proxy?path=api/admin/buchungen&sort=${sort}&dir=asc`;
+    if (suchtext) url += `&suchtext=${encodeURIComponent(suchtext)}`;
+    const r = await fetch(url, { headers: { Authorization: `Basic ${auth}` } });
+    const data = await r.json();
+    setList(data.buchungen || []);
+    const timers = {};
+    for (const r2 of (data.buchungen || [])) {
+      const ts = parseCallTimerFromBem(r2.bemerkung);
+      if (ts) timers[r2.id] = ts;
+    }
+    setCallTimers(timers);
+    setLoading(false);
+    // Nach Reset in den Tab "heute" springen
+    setTab("heute");
+  } catch {} })();
+}}
+
+  >↻</span>
+) : (
+  <span
+    style={{ fontSize: 20, color: "#444", cursor: "pointer" }}
+    title="Status"
+    onClick={() => { 
+  setDoneByUser(prev => ({ ...prev, [row.id]: true }));
+  (async () => { try {
+    const newBem = withDXTag(row.bemerkung, username);
+    const payload = { ...row, bemerkung: newBem };
+    ["abflugdatum","rueckflugdatum","start","end"].forEach(f => {
+      if (payload[f]) payload[f] = (typeof payload[f] === "string" ? payload[f].split("T")[0] : payload[f]);
+    });
+    await fetch(`/api/proxy?path=api/admin/buchung/${row.id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` },
+      body: JSON.stringify(payload)
+    });
+    setLoading(true);
+    let url = `/api/proxy?path=api/admin/buchungen&sort=${sort}&dir=asc`;
+    if (suchtext) url += `&suchtext=${encodeURIComponent(suchtext)}`;
+    const r = await fetch(url, { headers: { Authorization: `Basic ${auth}` } });
+    const data = await r.json();
+    setList(data.buchungen || []);
+    const timers = {};
+    for (const r2 of (data.buchungen || [])) {
+      const ts = parseCallTimerFromBem(r2.bemerkung);
+      if (ts) timers[r2.id] = ts;
+    }
+    setCallTimers(timers);
+    setLoading(false);
+  } catch {} })();
+}}
+  >✔️</span>
+)}
 </>) : (<>
-<span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status">✔️</span>
-                        <a href={`tel:${row.telefon}`}>
-                          <span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Anrufen">📞</span>
-                        </a>
+<span style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Status" onClick={() => { 
+  setDoneByUser(prev => ({ ...prev, [row.id]: true }));
+  (async () => { try {
+    const newBem = withDXTag(row.bemerkung, username);
+    const payload = { ...row, bemerkung: newBem };
+    ["abflugdatum","rueckflugdatum","start","end"].forEach(f => {
+      if (payload[f]) payload[f] = (typeof payload[f] === "string" ? payload[f].split("T")[0] : payload[f]);
+    });
+    await fetch(`/api/proxy?path=api/admin/buchung/${row.id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` },
+      body: JSON.stringify(payload)
+    });
+    setLoading(true);
+    let url = `/api/proxy?path=api/admin/buchungen&sort=${sort}&dir=asc`;
+    if (suchtext) url += `&suchtext=${encodeURIComponent(suchtext)}`;
+    const r = await fetch(url, { headers: { Authorization: `Basic ${auth}` } });
+    const data = await r.json();
+    setList(data.buchungen || []);
+    const timers = {};
+    for (const r2 of (data.buchungen || [])) {
+      const ts = parseCallTimerFromBem(r2.bemerkung);
+      if (ts) timers[r2.id] = ts;
+    }
+    setCallTimers(timers);
+    setLoading(false);
+  } catch {} })();
+}}>✔️</span>
+                        {callTimers[row.id] ? (
+                          <span
+                            style={{
+                              fontSize: 36,
+                              fontWeight: 900,
+                              color: (timerElapsedSec(row.id) >= 600) ? "red" : "#fff",
+                              minWidth: 96,
+                              textAlign: "right",
+                              letterSpacing: 1,
+                              userSelect: "none",
+                              textShadow: "0 1px 3px #000a",
+                              cursor: "default" }}
+                            title="Timer läuft"
+                          >
+                            {formatMMSS(timerElapsedSec(row.id))}
+                          </span>
+                        ) : (
+                          <span onClick={() => { setCallTimers(prev => { const next = { ...prev }; if (next[row.id]) delete next[row.id]; else next[row.id] = Date.now(); return next; }); (async () => { try {
+              const ts = Date.now();
+              const newBem = withCallTimer(row.bemerkung, ts);
+              const payload = { ...row, bemerkung: newBem };
+                              ["abflugdatum","rueckflugdatum","start","end"].forEach(f => {
+                                if (payload[f]) payload[f] = (typeof payload[f] === "string" ? payload[f].split("T")[0] : payload[f]);
+                              });
+
+              await fetch(`/api/proxy?path=api/admin/buchung/${row.id}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` },
+                body: JSON.stringify(payload)
+              });
+            } catch {} })(); }} style={{ fontSize: 20, color: "#444", cursor: "pointer" }} title="Anrufen">📞</span>
+                        )}
 </>)}
 
                       </div>
@@ -784,7 +1056,17 @@ for (const k of Object.keys(groupsByDate)) {
     if (suchtext) url += `&suchtext=${encodeURIComponent(suchtext)}`;
     fetch(url, { headers: { Authorization: `Basic ${auth}` } })
       .then(r => r.json())
-      .then(data => { setList(data.buchungen || []); setLoading(false); });
+      .then(data => {
+        const rows = data.buchungen || [];
+        setList(rows);
+        const timers = {};
+        for (const r of rows) {
+          const ts = parseCallTimerFromBem(r.bemerkung);
+          if (ts) timers[r.id] = ts;
+        }
+        setCallTimers(timers);
+        setLoading(false);
+      });
   }}
                   style={{
                     margin: "0 auto", maxWidth: 1300, background: "#f8f8f8",

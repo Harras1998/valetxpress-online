@@ -25,7 +25,7 @@ function PXHeader({
         width: "100%",
         display: "flex",
         alignItems: "center",
-        padding: "0 0 0 24px",
+        padding: 0,
         height: 56,
         background: "linear-gradient(#222,#222 85%,#222a 100%)",
         borderBottom: "1.5px solid #666",
@@ -42,7 +42,7 @@ function PXHeader({
           <span style={{ color: "#fff" }}>press-</span>
           <span style={{ color: "#fff", fontWeight: 400, fontSize: 24 }}>Fahrerliste</span>
         </div>
-        <div style={{ minWidth: 50, textAlign: "right", paddingRight: 28, display: onLogout ? "block" : "none" }}>
+        <div style={{ minWidth: 50, textAlign: "right", paddingRight: 0, display: onLogout ? "block" : "none" }}>
           <span
             style={{
               fontSize: 36,
@@ -66,7 +66,7 @@ function PXHeader({
         justifyContent: "space-between",
         borderBottom: "1.5px solid #dedede"
       }}>
-        <div style={{ display: "flex", alignItems: "center", marginLeft: 14, gap: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", marginLeft: 0, gap: 0 }}>
           <button
             onClick={() => setTab && setTab("heute")}
             style={{
@@ -108,7 +108,7 @@ function PXHeader({
               cursor: setTab ? "pointer" : "default"
             }}>Alle</button>
         </div>
-        <div style={{ flex: 1, display: tab === "alle" ? "none" : "flex", alignItems: "center", margin: "0 26px", maxWidth: 620 }}>
+        <div style={{ flex: 1, display: tab === "alle" ? "none" : "flex", alignItems: "center", margin: 0, maxWidth: 620 }}>
           <input
             type="text"
             value={suchtext || ""}
@@ -126,7 +126,7 @@ function PXHeader({
             disabled={!setSuchtext}
           />
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 32, marginRight: 38 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 32, marginRight: 0 }}>
           <select
             value={sort || "abflugdatum"}
             onChange={e => setSort && setSort(e.target.value)}
@@ -201,9 +201,7 @@ function PXFooter() {
     >
       <div
         style={{
-          maxWidth: 1440,
-          minWidth: 1440,
-          margin: "0 auto",
+          width: "100vw", maxWidth: "100vw", minWidth: "100vw", margin: 0,
           height: 56,
           display: "flex",
           alignItems: "center",
@@ -235,9 +233,7 @@ function PXEditFooter({ name }) {
     >
       <div
         style={{
-          maxWidth: 1440,
-          minWidth: 1440,
-          margin: "0 auto",
+          width: "100vw", maxWidth: "100vw", minWidth: "100vw", margin: 0,
           height: 56,
           display: "flex",
           alignItems: "center",
@@ -598,7 +594,11 @@ for (const k of Object.keys(groupsByDate)) {
   return (
     <>
       <Head>
-        <meta name="viewport" content="width=1440, user-scalable=no" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+              <style>{`
+          html, body, #__next { margin: 0; padding: 0; width: 100%; overflow-x: hidden; }
+          * { box-sizing: border-box; }
+        `}</style>
       </Head>
       {!auth ? (
         <div
