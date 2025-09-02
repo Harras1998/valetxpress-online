@@ -286,6 +286,74 @@ export default function FahrerListe() {
   }, [username, doneByUser]);
 
   
+  
+  // Dynamische Viewport-Auto-Fit (mobil/tablet) – wiederhergestellt
+  useEffect(() => {
+    try {
+      const meta = document.querySelector('meta[name="viewport"]');
+      const root = () => document.getElementById('vx-root');
+      const apply = () => {
+        const w = window.innerWidth || document.documentElement.clientWidth || 0;
+        if (w <= 1023) {
+          const minDesign = 1024;
+          const contentW = Math.max(minDesign, (root()?.scrollWidth || minDesign));
+          const design = contentW + 2; // kleine Sicherheitsmarge gegen 1px-Überlauf
+          const scale = Math.max(0.2, Math.min(1, w / design));
+          meta && meta.setAttribute('content',
+            `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`
+          );
+        } else {
+          meta && meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+        }
+      };
+      const t = setTimeout(apply, 0);
+      window.addEventListener('resize', apply);
+      window.addEventListener('orientationchange', apply);
+      document.fonts && document.fonts.ready && document.fonts.ready.then(apply).catch(()=>{});
+      window.addEventListener('load', apply);
+      return () => {
+        clearTimeout(t);
+        window.removeEventListener('resize', apply);
+        window.removeEventListener('orientationchange', apply);
+        window.removeEventListener('load', apply);
+      };
+    } catch {}
+  }, []);
+
+  
+  // Dynamische Viewport-Auto-Fit (mobil/tablet + 1024)
+  useEffect(() => {
+    try {
+      const meta = document.querySelector('meta[name="viewport"]');
+      const root = () => document.getElementById('vx-root');
+      const apply = () => {
+        const w = window.innerWidth || document.documentElement.clientWidth || 0;
+        if (w <= 1024) {
+          const minDesign = 1024;
+          const contentW = Math.max(minDesign, (root()?.scrollWidth || minDesign));
+          const design = contentW + 2; // 1–2px Sicherheitsmarge gegen Abschneiden
+          const scale = Math.max(0.2, Math.min(1, w / design));
+          meta && meta.setAttribute('content',
+            `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`
+          );
+        } else {
+          meta && meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+        }
+      };
+      const t = setTimeout(apply, 0);
+      window.addEventListener('resize', apply);
+      window.addEventListener('orientationchange', apply);
+      document.fonts && document.fonts.ready && document.fonts.ready.then(apply).catch(()=>{});
+      window.addEventListener('load', apply);
+      return () => {
+        clearTimeout(t);
+        window.removeEventListener('resize', apply);
+        window.removeEventListener('orientationchange', apply);
+        window.removeEventListener('load', apply);
+      };
+    } catch {}
+  }, []);
+
   // Login aus localStorage wiederherstellen
   useEffect(() => {
     try {
@@ -598,6 +666,7 @@ for (const k of Object.keys(groupsByDate)) {
               <style>{`
           html, body, #__next { margin: 0; padding: 0; width: 100%; }
           * { box-sizing: border-box; }
+          @media (max-width: 1023px) { #vx-root { overflow-x: auto; -webkit-overflow-scrolling: touch; } }
           @media (min-width: 1024px) { html, body { overflow-x: hidden; } }
           @media (max-width: 1024px) { #vx-root { overflow-x: auto; -webkit-overflow-scrolling: touch; } }
         `}</style>
