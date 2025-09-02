@@ -18,9 +18,7 @@ function PXHeader({
       width: "100%",
       background: "linear-gradient(#222 85%,#eee 100%)",
       margin: 0,
-      padding: 0,
-      overflowX: "visible"
-    }}>
+      padding: 0, }}>
       <div style={{
         width: "100%",
         display: "flex",
@@ -635,16 +633,15 @@ for (const k of Object.keys(groupsByDate)) {
           html, body, #__next { margin: 0; padding: 0; width: 100%; }
           * { box-sizing: border-box; }
           /* Large desktop/TV: lock horizontal scroll */
-          @media (min-width: 1441px) { html, body { overflow-x: hidden; } }
+          @media (min-width: 1024px) { html, body { overflow-x: hidden; } }
           /* <=1440px: allow scroll if ever needed; usually hidden due to Auto-Fit */
-          @media (max-width: 1440px) { #vx-root { overflow-x: auto; -webkit-overflow-scrolling: touch; } }
+          @media (max-width: 1023px) { #vx-root { overflow-x: auto; -webkit-overflow-scrolling: touch; } }
         `}</style>
       </Head>
       {!auth ? (
         <div id="vx-root"
           style={{
-            width: "100%", maxWidth: "100%", minWidth: 0, background: "#fff", fontFamily: "Arial", margin: 0, minHeight: "100vh", overflowX: "visible"
-          }}>
+            width: "100%", maxWidth: "100%", minWidth: 0, background: "#fff", fontFamily: "Arial", margin: 0, minHeight: "100vh", }}>
           <PXHeader
             username=""
             tab={tab}
@@ -729,8 +726,7 @@ for (const k of Object.keys(groupsByDate)) {
       ) : (
         <div id="vx-root"
           style={{
-            width: "100%", maxWidth: "100%", minWidth: 0, background: "#fff", fontFamily: "Arial", margin: 0, minHeight: "100vh", overflowX: "visible"
-          }}>
+            width: "100%", maxWidth: "100%", minWidth: 0, background: "#fff", fontFamily: "Arial", margin: 0, minHeight: "100vh", }}>
           <PXHeader
             username={username}
             tab={tab}
@@ -744,9 +740,7 @@ for (const k of Object.keys(groupsByDate)) {
           <div style={{
             maxWidth: "100%",
             margin: "auto",
-            marginTop: "auto",
-            overflowX: "visible"
-          }}>
+            marginTop: "auto", }}>
 
 {tab === "alle" && (
   <div style={{ background: "#A6F4A5", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", margin: 0, position: "relative"}}>
