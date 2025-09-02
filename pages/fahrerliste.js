@@ -289,57 +289,63 @@ export default function FahrerListe() {
 
   
   
-  // Viewport Auto-Fit (≤1440px): passt Breite an tatsächliche Inhaltsbreite an (mit Sicherheitsmarge)
+  
+  // Viewport Auto-Fit (≤1440px): iterative & robust (breitenbasiert, mit Sicherheitsmarge)
   useEffect(() => {
     try {
       const meta = document.querySelector('meta[name="viewport"]');
       const root = () => document.getElementById('vx-root') || document.body;
-      let raf = 0, t1 = 0, t2 = 0;
 
-      const compute = () => {
-        const w = window.innerWidth || document.documentElement.clientWidth || 0;
-        if (w <= 1440) {
-          const el = root();
-          const widths = [
-            el ? el.scrollWidth : 0,
-            document.documentElement.scrollWidth || 0,
-            document.body ? document.body.scrollWidth : 0
-          ];
-          const contentW = Math.max(1024, ...widths);
-          const design = Math.ceil(contentW + 12); // großzügige Sicherheitsmarge gegen Rundungsfehler
-          const scale = Math.max(0.2, Math.min(1, w / design));
-          meta && meta.setAttribute('content',
-            `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`
-          );
-        } else {
-          meta && meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
-        }
+      const measure = () => {
+        const el = root();
+        const widths = [
+          el ? el.scrollWidth : 0,
+          document.documentElement.scrollWidth || 0,
+          document.body ? document.body.scrollWidth : 0
+        ];
+        return Math.max(1024, ...widths);
       };
 
-      const schedule = () => { if (raf) cancelAnimationFrame(raf); raf = requestAnimationFrame(compute); };
+      const applyOnce = (w) => {
+        // großzügige Marge: 1% + 12 px
+        const contentW = measure();
+        const design = Math.ceil(contentW * 1.01 + 12);
+        const scale = Math.max(0.2, Math.min(1, w / design));
+        meta && meta.setAttribute('content', `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`);
+      };
 
-      // erste Läufe
-      schedule();
-      window.addEventListener('resize', schedule);
-      window.addEventListener('orientationchange', schedule);
-      window.addEventListener('load', compute);
-      document.fonts && document.fonts.ready && document.fonts.ready.then(compute).catch(()=>{});
-      t1 = window.setTimeout(compute, 80);
-      t2 = window.setTimeout(compute, 260);
+      const refine = () => {
+        const w = window.innerWidth || document.documentElement.clientWidth || 0;
+        if (w > 1440) {
+          meta && meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+          return;
+        }
+        // erster Versuch
+        applyOnce(w);
+        // zwei Nachläufe, um Rundungs-/Layout-Änderungen aufzufangen
+        setTimeout(() => applyOnce(w), 60);
+        setTimeout(() => applyOnce(w), 180);
+      };
 
-      // dynamische Änderungen am Inhalt
+      // initial + Events
+      refine();
+      const onResize = () => refine();
+      window.addEventListener('resize', onResize);
+      window.addEventListener('orientationchange', onResize);
+      window.addEventListener('load', refine);
+      document.fonts && document.fonts.ready && document.fonts.ready.then(refine).catch(()=>{});
+
+      // Beobachte inhaltliche Änderungen
       const el = root();
-      const ro = ('ResizeObserver' in window) ? new ResizeObserver(schedule) : null;
+      const ro = ('ResizeObserver' in window) ? new ResizeObserver(refine) : null;
       ro && el && ro.observe(el);
-      const mo = ('MutationObserver' in window) ? new MutationObserver(schedule) : null;
-      mo && el && mo.observe(el, { subtree: true, childList: true, attributes: true, attributeFilter: ['class','style'] });
+      const mo = ('MutationObserver' in window) ? new MutationObserver(refine) : null;
+      mo && el && mo.observe(el, { subtree: true, childList: true, attributes: true });
 
       return () => {
-        if (raf) cancelAnimationFrame(raf);
-        clearTimeout(t1); clearTimeout(t2);
-        window.removeEventListener('resize', schedule);
-        window.removeEventListener('orientationchange', schedule);
-        window.removeEventListener('load', compute);
+        window.removeEventListener('resize', onResize);
+        window.removeEventListener('orientationchange', onResize);
+        window.removeEventListener('load', refine);
         ro && ro.disconnect();
         mo && mo.disconnect();
       };
@@ -1051,7 +1057,7 @@ onClick={() => {
 
 {editBuchung && (
             <div style={{
-              position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
+              position: "fixed", top: 0, left: 0, width: "100%", height: "100vh",
               background: "#fff", zIndex: 10000, overflowY: "auto"
             }}>
               <div style={{
