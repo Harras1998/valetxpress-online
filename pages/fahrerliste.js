@@ -18,7 +18,9 @@ function PXHeader({
       width: "100%",
       background: "linear-gradient(#222 85%,#eee 100%)",
       margin: 0,
-      padding: 0, }}>
+      padding: 0,
+      overflowX: "hidden"
+    }}>
       <div style={{
         width: "100%",
         display: "flex",
@@ -199,7 +201,9 @@ function PXFooter() {
     >
       <div
         style={{
-          width: "100%", maxWidth: "100%", minWidth: 0, margin: 0,
+          maxWidth: 1440,
+          minWidth: 1440,
+          margin: "0 auto",
           height: 56,
           display: "flex",
           alignItems: "center",
@@ -231,7 +235,9 @@ function PXEditFooter({ name }) {
     >
       <div
         style={{
-          width: "100%", maxWidth: "100%", minWidth: 0, margin: 0,
+          maxWidth: 1440,
+          minWidth: 1440,
+          margin: "0 auto",
           height: 56,
           display: "flex",
           alignItems: "center",
@@ -285,37 +291,28 @@ export default function FahrerListe() {
 
   
   
-  // Dynamische Viewport-Auto-Fit (mobil/tablet) – wiederhergestellt
-  // Dynamische Viewport-Auto-Fit (mobil/tablet + 1024)
-  
-  
-  // Viewport Auto-Fit (≤1440px): passt die Breite an die tatsächliche Inhaltsbreite an
+  // Dynamische Viewport-Anpassung: skaliert die Seite auf Handy/Tablet wie bei ParkXpress
   useEffect(() => {
     try {
       const meta = document.querySelector('meta[name="viewport"]');
-      const root = () => document.getElementById('vx-root');
       const apply = () => {
         const w = window.innerWidth || document.documentElement.clientWidth || 0;
-        if (w <= 1440) {
-          const minDesign = 1024;
-          const contentW = Math.max(minDesign, (root()?.scrollWidth || minDesign));
-          const design = contentW + 2; // kleine Sicherheitsmarge
+        if (w <= 1023) {
+          const design = 1024; // Referenzbreite (ähnlich iPad/ParkXpress)
           const scale = Math.max(0.2, Math.min(1, w / design));
-          meta && meta.setAttribute('content', `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`);
+          meta && meta.setAttribute('content',
+            `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`
+          );
         } else {
           meta && meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
         }
       };
-      const t = setTimeout(apply, 0);
+      apply();
       window.addEventListener('resize', apply);
       window.addEventListener('orientationchange', apply);
-      document.fonts && document.fonts.ready && document.fonts.ready.then(apply).catch(()=>{});
-      window.addEventListener('load', apply);
       return () => {
-        clearTimeout(t);
         window.removeEventListener('resize', apply);
         window.removeEventListener('orientationchange', apply);
-        window.removeEventListener('load', apply);
       };
     } catch {}
   }, []);
@@ -628,20 +625,19 @@ for (const k of Object.keys(groupsByDate)) {
   return (
     <>
       <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-              <style>{`
-          html, body, #__next { margin: 0; padding: 0; width: 100%; }
-          * { box-sizing: border-box; }
-          /* Large desktop/TV: lock horizontal scroll */
-          @media (min-width: 1024px) { html, body { overflow-x: hidden; } }
-          /* <=1440px: allow scroll if ever needed; usually hidden due to Auto-Fit */
-          @media (max-width: 1023px) { #vx-root { overflow-x: auto; -webkit-overflow-scrolling: touch; } }
-        `}</style>
+        <meta name="viewport" content="width=1440, user-scalable=no" />
       </Head>
       {!auth ? (
-        <div id="vx-root"
+        <div
           style={{
-            width: "100%", maxWidth: "100%", minWidth: 0, background: "#fff", fontFamily: "Arial", margin: 0, minHeight: "100vh", }}>
+            maxWidth: 1440,
+            minWidth: 1440,
+            background: "#fff",
+            fontFamily: "Arial",
+            margin: "0 auto",
+            minHeight: "100vh",
+            overflowX: "hidden"
+          }}>
           <PXHeader
             username=""
             tab={tab}
@@ -724,9 +720,16 @@ for (const k of Object.keys(groupsByDate)) {
           <PXFooter />
         </div>
       ) : (
-        <div id="vx-root"
+        <div
           style={{
-            width: "100%", maxWidth: "100%", minWidth: 0, background: "#fff", fontFamily: "Arial", margin: 0, minHeight: "100vh", }}>
+            maxWidth: 1440,
+            minWidth: 1440,
+            background: "#fff",
+            fontFamily: "Arial",
+            margin: "0 auto",
+            minHeight: "100vh",
+            overflowX: "hidden"
+          }}>
           <PXHeader
             username={username}
             tab={tab}
@@ -740,7 +743,9 @@ for (const k of Object.keys(groupsByDate)) {
           <div style={{
             maxWidth: "100%",
             margin: "auto",
-            marginTop: "auto", }}>
+            marginTop: "auto",
+            overflowX: "hidden"
+          }}>
 
 {tab === "alle" && (
   <div style={{ background: "#A6F4A5", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", margin: 0, position: "relative"}}>
@@ -1027,7 +1032,7 @@ onClick={() => {
               background: "#fff", zIndex: 10000, overflowY: "auto"
             }}>
               <div style={{
-                width: "100%", margin: 0, minHeight: "100vh", fontFamily: "Arial"
+                width: 1440, margin: "0 auto", minHeight: "100vh", fontFamily: "Arial"
               }}>
                 {/* Header */}
                 <div style={{
