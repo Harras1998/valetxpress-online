@@ -291,22 +291,31 @@ export default function FahrerListe() {
   
   
   // Dynamische Viewport-Auto-Fit (mobil/tablet)
-  useEffect(() => {
+  
+useEffect(() => {
     try {
       const meta = document.querySelector('meta[name="viewport"]');
       const root = () => document.getElementById('vx-root');
+      const setMeta = (design, w) => {
+        if (!meta) return;
+        if (w < 1440) {
+          const scale = Math.max(0.2, Math.min(1, w / design));
+          const content = `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`;
+          if (meta.getAttribute('content') !== content) meta.setAttribute('content', content);
+        } else {
+          const content = 'width=device-width, initial-scale=1, viewport-fit=cover';
+          if (meta.getAttribute('content') !== content) meta.setAttribute('content', content);
+        }
+      };
       const apply = () => {
         const w = window.innerWidth || document.documentElement.clientWidth || 0;
         if (w < 1440) {
           const minDesign = 1440;
           const contentW = Math.max(minDesign, (root()?.scrollWidth || minDesign));
           const design = contentW + 1; // 1–2px Sicherheit
-          const scale = Math.max(0.2, Math.min(1, w / design));
-          meta && meta.setAttribute('content',
-            `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`
-          );
+          setMeta(design, w);
         } else {
-          meta && meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+          setMeta(0, w);
         }
       };
       const t = setTimeout(apply, 0);
@@ -314,14 +323,32 @@ export default function FahrerListe() {
       window.addEventListener('orientationchange', apply);
       document.fonts && document.fonts.ready && document.fonts.ready.then(apply).catch(()=>{});
       window.addEventListener('load', apply);
+      // Beobachte dynamische Layout-/Breitenänderungen
+      let ro = null;
+      if ('ResizeObserver' in window) {
+        ro = new ResizeObserver(apply);
+        root() && ro.observe(root());
+      }
+      const mo = new MutationObserver(() => apply());
+      root() && mo.observe(root(), { attributes:true, childList:true, subtree:true });
+      // Fail-safe: in den ersten 2 Sekunden erneut prüfen
+      let ticks = 0;
+      const iv = setInterval(() => {
+        apply();
+        if (++ticks > 8) clearInterval(iv);
+      }, 250);
       return () => {
         clearTimeout(t);
+        iv && clearInterval(iv);
+        ro && ro.disconnect && ro.disconnect();
+        mo && mo.disconnect && mo.disconnect();
         window.removeEventListener('resize', apply);
         window.removeEventListener('orientationchange', apply);
         window.removeEventListener('load', apply);
       };
     } catch {}
-  }, []);
+  }, [])
+;
 
   // Login aus localStorage wiederherstellen
   useEffect(() => {
