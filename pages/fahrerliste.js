@@ -291,53 +291,23 @@ export default function FahrerListe() {
 
   
   
-  
-  // Dynamische Viewport-Auto-Fit (robust für alle Breakpoints inkl. 320px & 1024px)
+  // Dynamische Viewport-Auto-Fit (mobil/tablet)
   useEffect(() => {
     try {
       const meta = document.querySelector('meta[name="viewport"]');
       const root = () => document.getElementById('vx-root');
       const apply = () => {
         const w = window.innerWidth || document.documentElement.clientWidth || 0;
-        const design = 1440; // feste Layoutbreite
-
-        const el = root && root();
-        if (!el) return;
-
-        // Basis: immer klare Root-Breite setzen
-        el.style.maxWidth = design + "px";
-        el.style.minWidth = design + "px";
-
-        if (w < design) {
-          // 1) Viewport-Skalierung
+        if (w < 1440) {
+          const minDesign = 1440;
+          const contentW = Math.max(minDesign, (root()?.scrollWidth || minDesign));
+          const design = contentW + 1; // 1–2px Sicherheit
           const scale = Math.max(0.2, Math.min(1, w / design));
-          if (meta) {
-            meta.setAttribute(
-              'content',
-              `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, minimum-scale=${scale}, user-scalable=no, viewport-fit=cover`
-            );
-          }
-
-          // 2) Fallback/Ergänzung: CSS-Transform (hilft, wenn Browser die Meta-Änderung
-          //    erst spät oder gar nicht übernimmt – z.B. in DevTools/Emulation).
-          el.style.transformOrigin = "top left";
-          el.style.transform = `scale(${scale})`;
-          el.style.position = "relative";
-          // horizontal mittig darstellen (ohne Überlauf):
-          const left = Math.max(0, Math.floor((w - design * scale) / 2));
-          el.style.left = left + "px";
-
-          // Scrollbalken vermeiden:
-          document.body && (document.body.style.overflowX = "hidden");
+          meta && meta.setAttribute('content',
+            `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`
+          );
         } else {
-          // Zurück auf natives Verhalten
-          if (meta) {
-            meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
-          }
-          el.style.transform = "none";
-          el.style.left = "0";
-          el.style.position = "static";
-          document.body && (document.body.style.overflowX = "hidden");
+          meta && meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
         }
       };
       const t = setTimeout(apply, 0);
@@ -353,7 +323,38 @@ export default function FahrerListe() {
       };
     } catch {}
   }, []);
-// Login aus localStorage wiederherstellen
+
+  // Breite > 1440 px: Wurzel-Container vollflächig machen (keine weißen Ränder)
+  useEffect(() => {
+    try {
+      const root = () => document.getElementById('vx-root');
+      const applyWide = () => {
+        const w = window.innerWidth || document.documentElement.clientWidth || 0;
+        const el = root && root();
+        if (!el) return;
+        if (w >= 1440) {
+          el.style.maxWidth = w + 'px';
+          el.style.minWidth = w + 'px';
+          el.style.margin = '0';
+        } else {
+          el.style.maxWidth = '1440px';
+          el.style.minWidth = '1440px';
+          el.style.margin = '0 auto';
+        }
+      };
+      const t2 = setTimeout(applyWide, 0);
+      window.addEventListener('resize', applyWide);
+      window.addEventListener('orientationchange', applyWide);
+      return () => {
+        clearTimeout(t2);
+        window.removeEventListener('resize', applyWide);
+        window.removeEventListener('orientationchange', applyWide);
+      };
+    } catch {}
+  }, []);
+
+
+  // Login aus localStorage wiederherstellen
   useEffect(() => {
     try {
       const savedAuth = localStorage.getItem("vx_auth");
