@@ -298,10 +298,10 @@ export default function FahrerListe() {
       const root = () => document.getElementById('vx-root');
       const apply = () => {
         const w = window.innerWidth || document.documentElement.clientWidth || 0;
-        if (w <= 1023) {
-          const minDesign = 1024;
+        if (w < 1440) {
+          const minDesign = 1440;
           const contentW = Math.max(minDesign, (root()?.scrollWidth || minDesign));
-          const design = contentW + 1; // 1–2px Sicherheit
+          const design = contentW + 8; // extra Sicherheit gegen 1px-Clip
           const scale = Math.max(0.2, Math.min(1, w / design));
           meta && meta.setAttribute('content',
             `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`
@@ -634,9 +634,8 @@ for (const k of Object.keys(groupsByDate)) {
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
               <style>{`
-          html, body, #__next { margin: 0; padding: 0; width: 100%; }
+          html, body, #__next { margin: 0; padding: 0; width: 100%; overflow-x: hidden; }
           * { box-sizing: border-box; }
-          @media (min-width: 1024px) { html, body { overflow-x: hidden; } }
         `}</style>
       </Head>
       {!auth ? (
