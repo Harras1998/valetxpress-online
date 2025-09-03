@@ -12,6 +12,27 @@ function PXHeader({
   onLogout,
   hideControls = false,
 }) {
+  // Root container style chooses fixed 1440 width for narrow screens and full-bleed for wide screens
+  const rootStyle = isWide ? {
+    maxWidth: "100%",
+    minWidth: 0,
+    width: "100%",
+    background: "#fff",
+    fontFamily: "Arial",
+    margin: 0,
+    minHeight: "100vh",
+    overflowX: "hidden"
+  } : {
+    maxWidth: 1440,
+    minWidth: 1440,
+    width: 1440,
+    background: "#fff",
+    fontFamily: "Arial",
+    margin: "0 auto",
+    minHeight: "100vh",
+    overflowX: "hidden"
+  };
+
 
   return (
     <div style={{
@@ -324,36 +345,6 @@ export default function FahrerListe() {
     } catch {}
   }, []);
 
-  // Breite > 1440 px: Wurzel-Container vollflächig machen (keine weißen Ränder)
-  useEffect(() => {
-    try {
-      const root = () => document.getElementById('vx-root');
-      const applyWide = () => {
-        const w = window.innerWidth || document.documentElement.clientWidth || 0;
-        const el = root && root();
-        if (!el) return;
-        if (w >= 1440) {
-          el.style.maxWidth = w + 'px';
-          el.style.minWidth = w + 'px';
-          el.style.margin = '0';
-        } else {
-          el.style.maxWidth = '1440px';
-          el.style.minWidth = '1440px';
-          el.style.margin = '0 auto';
-        }
-      };
-      const t2 = setTimeout(applyWide, 0);
-      window.addEventListener('resize', applyWide);
-      window.addEventListener('orientationchange', applyWide);
-      return () => {
-        clearTimeout(t2);
-        window.removeEventListener('resize', applyWide);
-        window.removeEventListener('orientationchange', applyWide);
-      };
-    } catch {}
-  }, []);
-
-
   // Login aus localStorage wiederherstellen
   useEffect(() => {
     try {
@@ -365,6 +356,24 @@ export default function FahrerListe() {
 const [editBuchung, setEditBuchung] = useState(null);
   const [editSaving, setEditSaving] = useState(false);
   const [alleShowAll, setAlleShowAll] = useState(false);
+  // Responsive root width: fixed 1440 for <1440px, fluid for >=1440px
+  const [isWide, setIsWide] = useState(false);
+  useEffect(() => {
+    const apply = () => {
+      try {
+        const w = window.innerWidth || document.documentElement.clientWidth || 0;
+        setIsWide(w >= 1440);
+      } catch {}
+    };
+    apply();
+    window.addEventListener('resize', apply);
+    window.addEventListener('orientationchange', apply);
+    return () => {
+      window.removeEventListener('resize', apply);
+      window.removeEventListener('orientationchange', apply);
+    };
+  }, []);
+
 
   const rueckModus = tab === "heute" || tab === "2tage";
   // --- Timer/Call state for "Heute"-Tab ---
@@ -671,15 +680,7 @@ for (const k of Object.keys(groupsByDate)) {
       </Head>
       {!auth ? (
         <div id="vx-root"
-          style={{
-            maxWidth: 1440,
-            minWidth: 1440,
-            background: "#fff",
-            fontFamily: "Arial",
-            margin: "0 auto",
-            minHeight: "100vh",
-            overflowX: "hidden"
-          }}>
+          style={rootStyle}>
           <PXHeader
             username=""
             tab={tab}
@@ -763,15 +764,7 @@ for (const k of Object.keys(groupsByDate)) {
         </div>
       ) : (
         <div id="vx-root"
-          style={{
-            maxWidth: 1440,
-            minWidth: 1440,
-            background: "#fff",
-            fontFamily: "Arial",
-            margin: "0 auto",
-            minHeight: "100vh",
-            overflowX: "hidden"
-          }}>
+          style={rootStyle}>
           <PXHeader
             username={username}
             tab={tab}
