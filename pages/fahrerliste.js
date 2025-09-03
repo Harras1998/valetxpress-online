@@ -12,28 +12,6 @@ function PXHeader({
   onLogout,
   hideControls = false,
 }) {
-  // Root container style chooses fixed 1440 width for narrow screens and full-bleed for wide screens
-  const rootStyle = isWide ? {
-    maxWidth: "100%",
-    minWidth: 0,
-    width: "100%",
-    background: "#fff",
-    fontFamily: "Arial",
-    margin: 0,
-    minHeight: "100vh",
-    overflowX: "hidden"
-  } : {
-    maxWidth: 1440,
-    minWidth: 1440,
-    width: 1440,
-    background: "#fff",
-    fontFamily: "Arial",
-    margin: "0 auto",
-    minHeight: "100vh",
-    overflowX: "hidden"
-  };
-
-
   return (
     <div style={{
       width: "100%",
@@ -375,6 +353,27 @@ const [editBuchung, setEditBuchung] = useState(null);
   }, []);
 
 
+
+  // Root container style: fixed 1440 for <1440px (viewport-scaled), full-bleed for >=1440px
+  const rootStyle = isWide ? {
+    maxWidth: "100%",
+    minWidth: 0,
+    width: "100%",
+    background: "#fff",
+    fontFamily: "Arial",
+    margin: 0,
+    minHeight: "100vh",
+    overflowX: "hidden"
+  } : {
+    maxWidth: 1440,
+    minWidth: 1440,
+    width: 1440,
+    background: "#fff",
+    fontFamily: "Arial",
+    margin: "0 auto",
+    minHeight: "100vh",
+    overflowX: "hidden"
+  };
   const rueckModus = tab === "heute" || tab === "2tage";
   // --- Timer/Call state for "Heute"-Tab ---
   const [callTimers, setCallTimers] = useState({});
