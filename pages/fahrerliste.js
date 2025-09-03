@@ -301,7 +301,7 @@ export default function FahrerListe() {
         if (w <= 1023) {
           const minDesign = 1024;
           const contentW = Math.max(minDesign, (root()?.scrollWidth || minDesign));
-          const design = contentW + 2; // 1–2px Sicherheit
+          const design = contentW + 1; // 1–2px Sicherheit
           const scale = Math.max(0.2, Math.min(1, w / design));
           meta && meta.setAttribute('content',
             `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`
