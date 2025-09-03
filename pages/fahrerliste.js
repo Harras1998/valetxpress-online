@@ -19,7 +19,7 @@ function PXHeader({
       background: "linear-gradient(#222 85%,#eee 100%)",
       margin: 0,
       padding: 0,
-      overflowX: "visible"
+      overflowX: "hidden"
     }}>
       <div style={{
         width: "100%",
@@ -201,7 +201,9 @@ function PXFooter() {
     >
       <div
         style={{
-          width: "100%", maxWidth: "100%", minWidth: 0, margin: 0,
+          maxWidth: 1440,
+          minWidth: 1440,
+          margin: "0 auto",
           height: 56,
           display: "flex",
           alignItems: "center",
@@ -233,7 +235,9 @@ function PXEditFooter({ name }) {
     >
       <div
         style={{
-          width: "100%", maxWidth: "100%", minWidth: 0, margin: 0,
+          maxWidth: 1440,
+          minWidth: 1440,
+          margin: "0 auto",
           height: 56,
           display: "flex",
           alignItems: "center",
@@ -594,18 +598,18 @@ for (const k of Object.keys(groupsByDate)) {
   return (
     <>
       <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-              <style>{`
-          html, body, #__next { margin: 0; padding: 0; width: 100%; }
-          * { box-sizing: border-box; }
-          @media (min-width: 1024px) { html, body { overflow-x: hidden; } }
-          @media (max-width: 1024px) { #vx-root { overflow-x: auto; -webkit-overflow-scrolling: touch; } }
-        `}</style>
+        <meta name="viewport" content="width=1440, user-scalable=no" />
       </Head>
       {!auth ? (
-        <div id="vx-root"
+        <div
           style={{
-            width: "100%", maxWidth: "100%", minWidth: 0, background: "#fff", fontFamily: "Arial", margin: 0, minHeight: "100vh", overflowX: "visible"
+            maxWidth: 1440,
+            minWidth: 1440,
+            background: "#fff",
+            fontFamily: "Arial",
+            margin: "0 auto",
+            minHeight: "100vh",
+            overflowX: "hidden"
           }}>
           <PXHeader
             username=""
@@ -689,9 +693,15 @@ for (const k of Object.keys(groupsByDate)) {
           <PXFooter />
         </div>
       ) : (
-        <div id="vx-root"
+        <div
           style={{
-            width: "100%", maxWidth: "100%", minWidth: 0, background: "#fff", fontFamily: "Arial", margin: 0, minHeight: "100vh", overflowX: "visible"
+            maxWidth: 1440,
+            minWidth: 1440,
+            background: "#fff",
+            fontFamily: "Arial",
+            margin: "0 auto",
+            minHeight: "100vh",
+            overflowX: "hidden"
           }}>
           <PXHeader
             username={username}
@@ -707,7 +717,7 @@ for (const k of Object.keys(groupsByDate)) {
             maxWidth: "100%",
             margin: "auto",
             marginTop: "auto",
-            overflowX: "visible"
+            overflowX: "hidden"
           }}>
 
 {tab === "alle" && (
@@ -995,7 +1005,7 @@ onClick={() => {
               background: "#fff", zIndex: 10000, overflowY: "auto"
             }}>
               <div style={{
-                width: "100%", margin: 0, minHeight: "100vh", fontFamily: "Arial"
+                width: 1440, margin: "0 auto", minHeight: "100vh", fontFamily: "Arial"
               }}>
                 {/* Header */}
                 <div style={{
