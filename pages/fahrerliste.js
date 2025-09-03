@@ -18,7 +18,9 @@ function PXHeader({
       width: "100%",
       background: "linear-gradient(#222 85%,#eee 100%)",
       margin: 0,
-      padding: 0, }}>
+      padding: 0,
+      overflowX: "visible"
+    }}>
       <div style={{
         width: "100%",
         display: "flex",
@@ -199,9 +201,7 @@ function PXFooter() {
     >
       <div
         style={{
-          maxWidth: 1440,
-          minWidth: 1440,
-          margin: "0 auto",
+          width: "100%", maxWidth: "100%", minWidth: 0, margin: 0,
           height: 56,
           display: "flex",
           alignItems: "center",
@@ -233,9 +233,7 @@ function PXEditFooter({ name }) {
     >
       <div
         style={{
-          maxWidth: 1440,
-          minWidth: 1440,
-          margin: "0 auto",
+          width: "100%", maxWidth: "100%", minWidth: 0, margin: 0,
           height: 56,
           display: "flex",
           alignItems: "center",
@@ -288,84 +286,6 @@ export default function FahrerListe() {
   }, [username, doneByUser]);
 
   
-  
-  
-  
-  // Viewport Auto-Fit (DOM-Scan): garantiert kein Abschneiden von 1440 px bis 320 px
-  useEffect(() => {
-    try {
-      const meta = document.querySelector('meta[name="viewport"]');
-      const root = () => document.getElementById('vx-root') || document.body;
-
-      const measureVisualWidth = () => {
-        let minLeft = 0, maxRight = 0;
-        const nodes = document.querySelectorAll('body *');
-        for (let i = 0; i < nodes.length; i++) {
-          const el = nodes[i];
-          const rect = el.getBoundingClientRect();
-          if (!isFinite(rect.left) || !isFinite(rect.right)) continue;
-          if (i === 0) { minLeft = rect.left; maxRight = rect.right; }
-          else { if (rect.left < minLeft) minLeft = rect.left; if (rect.right > maxRight) maxRight = rect.right; }
-        }
-        const visual = Math.max(0, maxRight - minLeft);
-        const scroll = Math.max(
-          document.scrollingElement ? document.scrollingElement.scrollWidth : 0,
-          document.documentElement ? document.documentElement.scrollWidth : 0,
-          document.body ? document.body.scrollWidth : 0
-        );
-        return Math.max(visual, scroll, 1024);
-      };
-
-      let raf = 0;
-      const apply = () => {
-        const viewportW = window.innerWidth || document.documentElement.clientWidth || 0;
-        if (viewportW > 1440) {
-          meta && meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
-          return;
-        }
-        const contentW = measureVisualWidth();
-        const margin = Math.max(24, Math.ceil(contentW * 0.015)); // 1.5% oder min 24px
-        const design = Math.ceil(contentW + margin);
-        const scale = Math.max(0.2, Math.min(1, viewportW / design));
-        const current = meta ? meta.getAttribute('content') || '' : '';
-        const next = `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`;
-        if (current !== next) {
-          meta && meta.setAttribute('content', next);
-        }
-      };
-
-      const schedule = () => { if (raf) cancelAnimationFrame(raf); raf = requestAnimationFrame(apply); };
-
-      // initial & retries
-      schedule();
-      setTimeout(schedule, 60);
-      setTimeout(schedule, 180);
-      setTimeout(schedule, 380);
-
-      // events
-      window.addEventListener('resize', schedule);
-      window.addEventListener('orientationchange', schedule);
-      window.addEventListener('load', apply);
-      document.fonts && document.fonts.ready && document.fonts.ready.then(apply).catch(()=>{});
-
-      // observers
-      const el = root();
-      const ro = ('ResizeObserver' in window) ? new ResizeObserver(schedule) : null;
-      ro && el && ro.observe(el);
-      const mo = ('MutationObserver' in window) ? new MutationObserver(schedule) : null;
-      mo && el && mo.observe(el, { subtree: true, childList: true, attributes: true });
-
-      return () => {
-        if (raf) cancelAnimationFrame(raf);
-        window.removeEventListener('resize', schedule);
-        window.removeEventListener('orientationchange', schedule);
-        window.removeEventListener('load', apply);
-        ro && ro.disconnect();
-        mo && mo.disconnect();
-      };
-    } catch {}
-  }, []);
-
   // Login aus localStorage wiederherstellen
   useEffect(() => {
     try {
@@ -675,16 +595,18 @@ for (const k of Object.keys(groupsByDate)) {
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+              <style>{`
+          html, body, #__next { margin: 0; padding: 0; width: 100%; }
+          * { box-sizing: border-box; }
+          @media (min-width: 1024px) { html, body { overflow-x: hidden; } }
+          @media (max-width: 1024px) { #vx-root { overflow-x: auto; -webkit-overflow-scrolling: touch; } }
+        `}</style>
       </Head>
       {!auth ? (
         <div id="vx-root"
           style={{
-            maxWidth: 1440,
-            minWidth: 1440,
-            background: "#fff",
-            fontFamily: "Arial",
-            margin: "0 auto",
-            minHeight: "100vh", }}>
+            width: "100%", maxWidth: "100%", minWidth: 0, background: "#fff", fontFamily: "Arial", margin: 0, minHeight: "100vh", overflowX: "visible"
+          }}>
           <PXHeader
             username=""
             tab={tab}
@@ -769,12 +691,8 @@ for (const k of Object.keys(groupsByDate)) {
       ) : (
         <div id="vx-root"
           style={{
-            maxWidth: 1440,
-            minWidth: 1440,
-            background: "#fff",
-            fontFamily: "Arial",
-            margin: "0 auto",
-            minHeight: "100vh", }}>
+            width: "100%", maxWidth: "100%", minWidth: 0, background: "#fff", fontFamily: "Arial", margin: 0, minHeight: "100vh", overflowX: "visible"
+          }}>
           <PXHeader
             username={username}
             tab={tab}
@@ -788,7 +706,9 @@ for (const k of Object.keys(groupsByDate)) {
           <div style={{
             maxWidth: "100%",
             margin: "auto",
-            marginTop: "auto", }}>
+            marginTop: "auto",
+            overflowX: "visible"
+          }}>
 
 {tab === "alle" && (
   <div style={{ background: "#A6F4A5", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", margin: 0, position: "relative"}}>
@@ -1071,11 +991,11 @@ onClick={() => {
 
 {editBuchung && (
             <div style={{
-              position: "fixed", top: 0, left: 0, width: "100%", height: "100vh",
+              position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
               background: "#fff", zIndex: 10000, overflowY: "auto"
             }}>
               <div style={{
-                width: 1440, margin: "0 auto", minHeight: "100vh", fontFamily: "Arial"
+                width: "100%", margin: 0, minHeight: "100vh", fontFamily: "Arial"
               }}>
                 {/* Header */}
                 <div style={{
