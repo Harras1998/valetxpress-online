@@ -291,7 +291,7 @@ export default function FahrerListe() {
 
   
   
-  // Dynamische Viewport-Auto-Fit (mobil/tablet)
+  // Dynamische Viewport-Auto-Fit (bis <1440px)
   useEffect(() => {
     try {
       const meta = document.querySelector('meta[name="viewport"]');
@@ -301,7 +301,7 @@ export default function FahrerListe() {
         if (w < 1440) {
           const minDesign = 1440;
           const contentW = Math.max(minDesign, (root()?.scrollWidth || minDesign));
-          const design = contentW + 8; // extra Sicherheit gegen 1px-Clip
+          const design = contentW + 1; // 1–2px Sicherheit
           const scale = Math.max(0.2, Math.min(1, w / design));
           meta && meta.setAttribute('content',
             `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`
@@ -634,8 +634,9 @@ for (const k of Object.keys(groupsByDate)) {
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
               <style>{`
-          html, body, #__next { margin: 0; padding: 0; width: 100%; overflow-x: hidden; }
+          html, body, #__next { margin: 0; padding: 0; width: 100%; }
           * { box-sizing: border-box; }
+          @media (min-width: 1024px) { html, body { overflow-x: hidden; } }
         `}</style>
       </Head>
       {!auth ? (
