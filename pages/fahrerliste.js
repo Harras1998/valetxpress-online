@@ -298,7 +298,13 @@ export default function FahrerListe() {
       const meta = document.querySelector('meta[name="viewport"]');
       const root = () => document.getElementById('vx-root');
       const apply = () => {
-        const w = window.innerWidth || document.documentElement.clientWidth || 0;
+        let w = window.innerWidth || document.documentElement.clientWidth || 0;
+        // iPad/iOS pinch-zoom fix: neutralize visualViewport zoom so our scaling stays stable
+        const vv = (typeof window !== 'undefined' && window.visualViewport) ? window.visualViewport : null;
+        if (vv && typeof vv.width === 'number' && typeof vv.scale === 'number' && vv.scale) {
+          const normalized = Math.round(vv.width * vv.scale);
+          if (normalized) w = normalized;
+        }
         const design = 1440; // feste Layoutbreite
 
         const el = root && root();
@@ -356,12 +362,20 @@ export default function FahrerListe() {
       const t = setTimeout(apply, 0);
       window.addEventListener('resize', apply);
       window.addEventListener('orientationchange', apply);
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', apply);
+        window.visualViewport.addEventListener('scroll', apply);
+      }
       document.fonts && document.fonts.ready && document.fonts.ready.then(apply).catch(()=>{});
       window.addEventListener('load', apply);
       return () => {
         clearTimeout(t);
         window.removeEventListener('resize', apply);
         window.removeEventListener('orientationchange', apply);
+        if (window.visualViewport) {
+          window.visualViewport.removeEventListener('resize', apply);
+          window.visualViewport.removeEventListener('scroll', apply);
+        }
         window.removeEventListener('load', apply);
       };
     } catch {}
