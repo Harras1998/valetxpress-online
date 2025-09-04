@@ -329,8 +329,21 @@ export default function FahrerListe() {
 
           // Scrollbalken vermeiden:
           document.body && (document.body.style.overflowX = "hidden");
+        } else if (w > design) {
+          // NEW: scale UP to fill wide viewports (no white bars), keep <=1440px unchanged
+          const scale = w / design;
+          if (meta) {
+            meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+          }
+          el.style.transformOrigin = "top left";
+          el.style.transform = `scale(${scale})`;
+          el.style.position = "relative";
+          // Compensate the default centering (margin: auto) so the scaled root starts at x=0
+          const left = -Math.floor((w - design) / 2);
+          el.style.left = left + "px";
+          document.body && (document.body.style.overflowX = "hidden");
         } else {
-          // Zurück auf natives Verhalten
+          // Exactly 1440px: native (unscaled) layout
           if (meta) {
             meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
           }
