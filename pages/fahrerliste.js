@@ -297,13 +297,21 @@ export default function FahrerListe() {
     try {
       const meta = document.querySelector('meta[name="viewport"]');
       const root = () => document.getElementById('vx-root');
+      // iPad pinch-zoom guard: remember the base width when not zooming
+      let __vx_baseW = window.innerWidth || document.documentElement.clientWidth || 0;
       const apply = () => {
         let w = window.innerWidth || document.documentElement.clientWidth || 0;
-        // iPad/iOS pinch-zoom fix: neutralize visualViewport zoom so our scaling stays stable
+        // iPad: während eines aktiven Pinch‑Zooms (visualViewport.scale != 1)
+        // nutzen wir die zuletzt bekannte Basisbreite, damit das Layout
+        // nicht neu berechnet/jittert. Außerhalb von Zoom-Phasen aktualisieren
+        // wir die Basis automatisch.
         const vv = (typeof window !== 'undefined' && window.visualViewport) ? window.visualViewport : null;
-        if (vv && typeof vv.width === 'number' && typeof vv.scale === 'number' && vv.scale) {
-          const normalized = Math.round(vv.width * vv.scale);
-          if (normalized) w = normalized;
+        if (vv && typeof vv.scale === 'number') {
+          if (Math.abs(vv.scale - 1) > 0.001) {
+            w = __vx_baseW; // fixiere Breite während des Zooms
+          } else {
+            __vx_baseW = w; // Basisbreite aktualisieren, wenn kein Zoom aktiv ist
+          }
         }
         const design = 1440; // feste Layoutbreite
 
@@ -362,20 +370,12 @@ export default function FahrerListe() {
       const t = setTimeout(apply, 0);
       window.addEventListener('resize', apply);
       window.addEventListener('orientationchange', apply);
-      if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', apply);
-        window.visualViewport.addEventListener('scroll', apply);
-      }
       document.fonts && document.fonts.ready && document.fonts.ready.then(apply).catch(()=>{});
       window.addEventListener('load', apply);
       return () => {
         clearTimeout(t);
         window.removeEventListener('resize', apply);
         window.removeEventListener('orientationchange', apply);
-        if (window.visualViewport) {
-          window.visualViewport.removeEventListener('resize', apply);
-          window.visualViewport.removeEventListener('scroll', apply);
-        }
         window.removeEventListener('load', apply);
       };
     } catch {}
