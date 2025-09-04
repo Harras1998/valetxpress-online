@@ -12,6 +12,7 @@ function PXHeader({
   onLogout,
   hideControls = false,
 }) {
+
   return (
     <div style={{
       width: "100%",
@@ -290,32 +291,53 @@ export default function FahrerListe() {
 
   
   
-  // Dynamische Viewport-Auto-Fit (mobil/tablet)
   
-useEffect(() => {
+  // Dynamische Viewport-Auto-Fit (robust für alle Breakpoints inkl. 320px & 1024px)
+  useEffect(() => {
     try {
       const meta = document.querySelector('meta[name="viewport"]');
       const root = () => document.getElementById('vx-root');
-      const setMeta = (design, w) => {
-        if (!meta) return;
-        if (w < 1440) {
-          const scale = Math.max(0.2, Math.min(1, w / design));
-          const content = `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`;
-          if (meta.getAttribute('content') !== content) meta.setAttribute('content', content);
-        } else {
-          const content = 'width=device-width, initial-scale=1, viewport-fit=cover';
-          if (meta.getAttribute('content') !== content) meta.setAttribute('content', content);
-        }
-      };
       const apply = () => {
         const w = window.innerWidth || document.documentElement.clientWidth || 0;
-        if (w < 1440) {
-          const minDesign = 1440;
-          const contentW = Math.max(minDesign, (root()?.scrollWidth || minDesign));
-          const design = contentW + 1; // 1–2px Sicherheit
-          setMeta(design, w);
+        const design = 1440; // feste Layoutbreite
+
+        const el = root && root();
+        if (!el) return;
+
+        // Basis: immer klare Root-Breite setzen
+        el.style.maxWidth = design + "px";
+        el.style.minWidth = design + "px";
+
+        if (w < design) {
+          // 1) Viewport-Skalierung
+          const scale = Math.max(0.2, Math.min(1, w / design));
+          if (meta) {
+            meta.setAttribute(
+              'content',
+              `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, minimum-scale=${scale}, user-scalable=no, viewport-fit=cover`
+            );
+          }
+
+          // 2) Fallback/Ergänzung: CSS-Transform (hilft, wenn Browser die Meta-Änderung
+          //    erst spät oder gar nicht übernimmt – z.B. in DevTools/Emulation).
+          el.style.transformOrigin = "top left";
+          el.style.transform = `scale(${scale})`;
+          el.style.position = "relative";
+          // horizontal mittig darstellen (ohne Überlauf):
+          const left = Math.max(0, Math.floor((w - design * scale) / 2));
+          el.style.left = left + "px";
+
+          // Scrollbalken vermeiden:
+          document.body && (document.body.style.overflowX = "hidden");
         } else {
-          setMeta(0, w);
+          // Zurück auf natives Verhalten
+          if (meta) {
+            meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+          }
+          el.style.transform = "none";
+          el.style.left = "0";
+          el.style.position = "static";
+          document.body && (document.body.style.overflowX = "hidden");
         }
       };
       const t = setTimeout(apply, 0);
@@ -323,34 +345,15 @@ useEffect(() => {
       window.addEventListener('orientationchange', apply);
       document.fonts && document.fonts.ready && document.fonts.ready.then(apply).catch(()=>{});
       window.addEventListener('load', apply);
-      // Beobachte dynamische Layout-/Breitenänderungen
-      let ro = null;
-      if ('ResizeObserver' in window) {
-        ro = new ResizeObserver(apply);
-        root() && ro.observe(root());
-      }
-      const mo = new MutationObserver(() => apply());
-      root() && mo.observe(root(), { attributes:true, childList:true, subtree:true });
-      // Fail-safe: in den ersten 2 Sekunden erneut prüfen
-      let ticks = 0;
-      const iv = setInterval(() => {
-        apply();
-        if (++ticks > 8) clearInterval(iv);
-      }, 250);
       return () => {
         clearTimeout(t);
-        iv && clearInterval(iv);
-        ro && ro.disconnect && ro.disconnect();
-        mo && mo.disconnect && mo.disconnect();
         window.removeEventListener('resize', apply);
         window.removeEventListener('orientationchange', apply);
         window.removeEventListener('load', apply);
       };
     } catch {}
-  }, [])
-;
-
-  // Login aus localStorage wiederherstellen
+  }, []);
+// Login aus localStorage wiederherstellen
   useEffect(() => {
     try {
       const savedAuth = localStorage.getItem("vx_auth");
@@ -361,46 +364,7 @@ useEffect(() => {
 const [editBuchung, setEditBuchung] = useState(null);
   const [editSaving, setEditSaving] = useState(false);
   const [alleShowAll, setAlleShowAll] = useState(false);
-  // Responsive root width: fixed 1440 for <1440px, fluid for >=1440px
-  const [isWide, setIsWide] = useState(false);
-  useEffect(() => {
-    const apply = () => {
-      try {
-        const w = window.innerWidth || document.documentElement.clientWidth || 0;
-        setIsWide(w >= 1440);
-      } catch {}
-    };
-    apply();
-    window.addEventListener('resize', apply);
-    window.addEventListener('orientationchange', apply);
-    return () => {
-      window.removeEventListener('resize', apply);
-      window.removeEventListener('orientationchange', apply);
-    };
-  }, []);
 
-
-
-  // Root container style: fixed 1440 for <1440px (viewport-scaled), full-bleed for >=1440px
-  const rootStyle = isWide ? {
-    maxWidth: "100%",
-    minWidth: 0,
-    width: "100%",
-    background: "#fff",
-    fontFamily: "Arial",
-    margin: 0,
-    minHeight: "100vh",
-    overflowX: "hidden"
-  } : {
-    maxWidth: 1440,
-    minWidth: 1440,
-    width: 1440,
-    background: "#fff",
-    fontFamily: "Arial",
-    margin: "0 auto",
-    minHeight: "100vh",
-    overflowX: "hidden"
-  };
   const rueckModus = tab === "heute" || tab === "2tage";
   // --- Timer/Call state for "Heute"-Tab ---
   const [callTimers, setCallTimers] = useState({});
@@ -706,7 +670,15 @@ for (const k of Object.keys(groupsByDate)) {
       </Head>
       {!auth ? (
         <div id="vx-root"
-          style={rootStyle}>
+          style={{
+            maxWidth: 1440,
+            minWidth: 1440,
+            background: "#fff",
+            fontFamily: "Arial",
+            margin: "0 auto",
+            minHeight: "100vh",
+            overflowX: "hidden"
+          }}>
           <PXHeader
             username=""
             tab={tab}
@@ -790,7 +762,15 @@ for (const k of Object.keys(groupsByDate)) {
         </div>
       ) : (
         <div id="vx-root"
-          style={rootStyle}>
+          style={{
+            maxWidth: 1440,
+            minWidth: 1440,
+            background: "#fff",
+            fontFamily: "Arial",
+            margin: "0 auto",
+            minHeight: "100vh",
+            overflowX: "hidden"
+          }}>
           <PXHeader
             username={username}
             tab={tab}
