@@ -391,6 +391,16 @@ export default function FahrerListe() {
 const [editBuchung, setEditBuchung] = useState(null);
   const [editSaving, setEditSaving] = useState(false);
   const [alleShowAll, setAlleShowAll] = useState(false);
+  // Sichtfeld für Notizen ohne Steuer‑Tags (CT/DX)
+  const [editBemerkungPlain, setEditBemerkungPlain] = useState("");
+
+  // Wenn eine Buchung zum Bearbeiten geöffnet wird, Notiz-Text ohne [CT:...] und [DX:...] anzeigen
+  useEffect(() => {
+    try {
+      setEditBemerkungPlain(editBuchung ? stripAllTags(editBuchung.bemerkung || "") : "");
+    } catch {}
+  }, [editBuchung]);
+
 
   const rueckModus = tab === "heute" || tab === "2tage";
   // --- Timer/Call state for "Heute"-Tab ---
@@ -497,6 +507,21 @@ function withDXTag(bem, user) {
 // Helper: alle Steuer-Tags (CT + DX) für die Anzeige ausblenden
 function stripAllTags(bem) {
   return stripDXTag(stripCallTimer(bem));
+}
+
+// Hilfsfunktionen: vorhandene CT/DX-Tags beibehalten, wenn der sichtbare Notiztext geändert wird
+function __extractBemerkungTags(bem) {
+  const tags = [];
+  const dx = (bem || "").match(/\[DX:[^\]]+\]/);
+  if (dx) tags.push(dx[0]);
+  const ct = (bem || "").match(/\[CT:\d{10,}\]/);
+  if (ct) tags.push(ct[0]);
+  return tags.join(" ").trim();
+}
+function __mergeBemerkungWithTags(plain, originalBem) {
+  const tags = __extractBemerkungTags(originalBem);
+  const base = (plain || "").trim();
+  return tags ? (base ? (base + " " + tags) : tags) : base;
 }
 
 
@@ -1282,7 +1307,11 @@ onClick={() => {
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label>Sperrgepäck/Notizen:</label><br />
-                    <textarea value={editBuchung.bemerkung || ""} onChange={e => setEditBuchung({ ...editBuchung, bemerkung: e.target.value })} style={{ width: "100%", fontSize: 18 }} />
+                    <textarea value={editBemerkungPlain} onChange={e => {
+                    const plain = e.target.value;
+                    setEditBemerkungPlain(plain);
+                    setEditBuchung(prev => ({ ...prev, bemerkung: __mergeBemerkungWithTags(plain, (prev && prev.bemerkung) || "") }));
+                  }} style={{ width: "100%", fontSize: 18 }} />
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label>Typ (valet/allinclusive):</label><br />
