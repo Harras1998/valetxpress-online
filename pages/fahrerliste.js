@@ -388,7 +388,9 @@ export default function FahrerListe() {
       if (savedAuth) { setAuth(savedAuth); setUsername(savedUser); }
     } catch {}
   }, []);
-const [editBuchung, setEditBuchung] = useState(null);
+  // Dynamische Höhe der Bearbeitungsmaske (in px, kompensiert Root-Scale)
+  const [editBuchung, setEditBuchung] = useState(null);
+  const [overlayHeight, setOverlayHeight] = useState("100vh");
   const [editSaving, setEditSaving] = useState(false);
   const [alleShowAll, setAlleShowAll] = useState(false);
   // Sichtfeld für Notizen ohne Steuer‑Tags (CT/DX)
@@ -403,6 +405,37 @@ const [editBuchung, setEditBuchung] = useState(null);
 
 
   const rueckModus = tab === "heute" || tab === "2tage";
+  
+  // Höhe der Bearbeitungsmaske robust für alle Geräte berechnen
+  useEffect(() => {
+    if (!editBuchung) return;
+
+    const design = 1440; // muss identisch zum Root-Layout sein
+    const compute = () => {
+      try {
+        const w = window.innerWidth || document.documentElement.clientWidth || 0;
+        const vv = (typeof window !== 'undefined' && window.visualViewport) ? window.visualViewport : null;
+        const vh = vv && typeof vv.height === 'number' ? vv.height : (window.innerHeight || 0);
+        const scale = w > design ? (w / design) : 1; // Root wird nur bei w>design hochskaliert
+        const preScaled = Math.ceil(vh / Math.max(0.2, Math.min(5, scale)));
+
+        setOverlayHeight(preScaled + "px");
+      } catch {}
+    };
+
+    // initial & on changes
+    compute();
+    window.addEventListener('resize', compute);
+    window.addEventListener('orientationchange', compute);
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', compute);
+
+    return () => {
+      window.removeEventListener('resize', compute);
+      window.removeEventListener('orientationchange', compute);
+      if (window.visualViewport) window.visualViewport.removeEventListener('resize', compute);
+    };
+  }, [editBuchung]);
+
   // --- Timer/Call state for "Heute"-Tab ---
   const [callTimers, setCallTimers] = useState({});
   // Persistenz der Anruf-Timer über Reloads (global)
@@ -728,7 +761,7 @@ for (const k of Object.keys(groupsByDate)) {
             background: "#fff",
             fontFamily: "Arial",
             margin: "0 auto",
-            minHeight: "100vh",
+            minHeight: overlayHeight,
             overflowX: "hidden",
             position: "relative"
           }}>
@@ -1124,11 +1157,11 @@ onClick={() => {
 {editBuchung && (
             <div style={{
               position: "absolute", top: 0, left: 0, right: 0,
-              width: "100%", height: "100vh",
+              width: "100%", height: overlayHeight,
               background: "#fff", zIndex: 10000, overflowY: "auto"
             }}>
               <div style={{
-                width: 1440, margin: "0 auto", minHeight: "100vh", fontFamily: "Arial"
+                width: 1440, margin: "0 auto", minHeight: overlayHeight, fontFamily: "Arial"
               }}>
                 {/* Header */}
                 <div style={{
