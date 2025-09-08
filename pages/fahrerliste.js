@@ -363,7 +363,7 @@ export default function FahrerListe() {
           }
           el.style.transform = "none";
           el.style.left = "0";
-          el.style.position = "static";
+          el.style.position = "relative";
           document.body && (document.body.style.overflowX = "hidden");
         }
       };
@@ -729,7 +729,8 @@ for (const k of Object.keys(groupsByDate)) {
             fontFamily: "Arial",
             margin: "0 auto",
             minHeight: "100vh",
-            overflowX: "hidden"
+            overflowX: "hidden",
+            position: "relative"
           }}>
           <PXHeader
             username=""
@@ -821,7 +822,8 @@ for (const k of Object.keys(groupsByDate)) {
             fontFamily: "Arial",
             margin: "0 auto",
             minHeight: "100vh",
-            overflowX: "hidden"
+            overflowX: "hidden",
+            position: "relative"
           }}>
           <PXHeader
             username={username}
@@ -1121,7 +1123,8 @@ onClick={() => {
 
 {editBuchung && (
             <div style={{
-              position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
+              position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+              width: "100%", height: "100%",
               background: "#fff", zIndex: 10000, overflowY: "auto"
             }}>
               <div style={{
