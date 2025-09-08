@@ -416,7 +416,8 @@ export default function FahrerListe() {
     const prevOverflow = el.style.overflow;
     el.style.overflow = "hidden";
 
-    const compute = () => {\n      // Skaliere & zentriere das Overlay-Innenleben identisch zum Root
+    const compute = () => {
+      // Skaliere & zentriere das Overlay-Innenleben identisch zum Root
       const vv = (typeof window !== 'undefined' && window.visualViewport) ? window.visualViewport : null;
       const h = vv && typeof vv.height === 'number' ? Math.round(vv.height) : (window.innerHeight || 0);
       setOverlayHeight(h ? (h + "px") : "100vh");
