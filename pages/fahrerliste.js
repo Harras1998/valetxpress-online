@@ -427,13 +427,24 @@ export default function FahrerListe() {
           const w = window.innerWidth || document.documentElement.clientWidth || 0;
           const design = 1440;
           let scale = 1;
-          if (w < design) scale = Math.max(0.2, Math.min(1, w / design));
-          else if (w > design) scale = (w / design);
+          let left = 0;
+          if (w < design) {
+            scale = Math.max(0.2, Math.min(1, w / design));
+            left = Math.max(0, Math.floor((w - design * scale) / 2));
+          } else if (w > design) {
+            scale = w / design;
+            left = -Math.floor((w - design) / 2);
+          } else {
+            scale = 1;
+            left = 0;
+          }
           el.style.transformOrigin = "top left";
           el.style.transform = `scale(${scale})`;
           el.style.position = "relative";
-          const left = Math.max(0, Math.floor((w - design * scale) / 2));
           el.style.left = left + "px";
+        }
+      } catch {}
+    };
         }
       } catch {}
     };
@@ -1175,7 +1186,7 @@ onClick={() => {
               width: "100%",
               background: "#fff", zIndex: 10000, overflowY: "auto", overflowX: "hidden"
             }}>
-              <div ref={editInnerRef} style={{ width: 1440, margin: "0 auto", minHeight: "100%" }}>
+              <div ref={editInnerRef} style={{ width: 1440, margin: "0 auto", minHeight: "100%", fontFamily: "Arial" }}>
 {/* Header */}
                 <div style={{
                   background: "#222", color: "#fff", padding: 10,
