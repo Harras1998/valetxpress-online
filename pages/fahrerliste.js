@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import ReactDOM from "react-dom";
 import Head from "next/head";
 
 function PXHeader({
@@ -1173,7 +1172,7 @@ onClick={() => {
               width: "100%", height: overlayHeight,
               background: "#fff", zIndex: 10000, overflowY: "auto", overflowX: "hidden"
             }}>
-              <div ref={editInnerRef} style={{ width: 1440, margin: "0 auto", minHeight: "100%", fontFamily: "Arial" }, fontFamily: "Arial" }}>
+              <div ref={editInnerRef} style={{ width: 1440, margin: "0 auto", minHeight: "100%", fontFamily: "Arial" }}>
 {/* Header */}
                 <div style={{
                   background: "#222", color: "#fff", padding: 10,
@@ -1389,6 +1388,7 @@ onClick={() => {
             </div>
           )}
         </div>
+      )}
     </>
   );
 }
