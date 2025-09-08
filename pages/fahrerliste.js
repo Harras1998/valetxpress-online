@@ -426,25 +426,12 @@ export default function FahrerListe() {
         if (el) {
           const w = window.innerWidth || document.documentElement.clientWidth || 0;
           const design = 1440;
-          let scale = 1;
-          let left = 0;
-          if (w < design) {
-            scale = Math.max(0.2, Math.min(1, w / design));
-            left = Math.max(0, Math.floor((w - design * scale) / 2));
-          } else if (w > design) {
-            scale = w / design;
-            left = -Math.floor((w - design) / 2);
-          } else {
-            scale = 1;
-            left = 0;
-          }
+          let scale = w < design ? Math.max(0.2, Math.min(1, w / design)) : (w / design);
+          const left = Math.max(0, Math.floor((w - design * scale) / 2));
           el.style.transformOrigin = "top left";
           el.style.transform = `scale(${scale})`;
           el.style.position = "relative";
           el.style.left = left + "px";
-        }
-      } catch {}
-    };
         }
       } catch {}
     };
@@ -1180,13 +1167,13 @@ onClick={() => {
 
 <PXFooter />
 
-{editBuchung && ReactDOM.createPortal(
+{editBuchung && (
             <div style={{
-              position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
-              width: "100%",
+              position: "absolute", top: 0, left: 0, right: 0,
+              width: "100%", height: overlayHeight,
               background: "#fff", zIndex: 10000, overflowY: "auto", overflowX: "hidden"
             }}>
-              <div ref={editInnerRef} style={{ width: 1440, margin: "0 auto", minHeight: "100%", fontFamily: "Arial" }}>
+              <div ref={editInnerRef} style={{ width: 1440, margin: "0 auto", minHeight: "100%", fontFamily: "Arial" }, fontFamily: "Arial" }}>
 {/* Header */}
                 <div style={{
                   background: "#222", color: "#fff", padding: 10,
@@ -1399,9 +1386,9 @@ onClick={() => {
               <PXEditFooter name={`${(editBuchung.vorname || "").trim()} ${(editBuchung.nachname || "").trim()}`.trim()} />
             </div>
             
-            </div>, document.body)}
+            </div>
+          )}
         </div>
-      )}
     </>
   );
 }
