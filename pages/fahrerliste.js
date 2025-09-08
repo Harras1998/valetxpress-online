@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import ReactDOM from "react-dom";
 import Head from "next/head";
 
 function PXHeader({
@@ -391,6 +392,7 @@ export default function FahrerListe() {
   // Dynamische Höhe der Bearbeitungsmaske (in px, kompensiert Root-Scale)
   const [editBuchung, setEditBuchung] = useState(null);
   const [overlayHeight, setOverlayHeight] = useState("100vh");
+  const editInnerRef = useRef(null);
   const [editSaving, setEditSaving] = useState(false);
   const [alleShowAll, setAlleShowAll] = useState(false);
   // Sichtfeld für Notizen ohne Steuer‑Tags (CT/DX)
@@ -406,35 +408,47 @@ export default function FahrerListe() {
 
   const rueckModus = tab === "heute" || tab === "2tage";
   
-  // Höhe der Bearbeitungsmaske robust für alle Geräte berechnen
+  
+  // Body-Scroll sperren & Overlayhöhe exakt zum Viewport setzen, solange die Maske offen ist
   useEffect(() => {
     if (!editBuchung) return;
+    const el = document.body;
+    const prevOverflow = el.style.overflow;
+    el.style.overflow = "hidden";
 
-    const design = 1440; // muss identisch zum Root-Layout sein
-    const compute = () => {
+    const compute = () => {\n      // Skaliere & zentriere das Overlay-Innenleben identisch zum Root
+      const vv = (typeof window !== 'undefined' && window.visualViewport) ? window.visualViewport : null;
+      const h = vv && typeof vv.height === 'number' ? Math.round(vv.height) : (window.innerHeight || 0);
+      setOverlayHeight(h ? (h + "px") : "100vh");
       try {
-        const w = window.innerWidth || document.documentElement.clientWidth || 0;
-        const vv = (typeof window !== 'undefined' && window.visualViewport) ? window.visualViewport : null;
-        const vh = vv && typeof vv.height === 'number' ? vv.height : (window.innerHeight || 0);
-        const scale = w > design ? (w / design) : 1; // Root wird nur bei w>design hochskaliert
-        const preScaled = Math.ceil(vh / Math.max(0.2, Math.min(5, scale)));
-
-        setOverlayHeight(preScaled + "px");
+        const el = editInnerRef.current;
+        if (el) {
+          const w = window.innerWidth || document.documentElement.clientWidth || 0;
+          const design = 1440;
+          let scale = 1;
+          if (w < design) scale = Math.max(0.2, Math.min(1, w / design));
+          else if (w > design) scale = (w / design);
+          el.style.transformOrigin = "top left";
+          el.style.transform = `scale(${scale})`;
+          el.style.position = "relative";
+          const left = Math.max(0, Math.floor((w - design * scale) / 2));
+          el.style.left = left + "px";
+        }
       } catch {}
     };
-
-    // initial & on changes
     compute();
-    window.addEventListener('resize', compute);
-    window.addEventListener('orientationchange', compute);
-    if (window.visualViewport) window.visualViewport.addEventListener('resize', compute);
+    window.addEventListener("resize", compute);
+    window.addEventListener("orientationchange", compute);
+    if (window.visualViewport) window.visualViewport.addEventListener("resize", compute);
 
     return () => {
-      window.removeEventListener('resize', compute);
-      window.removeEventListener('orientationchange', compute);
-      if (window.visualViewport) window.visualViewport.removeEventListener('resize', compute);
+      el.style.overflow = prevOverflow;
+      window.removeEventListener("resize", compute);
+      window.removeEventListener("orientationchange", compute);
+      if (window.visualViewport) window.visualViewport.removeEventListener("resize", compute);
     };
   }, [editBuchung]);
+
 
   // --- Timer/Call state for "Heute"-Tab ---
   const [callTimers, setCallTimers] = useState({});
@@ -1154,16 +1168,14 @@ onClick={() => {
 
 <PXFooter />
 
-{editBuchung && (
+{editBuchung && ReactDOM.createPortal(
             <div style={{
-              position: "absolute", top: 0, left: 0, right: 0,
-              width: "100%", height: overlayHeight,
-              background: "#fff", zIndex: 10000, overflowY: "auto"
+              position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+              width: "100%",
+              background: "#fff", zIndex: 10000, overflowY: "auto", overflowX: "hidden"
             }}>
-              <div style={{
-                width: 1440, margin: "0 auto", minHeight: overlayHeight, fontFamily: "Arial"
-              }}>
-                {/* Header */}
+              <div ref={editInnerRef} style={{ width: 1440, margin: "0 auto", minHeight: "100%" }}>
+{/* Header */}
                 <div style={{
                   background: "#222", color: "#fff", padding: 10,
                   fontWeight: "bold", fontSize: 22, textAlign: "center",
@@ -1375,8 +1387,7 @@ onClick={() => {
               <PXEditFooter name={`${(editBuchung.vorname || "").trim()} ${(editBuchung.nachname || "").trim()}`.trim()} />
             </div>
             
-            </div>
-          )}
+            </div>, document.body)}
         </div>
       )}
     </>
