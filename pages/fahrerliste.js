@@ -316,9 +316,6 @@ export default function FahrerListe() {
         }
         const design = 1440; // feste Layoutbreite
 
-        // Fix: do not scale UP on wide screens – clamp viewport width to design width
-        if (w > design) { w = design; }
-
         const el = root && root();
         if (!el) return;
 
@@ -357,8 +354,8 @@ export default function FahrerListe() {
           el.style.transform = `scale(${scale})`;
           el.style.position = "relative";
           // Compensate the default centering (margin: auto) so the scaled root starts at x=0
-          const left = -Math.floor((w - design) / 2);
-          el.style.left = left + "px";
+          el.style.left = "0px";
+          el.style.margin = "0";
           document.body && (document.body.style.overflowX = "hidden");
         } else {
           // Exactly 1440px: native (unscaled) layout
