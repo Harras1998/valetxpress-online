@@ -1169,7 +1169,7 @@ onClick={() => {
 {editBuchung && (
             <div style={{
               position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
-              background: "#fff", zIndex: 10000, overflowY: "auto, overscrollBehavior: "contain", WebkitOverflowScrolling: "touch" }}>
+              background: "#fff", zIndex: 10000, overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch" }}>
               <div style={{
                 width: 1440, margin: "0 auto", minHeight: "100vh", fontFamily: "Arial"
               }}>
