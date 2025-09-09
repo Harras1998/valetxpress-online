@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Head from "next/head";
 
 function PXHeader({
@@ -388,10 +388,7 @@ export default function FahrerListe() {
       if (savedAuth) { setAuth(savedAuth); setUsername(savedUser); }
     } catch {}
   }, []);
-  // Dynamische Höhe der Bearbeitungsmaske (in px, kompensiert Root-Scale)
-  const [editBuchung, setEditBuchung] = useState(null);
-  const [overlayHeight, setOverlayHeight] = useState("100vh");
-  const editInnerRef = useRef(null);
+const [editBuchung, setEditBuchung] = useState(null);
   const [editSaving, setEditSaving] = useState(false);
   const [alleShowAll, setAlleShowAll] = useState(false);
   // Sichtfeld für Notizen ohne Steuer‑Tags (CT/DX)
@@ -406,48 +403,6 @@ export default function FahrerListe() {
 
 
   const rueckModus = tab === "heute" || tab === "2tage";
-  
-  
-  // Body-Scroll sperren & Overlayhöhe exakt zum Viewport setzen, solange die Maske offen ist
-  useEffect(() => {
-    if (!editBuchung) return;
-    const el = document.body;
-    const prevOverflow = el.style.overflow;
-    el.style.overflow = "hidden";
-
-    const compute = () => {
-      // Skaliere & zentriere das Overlay-Innenleben identisch zum Root
-      const vv = (typeof window !== 'undefined' && window.visualViewport) ? window.visualViewport : null;
-      const h = vv && typeof vv.height === 'number' ? Math.round(vv.height) : (window.innerHeight || 0);
-      setOverlayHeight(h ? (h + "px") : "100vh");
-      try {
-        const el = editInnerRef.current;
-        if (el) {
-          const w = window.innerWidth || document.documentElement.clientWidth || 0;
-          const design = 1440;
-          let scale = w < design ? Math.max(0.2, Math.min(1, w / design)) : (w / design);
-          const left = Math.max(0, Math.floor((w - design * scale) / 2));
-          el.style.transformOrigin = "top left";
-          el.style.transform = `scale(${scale})`;
-          el.style.position = "relative";
-          el.style.left = left + "px";
-        }
-      } catch {}
-    };
-    compute();
-    window.addEventListener("resize", compute);
-    window.addEventListener("orientationchange", compute);
-    if (window.visualViewport) window.visualViewport.addEventListener("resize", compute);
-
-    return () => {
-      el.style.overflow = prevOverflow;
-      window.removeEventListener("resize", compute);
-      window.removeEventListener("orientationchange", compute);
-      if (window.visualViewport) window.visualViewport.removeEventListener("resize", compute);
-    };
-  }, [editBuchung]);
-
-
   // --- Timer/Call state for "Heute"-Tab ---
   const [callTimers, setCallTimers] = useState({});
   // Persistenz der Anruf-Timer über Reloads (global)
@@ -773,7 +728,7 @@ for (const k of Object.keys(groupsByDate)) {
             background: "#fff",
             fontFamily: "Arial",
             margin: "0 auto",
-            minHeight: overlayHeight,
+            minHeight: "100vh",
             overflowX: "hidden",
             position: "relative"
           }}>
@@ -1168,12 +1123,14 @@ onClick={() => {
 
 {editBuchung && (
             <div style={{
-              position: "absolute", top: 0, left: 0, right: 0,
-              width: "100%", height: overlayHeight,
-              background: "#fff", zIndex: 10000, overflowY: "auto", overflowX: "hidden"
+              position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+              width: "100%", height: "100%",
+              background: "#fff", zIndex: 10000, overflowY: "auto"
             }}>
-              <div ref={editInnerRef} style={{ width: 1440, margin: "0 auto", minHeight: "100%", fontFamily: "Arial" }}>
-{/* Header */}
+              <div style={{
+                width: 1440, margin: "0 auto", minHeight: "100vh", fontFamily: "Arial"
+              }}>
+                {/* Header */}
                 <div style={{
                   background: "#222", color: "#fff", padding: 10,
                   fontWeight: "bold", fontSize: 22, textAlign: "center",
