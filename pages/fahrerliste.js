@@ -316,6 +316,9 @@ export default function FahrerListe() {
         }
         const design = 1440; // feste Layoutbreite
 
+        // Fix: do not scale UP on wide screens – clamp viewport width to design width
+        if (w > design) { w = design; }
+
         const el = root && root();
         if (!el) return;
 
@@ -401,7 +404,7 @@ const [editBuchung, setEditBuchung] = useState(null);
     const calc = () => {
       try {
         const w = window.innerWidth || document.documentElement.clientWidth || 0;
-        const scale = Math.max(0.2, Math.min(4, w / designW));
+        const scale = Math.max(0.2, Math.min(1, w / designW));
         setEditScale(scale);
         const left = Math.max(0, Math.floor((w - designW * scale) / 2));
         setEditLeft(left);
@@ -762,7 +765,7 @@ for (const k of Object.keys(groupsByDate)) {
               <style>{`
           html, body, #__next { margin: 0; padding: 0; width: 100%; }
           * { box-sizing: border-box; }
-          @media (min-width: 1024px) { html, body { overflow-x: hidden; } }
+          html, body { overflow-x: hidden; }
         `}</style>
       </Head>
       {!auth ? (
