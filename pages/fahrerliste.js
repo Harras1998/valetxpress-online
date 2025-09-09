@@ -354,8 +354,8 @@ export default function FahrerListe() {
           el.style.transform = `scale(${scale})`;
           el.style.position = "relative";
           // Compensate the default centering (margin: auto) so the scaled root starts at x=0
-          el.style.left = "0px";
-          el.style.margin = "0";
+          const left = -Math.floor((w - design) / 2);
+          el.style.left = left + "px";
           document.body && (document.body.style.overflowX = "hidden");
         } else {
           // Exactly 1440px: native (unscaled) layout
@@ -763,6 +763,8 @@ for (const k of Object.keys(groupsByDate)) {
           html, body, #__next { margin: 0; padding: 0; width: 100%; }
           * { box-sizing: border-box; }
           html, body { overflow-x: hidden; }
+          #__next { height: auto !important; overflow-y: visible !important; }
+          #vx-root { overflow-y: visible !important; }
         `}</style>
       </Head>
       {!auth ? (
