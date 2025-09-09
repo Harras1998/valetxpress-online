@@ -292,58 +292,70 @@ export default function FahrerListe() {
   
   
   
-  // Dynamische Viewport-Auto-Fit (robust & ohne Doppel-Scroll)
+  // Dynamische Viewport-Auto-Fit (robust für alle Breakpoints inkl. 320px & 1024px)
   useEffect(() => {
     try {
       const meta = document.querySelector('meta[name="viewport"]');
-      const rootEl = document.getElementById('vx-root');
-      if (!rootEl) return;
-
-      const DESIGN = 1440; // feste Layoutbreite
-
+      const root = () => document.getElementById('vx-root');
       const apply = () => {
-        const w = window.innerWidth || document.documentElement.clientWidth || DESIGN;
+        const w = window.innerWidth || document.documentElement.clientWidth || 0;
+        const design = 1440; // feste Layoutbreite
 
-        // feste Layoutbreite; verhindert Layoutsprünge
-        rootEl.style.maxWidth = DESIGN + "px";
-        rootEl.style.minWidth = DESIGN + "px";
+        const el = root && root();
+        if (!el) return;
 
-        if (w < DESIGN) {
-          // Kleiner als Designbreite: skaliere proportional herunter
-          const scale = Math.max(0.2, Math.min(1, w / DESIGN));
+        // Basis: immer klare Root-Breite setzen
+        el.style.maxWidth = design + "px";
+        el.style.minWidth = design + "px";
+
+        if (w < design) {
+          // 1) Viewport-Skalierung
+          const scale = Math.max(0.2, Math.min(1, w / design));
           if (meta) {
             meta.setAttribute(
               'content',
-              `width=${DESIGN}, initial-scale=${scale}, maximum-scale=${scale}, minimum-scale=${scale}, user-scalable=no, viewport-fit=cover`
+              `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, minimum-scale=${scale}, user-scalable=no, viewport-fit=cover`
             );
           }
-          rootEl.style.transformOrigin = "top left";
-          rootEl.style.transform = `scale(${scale})`;
-          rootEl.style.position = "relative";
-          rootEl.style.left = "0";
-          if (document && document.body) document.body.style.overflowX = "hidden";
+
+          // iPad/Edit-Fix: Wenn der Edit-Overlay offen ist, darf der Root NICHT transformiert
+          // werden, sonst wird das fixed-Overlay mitskaliert und "springt".
+          // 2) Fallback/Ergänzung: CSS-Transform (hilft, wenn Browser die Meta-Änderung
+          //    erst spät oder gar nicht übernimmt – z.B. in DevTools/Emulation).
+            el.style.transformOrigin = "top left";
+            el.style.transform = `scale(${scale})`;
+            el.style.position = "relative";
+            // horizontal mittig darstellen (ohne Überlauf):
+            const left = Math.max(0, Math.floor((w - design * scale) / 2));
+            el.style.left = left + "px";
+
+          // Scrollbalken vermeiden:
+          document.body && (document.body.style.overflowX = "hidden");
+          // iPad Overlay: inverse Transform, damit position:fixed sich wie viewport-fixed verhält
+          const __ov = document.getElementById("vx-edit-layer");
+          if (__ov) {
+            __ov.style.transformOrigin = "top left";
+            __ov.style.transform = `translate(${(-1) * Math.floor(left/Math.max(0.01, scale))}px, 0) scale(${1/scale})`;
+            // Hinweis: translateX(-left/scale) * scale cancels parent left+scale
+          }
         } else {
-          // >= Designbreite: native Darstellung ohne Transform
+          // Zurück auf natives Verhalten
           if (meta) {
             meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
           }
-          rootEl.style.transform = "none";
-          rootEl.style.transformOrigin = "top left";
-          rootEl.style.position = "relative";
-          rootEl.style.left = "0";
-          if (document && document.body) document.body.style.overflowX = "hidden";
+          el.style.transform = "none";
+          el.style.left = "0";
+          el.style.position = "static";
+          document.body && (document.body.style.overflowX = "hidden");
+          const __ov = document.getElementById("vx-edit-layer");
+          if (__ov) { __ov.style.transform = "none"; __ov.style.left = "0"; }
         }
-      };
-
-      // erste Berechnung & Listener
+      
       const t = setTimeout(apply, 0);
       window.addEventListener('resize', apply);
       window.addEventListener('orientationchange', apply);
-      if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(apply).catch(()=>{});
-      }
+      document.fonts && document.fonts.ready && document.fonts.ready.then(apply).catch(()=>{});
       window.addEventListener('load', apply);
-
       return () => {
         clearTimeout(t);
         window.removeEventListener('resize', apply);
@@ -363,31 +375,6 @@ export default function FahrerListe() {
 const [editBuchung, setEditBuchung] = useState(null);
   const [editSaving, setEditSaving] = useState(false);
   const [alleShowAll, setAlleShowAll] = useState(false);
-  // Sichtfeld für Notizen ohne Steuer‑Tags (CT/DX)
-  const [editBemerkungPlain, setEditBemerkungPlain] = useState("");
-
-  // Wenn eine Buchung zum Bearbeiten geöffnet wird, Notiz-Text ohne [CT:...] und [DX:...] anzeigen
-  useEffect(() => {
-    try {
-      setEditBemerkungPlain(editBuchung ? stripAllTags(editBuchung.bemerkung || "") : "");
-    } catch {}
-  }, [editBuchung]);
-
-// Sperre den Hintergrund-Scroll, wenn der Bearbeiten-Overlay offen ist
-useEffect(() => {
-  try {
-    const b = document && document.body;
-    if (!b) return;
-    const prev = b.style.overflow;
-    if (editBuchung) {
-      b.style.overflow = "hidden";
-    } else {
-      b.style.overflow = prev || "";
-    }
-    return () => { try { b.style.overflow = prev || ""; } catch {} };
-  } catch {}
-}, [editBuchung]);
-
 
   const rueckModus = tab === "heute" || tab === "2tage";
   // --- Timer/Call state for "Heute"-Tab ---
@@ -494,21 +481,6 @@ function withDXTag(bem, user) {
 // Helper: alle Steuer-Tags (CT + DX) für die Anzeige ausblenden
 function stripAllTags(bem) {
   return stripDXTag(stripCallTimer(bem));
-}
-
-// Hilfsfunktionen: vorhandene CT/DX-Tags beibehalten, wenn der sichtbare Notiztext geändert wird
-function __extractBemerkungTags(bem) {
-  const tags = [];
-  const dx = (bem || "").match(/\[DX:[^\]]+\]/);
-  if (dx) tags.push(dx[0]);
-  const ct = (bem || "").match(/\[CT:\d{10,}\]/);
-  if (ct) tags.push(ct[0]);
-  return tags.join(" ").trim();
-}
-function __mergeBemerkungWithTags(plain, originalBem) {
-  const tags = __extractBemerkungTags(originalBem);
-  const base = (plain || "").trim();
-  return tags ? (base ? (base + " " + tags) : tags) : base;
 }
 
 
@@ -704,8 +676,6 @@ for (const k of Object.keys(groupsByDate)) {
               <style>{`
           html, body, #__next { margin: 0; padding: 0; width: 100%; }
           * { box-sizing: border-box; }
-          /* keep layout from shifting when vertical scrollbar appears */
-          html, body { scrollbar-gutter: stable; }
           @media (min-width: 1024px) { html, body { overflow-x: hidden; } }
         `}</style>
       </Head>
@@ -718,8 +688,7 @@ for (const k of Object.keys(groupsByDate)) {
             fontFamily: "Arial",
             margin: "0 auto",
             minHeight: "100vh",
-            overflowX: "hidden",
-            position: "relative"
+            overflowX: "hidden"
           }}>
           <PXHeader
             username=""
@@ -811,8 +780,7 @@ for (const k of Object.keys(groupsByDate)) {
             fontFamily: "Arial",
             margin: "0 auto",
             minHeight: "100vh",
-            overflowX: "hidden",
-            position: "relative"
+            overflowX: "hidden"
           }}>
           <PXHeader
             username={username}
@@ -1111,8 +1079,8 @@ onClick={() => {
 <PXFooter />
 
 {editBuchung && (
-            <div style={{
-              position: "fixed", inset: 0,
+            <div id="vx-edit-layer" style={{
+              position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
               background: "#fff", zIndex: 10000, overflowY: "auto"
             }}>
               <div style={{
@@ -1298,11 +1266,7 @@ onClick={() => {
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label>Sperrgepäck/Notizen:</label><br />
-                    <textarea value={editBemerkungPlain} onChange={e => {
-                    const plain = e.target.value;
-                    setEditBemerkungPlain(plain);
-                    setEditBuchung(prev => ({ ...prev, bemerkung: __mergeBemerkungWithTags(plain, (prev && prev.bemerkung) || "") }));
-                  }} style={{ width: "100%", fontSize: 18 }} />
+                    <textarea value={editBuchung.bemerkung || ""} onChange={e => setEditBuchung({ ...editBuchung, bemerkung: e.target.value })} style={{ width: "100%", fontSize: 18 }} />
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label>Typ (valet/allinclusive):</label><br />
