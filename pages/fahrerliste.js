@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Head from "next/head";
 
 function PXHeader({
@@ -390,6 +391,50 @@ export default function FahrerListe() {
   }, []);
 const [editBuchung, setEditBuchung] = useState(null);
   const [editSaving, setEditSaving] = useState(false);
+  // --- Edit-Overlay: responsive Skalierung + Scroll-Lock (verhindert doppelte Scrollbalken) ---
+  const designW = 1440;
+  const [editScale, setEditScale] = useState(1);
+  const [editLeft, setEditLeft] = useState(0);
+
+  useEffect(() => {
+    if (!editBuchung) return;
+    const calc = () => {
+      try {
+        const w = window.innerWidth || document.documentElement.clientWidth || 0;
+        const scale = Math.max(0.2, Math.min(4, w / designW));
+        setEditScale(scale);
+        const left = Math.max(0, Math.floor((w - designW * scale) / 2));
+        setEditLeft(left);
+      } catch {}
+    };
+    calc();
+    window.addEventListener('resize', calc);
+    window.addEventListener('orientationchange', calc);
+    return () => {
+      window.removeEventListener('resize', calc);
+      window.removeEventListener('orientationchange', calc);
+    };
+  }, [editBuchung]);
+
+  useEffect(() => {
+    if (!editBuchung) return;
+    const body = document.body;
+    if (!body) return;
+    const prevOverflow = body.style.overflow;
+    const prevOverflowX = body.style.overflowX;
+    const prevOverflowY = body.style.overflowY;
+    try {
+      body.style.overflow = 'hidden';
+    } catch {}
+    return () => {
+      try {
+        body.style.overflow = prevOverflow || '';
+        body.style.overflowX = prevOverflowX || '';
+        body.style.overflowY = prevOverflowY || '';
+      } catch {}
+    };
+  }, [editBuchung]);
+
   const [alleShowAll, setAlleShowAll] = useState(false);
   // Sichtfeld für Notizen ohne Steuer‑Tags (CT/DX)
   const [editBemerkungPlain, setEditBemerkungPlain] = useState("");
@@ -1119,13 +1164,13 @@ onClick={() => {
 
 <PXFooter />
 
-{editBuchung && (
+{editBuchung && createPortal((
             <div style={{
               position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
-              background: "#fff", zIndex: 10000, overflowY: "auto"
+              background: "#fff", zIndex: 10000, overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch"
             }}>
               <div style={{
-                width: 1440, margin: "0 auto", minHeight: "100vh", fontFamily: "Arial"
+                width: 1440, minHeight: "100vh", fontFamily: "Arial", transformOrigin: "top left", transform: `scale(${editScale})`, position: "relative", left: `${editLeft}px`
               }}>
                 {/* Header */}
                 <div style={{
@@ -1340,7 +1385,7 @@ onClick={() => {
             </div>
             
             </div>
-          )}
+          ), (typeof document !== 'undefined' ? document.body : null))}
         </div>
       )}
     </>
