@@ -411,13 +411,33 @@ useEffect(() => {
   try {
     const styleId = 'vx-hide-inner-scrollbars';
     const root = document.getElementById('vx-root');
+    const htmlEl = document.documentElement;
+    const bodyEl = document.body;
+
+    // Snapshot previous inline styles to restore on cleanup
+    const prev = {
+      htmlOverflowY: htmlEl && htmlEl.style ? htmlEl.style.overflowY : '',
+      htmlHeight: htmlEl && htmlEl.style ? htmlEl.style.height : '',
+      bodyOverflowY: bodyEl && bodyEl.style ? bodyEl.style.overflowY : '',
+      bodyHeight: bodyEl && bodyEl.style ? bodyEl.style.height : '',
+      bodyOverscroll: bodyEl && bodyEl.style ? bodyEl.style.overscrollBehavior : '',
+      bodyWebkit: bodyEl && bodyEl.style ? bodyEl.style.WebkitOverflowScrolling : '',
+      rootOverflowY: root && root.style ? root.style.overflowY : '',
+      rootHeight: root && root.style ? root.style.height : '',
+    };
+
     if (tab === 'alle' && alleShowAll) {
-      // Root soll nicht selbst scrollen – die Seite übernimmt das.
-      if (root) root.style.overflowY = 'visible';
-      // Standard-Scroll nur am Dokument/Body
-      document.documentElement.style.overflowY = 'auto';
-      document.body.style.overflowY = 'auto';
-      // Sichtbare doppelte Scrollleisten in inneren Containern verhindern (nur in diesem Modus aktiv):
+      // Ensure only BODY scrolls; HTML is locked to prevent a second scrollbar.
+      if (root) { root.style.overflowY = 'visible'; root.style.height = 'auto'; }
+      if (htmlEl && htmlEl.style) { htmlEl.style.overflowY = 'hidden'; htmlEl.style.height = '100vh'; }
+      if (bodyEl && bodyEl.style) {
+        bodyEl.style.overflowY = 'auto';
+        bodyEl.style.height = '100vh';
+        bodyEl.style.WebkitOverflowScrolling = 'touch';
+        bodyEl.style.overscrollBehavior = 'contain';
+      }
+
+      // Hide visual inner scrollbars inside the app to avoid the appearance of doubles
       if (!document.getElementById(styleId)) {
         const st = document.createElement('style');
         st.id = styleId;
@@ -427,18 +447,27 @@ useEffect(() => {
         `;
         document.head.appendChild(st);
       }
-    } else {
-      // Aufräumen / Zustand zurücksetzen
-      if (root) root.style.overflowY = '';
-      const st = document.getElementById(styleId);
-      if (st) st.remove();
-      document.documentElement.style.overflowY = '';
-      document.body.style.overflowY = '';
     }
-  } catch {}
-}, [tab, alleShowAll]);
 
-  // Sichtfeld für Notizen ohne Steuer‑Tags (CT/DX)
+    // Cleanup / restore
+    return () => {
+      try {
+        const st = document.getElementById(styleId);
+        if (st) st.remove();
+      } catch {}
+      try {
+        if (root && root.style) { root.style.overflowY = prev.rootOverflowY || ''; root.style.height = prev.rootHeight || ''; }
+        if (htmlEl && htmlEl.style) { htmlEl.style.overflowY = prev.htmlOverflowY || ''; htmlEl.style.height = prev.htmlHeight || ''; }
+        if (bodyEl && bodyEl.style) {
+          bodyEl.style.overflowY = prev.bodyOverflowY || '';
+          bodyEl.style.height = prev.bodyHeight || '';
+          bodyEl.style.WebkitOverflowScrolling = prev.bodyWebkit || '';
+          bodyEl.style.overscrollBehavior = prev.bodyOverscroll || '';
+        }
+      } catch {}
+    };
+  } catch {}
+}, [tab, alleShowAll]);// Sichtfeld für Notizen ohne Steuer‑Tags (CT/DX)
   const [editBemerkungPlain, setEditBemerkungPlain] = useState("");
 
   // Wenn eine Buchung zum Bearbeiten geöffnet wird, Notiz-Text ohne [CT:...] und [DX:...] anzeigen
