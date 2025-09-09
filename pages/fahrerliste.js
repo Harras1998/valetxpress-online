@@ -297,8 +297,22 @@ export default function FahrerListe() {
     try {
       const meta = document.querySelector('meta[name="viewport"]');
       const root = () => document.getElementById('vx-root');
+      // iPad pinch-zoom guard: remember the base width when not zooming
+      let __vx_baseW = window.innerWidth || document.documentElement.clientWidth || 0;
       const apply = () => {
-        const w = window.innerWidth || document.documentElement.clientWidth || 0;
+        let w = window.innerWidth || document.documentElement.clientWidth || 0;
+        // iPad: während eines aktiven Pinch‑Zooms (visualViewport.scale != 1)
+        // nutzen wir die zuletzt bekannte Basisbreite, damit das Layout
+        // nicht neu berechnet/jittert. Außerhalb von Zoom-Phasen aktualisieren
+        // wir die Basis automatisch.
+        const vv = (typeof window !== 'undefined' && window.visualViewport) ? window.visualViewport : null;
+        if (vv && typeof vv.scale === 'number') {
+          if (Math.abs(vv.scale - 1) > 0.001) {
+            w = __vx_baseW; // fixiere Breite während des Zooms
+          } else {
+            __vx_baseW = w; // Basisbreite aktualisieren, wenn kein Zoom aktiv ist
+          }
+        }
         const design = 1440; // feste Layoutbreite
 
         const el = root && root();
@@ -318,27 +332,32 @@ export default function FahrerListe() {
             );
           }
 
-          // iPad/Edit-Fix: Wenn der Edit-Overlay offen ist, darf der Root NICHT transformiert
-          // werden, sonst wird das fixed-Overlay mitskaliert und "springt".
-          const editing = !!document.getElementById('vx-edit-layer');
-          if (editing) {
-            el.style.transform = "none";
-            el.style.left = "0";
-            el.style.position = "static";
-          } else {
-            // 2) Fallback/Ergänzung: CSS-Transform (nur wenn kein Edit offen)
-            el.style.transformOrigin = "top left";
-            el.style.transform = `scale(${scale})`;
-            el.style.position = "relative";
-            // horizontal mittig darstellen (ohne Überlauf):
-            const left = Math.max(0, Math.floor((w - design * scale) / 2));
-            el.style.left = left + "px";
-          }
+          // 2) Fallback/Ergänzung: CSS-Transform (hilft, wenn Browser die Meta-Änderung
+          //    erst spät oder gar nicht übernimmt – z.B. in DevTools/Emulation).
+          el.style.transformOrigin = "top left";
+          el.style.transform = `scale(${scale})`;
+          el.style.position = "relative";
+          // horizontal mittig darstellen (ohne Überlauf):
+          const left = Math.max(0, Math.floor((w - design * scale) / 2));
+          el.style.left = left + "px";
 
           // Scrollbalken vermeiden:
           document.body && (document.body.style.overflowX = "hidden");
+        } else if (w > design) {
+          // NEW: scale UP to fill wide viewports (no white bars), keep <=1440px unchanged
+          const scale = w / design;
+          if (meta) {
+            meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+          }
+          el.style.transformOrigin = "top left";
+          el.style.transform = `scale(${scale})`;
+          el.style.position = "relative";
+          // Compensate the default centering (margin: auto) so the scaled root starts at x=0
+          const left = -Math.floor((w - design) / 2);
+          el.style.left = left + "px";
+          document.body && (document.body.style.overflowX = "hidden");
         } else {
-          // Zurück auf natives Verhalten
+          // Exactly 1440px: native (unscaled) layout
           if (meta) {
             meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
           }
@@ -370,11 +389,18 @@ export default function FahrerListe() {
     } catch {}
   }, []);
 const [editBuchung, setEditBuchung] = useState(null);
-  useEffect(() => {
-    try { window.dispatchEvent(new Event('resize')); } catch {}
-  }, [editBuchung]);
   const [editSaving, setEditSaving] = useState(false);
   const [alleShowAll, setAlleShowAll] = useState(false);
+  // Sichtfeld für Notizen ohne Steuer‑Tags (CT/DX)
+  const [editBemerkungPlain, setEditBemerkungPlain] = useState("");
+
+  // Wenn eine Buchung zum Bearbeiten geöffnet wird, Notiz-Text ohne [CT:...] und [DX:...] anzeigen
+  useEffect(() => {
+    try {
+      setEditBemerkungPlain(editBuchung ? stripAllTags(editBuchung.bemerkung || "") : "");
+    } catch {}
+  }, [editBuchung]);
+
 
   const rueckModus = tab === "heute" || tab === "2tage";
   // --- Timer/Call state for "Heute"-Tab ---
@@ -481,6 +507,21 @@ function withDXTag(bem, user) {
 // Helper: alle Steuer-Tags (CT + DX) für die Anzeige ausblenden
 function stripAllTags(bem) {
   return stripDXTag(stripCallTimer(bem));
+}
+
+// Hilfsfunktionen: vorhandene CT/DX-Tags beibehalten, wenn der sichtbare Notiztext geändert wird
+function __extractBemerkungTags(bem) {
+  const tags = [];
+  const dx = (bem || "").match(/\[DX:[^\]]+\]/);
+  if (dx) tags.push(dx[0]);
+  const ct = (bem || "").match(/\[CT:\d{10,}\]/);
+  if (ct) tags.push(ct[0]);
+  return tags.join(" ").trim();
+}
+function __mergeBemerkungWithTags(plain, originalBem) {
+  const tags = __extractBemerkungTags(originalBem);
+  const base = (plain || "").trim();
+  return tags ? (base ? (base + " " + tags) : tags) : base;
 }
 
 
@@ -1079,7 +1120,7 @@ onClick={() => {
 <PXFooter />
 
 {editBuchung && (
-            <div id="vx-edit-layer" style={{
+            <div style={{
               position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
               background: "#fff", zIndex: 10000, overflowY: "auto"
             }}>
@@ -1266,7 +1307,11 @@ onClick={() => {
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label>Sperrgepäck/Notizen:</label><br />
-                    <textarea value={editBuchung.bemerkung || ""} onChange={e => setEditBuchung({ ...editBuchung, bemerkung: e.target.value })} style={{ width: "100%", fontSize: 18 }} />
+                    <textarea value={editBemerkungPlain} onChange={e => {
+                    const plain = e.target.value;
+                    setEditBemerkungPlain(plain);
+                    setEditBuchung(prev => ({ ...prev, bemerkung: __mergeBemerkungWithTags(plain, (prev && prev.bemerkung) || "") }));
+                  }} style={{ width: "100%", fontSize: 18 }} />
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label>Typ (valet/allinclusive):</label><br />
