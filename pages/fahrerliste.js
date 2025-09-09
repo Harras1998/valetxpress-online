@@ -292,81 +292,58 @@ export default function FahrerListe() {
   
   
   
-  // Dynamische Viewport-Auto-Fit (robust für alle Breakpoints inkl. 320px & 1024px)
+  // Dynamische Viewport-Auto-Fit (robust & ohne Doppel-Scroll)
   useEffect(() => {
     try {
       const meta = document.querySelector('meta[name="viewport"]');
-      const root = () => document.getElementById('vx-root');
-      // iPad pinch-zoom guard: remember the base width when not zooming
-      let __vx_baseW = window.innerWidth || document.documentElement.clientWidth || 0;
+      const rootEl = document.getElementById('vx-root');
+      if (!rootEl) return;
+
+      const DESIGN = 1440; // feste Layoutbreite
+
       const apply = () => {
-        let w = window.innerWidth || document.documentElement.clientWidth || 0;
-        // iPad: während eines aktiven Pinch‑Zooms (visualViewport.scale != 1)
-        // nutzen wir die zuletzt bekannte Basisbreite, damit das Layout
-        // nicht neu berechnet/jittert. Außerhalb von Zoom-Phasen aktualisieren
-        // wir die Basis automatisch.
-        const vv = (typeof window !== 'undefined' && window.visualViewport) ? window.visualViewport : null;
-        if (vv && typeof vv.scale === 'number') {
-          if (Math.abs(vv.scale - 1) > 0.001) {
-            w = __vx_baseW; // fixiere Breite während des Zooms
-          } else {
-            __vx_baseW = w; // Basisbreite aktualisieren, wenn kein Zoom aktiv ist
-          }
-        }
-        const design = 1440; // feste Layoutbreite
+        const w = window.innerWidth || document.documentElement.clientWidth || DESIGN;
 
-        const el = root && root();
-        if (!el) return;
+        // feste Layoutbreite; verhindert Layoutsprünge
+        rootEl.style.maxWidth = DESIGN + "px";
+        rootEl.style.minWidth = DESIGN + "px";
 
-        // Basis: immer klare Root-Breite setzen
-        el.style.maxWidth = design + "px";
-        el.style.minWidth = design + "px";
-
-        if (w < design) {
-          // 1) Viewport-Skalierung
-          const scale = Math.max(0.2, Math.min(1, w / design));
+        if (w < DESIGN) {
+          // Kleiner als Designbreite: skaliere proportional herunter
+          const scale = Math.max(0.2, Math.min(1, w / DESIGN));
           if (meta) {
             meta.setAttribute(
               'content',
-              `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, minimum-scale=${scale}, user-scalable=no, viewport-fit=cover`
+              `width=${DESIGN}, initial-scale=${scale}, maximum-scale=${scale}, minimum-scale=${scale}, user-scalable=no, viewport-fit=cover`
             );
           }
-
-          // 2) Fallback/Ergänzung: CSS-Transform (hilft, wenn Browser die Meta-Änderung
-          //    erst spät oder gar nicht übernimmt – z.B. in DevTools/Emulation).
-          el.style.transformOrigin = "top left";
-          el.style.transform = `scale(${scale})`;
-          el.style.position = "relative";
-          // horizontal mittig darstellen (ohne Überlauf):
-          const left = Math.max(0, Math.floor((w - design * scale) / 2));
-          el.style.left = left + "px";
-
-          // Scrollbalken vermeiden:
-          document.body && (document.body.style.overflowX = "hidden");
-        
-} else {
-  // >= design width: native, unscaled layout (prevents double scrollbars & shifting)
-  if (meta) {
-    meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
-  }
-  el.style.transform = "none";
-  el.style.transformOrigin = "top left";
-  el.style.left = "0";
-  el.style.position = "relative";
-  document.body && (document.body.style.overflowX = "hidden");
-}
-
-          el.style.transform = "none";
-          el.style.left = "0";
-          el.style.position = "relative";
-          document.body && (document.body.style.overflowX = "hidden");
+          rootEl.style.transformOrigin = "top left";
+          rootEl.style.transform = `scale(${scale})`;
+          rootEl.style.position = "relative";
+          rootEl.style.left = "0";
+          if (document && document.body) document.body.style.overflowX = "hidden";
+        } else {
+          // >= Designbreite: native Darstellung ohne Transform
+          if (meta) {
+            meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+          }
+          rootEl.style.transform = "none";
+          rootEl.style.transformOrigin = "top left";
+          rootEl.style.position = "relative";
+          rootEl.style.left = "0";
+          if (document && document.body) document.body.style.overflowX = "hidden";
         }
       };
+
+      // erste Berechnung & Listener
       const t = setTimeout(apply, 0);
       window.addEventListener('resize', apply);
       window.addEventListener('orientationchange', apply);
-      document.fonts && document.fonts.ready && document.fonts.ready.then(apply).catch(()=>{});
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(apply).catch(()=>{});
+      }
       window.addEventListener('load', apply);
+
       return () => {
         clearTimeout(t);
         window.removeEventListener('resize', apply);
