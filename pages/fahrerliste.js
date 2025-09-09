@@ -343,24 +343,19 @@ export default function FahrerListe() {
 
           // Scrollbalken vermeiden:
           document.body && (document.body.style.overflowX = "hidden");
-        } else if (w > design) {
-          // NEW: scale UP to fill wide viewports (no white bars), keep <=1440px unchanged
-          const scale = w / design;
-          if (meta) {
-            meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
-          }
-          el.style.transformOrigin = "top left";
-          el.style.transform = `scale(${scale})`;
-          el.style.position = "relative";
-          // Compensate the default centering (margin: auto) so the scaled root starts at x=0
-          const left = -Math.floor((w - design) / 2);
-          el.style.left = left + "px";
-          document.body && (document.body.style.overflowX = "hidden");
-        } else {
-          // Exactly 1440px: native (unscaled) layout
-          if (meta) {
-            meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
-          }
+        
+} else {
+  // >= design width: native, unscaled layout (prevents double scrollbars & shifting)
+  if (meta) {
+    meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+  }
+  el.style.transform = "none";
+  el.style.transformOrigin = "top left";
+  el.style.left = "0";
+  el.style.position = "relative";
+  document.body && (document.body.style.overflowX = "hidden");
+}
+
           el.style.transform = "none";
           el.style.left = "0";
           el.style.position = "relative";
@@ -400,6 +395,21 @@ const [editBuchung, setEditBuchung] = useState(null);
       setEditBemerkungPlain(editBuchung ? stripAllTags(editBuchung.bemerkung || "") : "");
     } catch {}
   }, [editBuchung]);
+
+// Sperre den Hintergrund-Scroll, wenn der Bearbeiten-Overlay offen ist
+useEffect(() => {
+  try {
+    const b = document && document.body;
+    if (!b) return;
+    const prev = b.style.overflow;
+    if (editBuchung) {
+      b.style.overflow = "hidden";
+    } else {
+      b.style.overflow = prev || "";
+    }
+    return () => { try { b.style.overflow = prev || ""; } catch {} };
+  } catch {}
+}, [editBuchung]);
 
 
   const rueckModus = tab === "heute" || tab === "2tage";
@@ -717,6 +727,8 @@ for (const k of Object.keys(groupsByDate)) {
               <style>{`
           html, body, #__next { margin: 0; padding: 0; width: 100%; }
           * { box-sizing: border-box; }
+          /* keep layout from shifting when vertical scrollbar appears */
+          html, body { scrollbar-gutter: stable; }
           @media (min-width: 1024px) { html, body { overflow-x: hidden; } }
         `}</style>
       </Head>
@@ -1123,8 +1135,7 @@ onClick={() => {
 
 {editBuchung && (
             <div style={{
-              position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
-              width: "100%", height: "100%",
+              position: "fixed", inset: 0,
               background: "#fff", zIndex: 10000, overflowY: "auto"
             }}>
               <div style={{
