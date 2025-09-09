@@ -320,24 +320,23 @@ export default function FahrerListe() {
 
           // iPad/Edit-Fix: Wenn der Edit-Overlay offen ist, darf der Root NICHT transformiert
           // werden, sonst wird das fixed-Overlay mitskaliert und "springt".
-          // 2) Fallback/Ergänzung: CSS-Transform (hilft, wenn Browser die Meta-Änderung
-          //    erst spät oder gar nicht übernimmt – z.B. in DevTools/Emulation).
+          const editing = !!document.getElementById('vx-edit-layer');
+          if (editing) {
+            el.style.transform = "none";
+            el.style.left = "0";
+            el.style.position = "static";
+          } else {
+            // 2) Fallback/Ergänzung: CSS-Transform (nur wenn kein Edit offen)
             el.style.transformOrigin = "top left";
             el.style.transform = `scale(${scale})`;
             el.style.position = "relative";
             // horizontal mittig darstellen (ohne Überlauf):
             const left = Math.max(0, Math.floor((w - design * scale) / 2));
             el.style.left = left + "px";
+          }
 
           // Scrollbalken vermeiden:
           document.body && (document.body.style.overflowX = "hidden");
-          // iPad Overlay: inverse Transform, damit position:fixed sich wie viewport-fixed verhält
-          const __ov = document.getElementById("vx-edit-layer");
-          if (__ov) {
-            __ov.style.transformOrigin = "top left";
-            __ov.style.transform = `translate(${(-1) * Math.floor(left/Math.max(0.01, scale))}px, 0) scale(${1/scale})`;
-            // Hinweis: translateX(-left/scale) * scale cancels parent left+scale
-          }
         } else {
           // Zurück auf natives Verhalten
           if (meta) {
@@ -347,10 +346,8 @@ export default function FahrerListe() {
           el.style.left = "0";
           el.style.position = "static";
           document.body && (document.body.style.overflowX = "hidden");
-          const __ov = document.getElementById("vx-edit-layer");
-          if (__ov) { __ov.style.transform = "none"; __ov.style.left = "0"; }
         }
-      
+      };
       const t = setTimeout(apply, 0);
       window.addEventListener('resize', apply);
       window.addEventListener('orientationchange', apply);
@@ -373,6 +370,9 @@ export default function FahrerListe() {
     } catch {}
   }, []);
 const [editBuchung, setEditBuchung] = useState(null);
+  useEffect(() => {
+    try { window.dispatchEvent(new Event('resize')); } catch {}
+  }, [editBuchung]);
   const [editSaving, setEditSaving] = useState(false);
   const [alleShowAll, setAlleShowAll] = useState(false);
 
