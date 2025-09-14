@@ -345,30 +345,18 @@ export default function FahrerListe() {
           // Scrollbalken vermeiden:
           document.body && (document.body.style.overflowX = "hidden");
         } else if (w > design) {
-          // Fill wide viewports without white bars. Prefer CSS 'zoom' so layout/scroll height stay correct.
+          // NEW: scale UP to fill wide viewports (no white bars), keep <=1440px unchanged
           const scale = w / design;
           if (meta) {
             meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
           }
-          if ('zoom' in el.style) {
-            el.style.zoom = String(scale);
-            el.style.transform = 'none';
-            el.style.position = 'static';
-            el.style.left = '0px';
-          } else {
-            el.style.transformOrigin = 'top left';
-            el.style.transform = `scale(${scale})`;
-            el.style.position = 'relative';
-            const left = -Math.floor((w - design) / 2);
-            el.style.left = left + 'px';
-            try {
-              const baseH = el.scrollHeight || el.offsetHeight || 0;
-              const scaledH = Math.ceil(baseH * scale);
-              document.documentElement.style.height = scaledH + 'px';
-              document.body.style.height = scaledH + 'px';
-            } catch {}
-          }
-          document.body && (document.body.style.overflowX = 'hidden');
+          el.style.transformOrigin = "top left";
+          el.style.transform = `scale(${scale})`;
+          el.style.position = "relative";
+          // Compensate the default centering (margin: auto) so the scaled root starts at x=0
+          const left = -Math.floor((w - design) / 2);
+          el.style.left = left + "px";
+          document.body && (document.body.style.overflowX = "hidden");
         } else {
           // Exactly 1440px: native (unscaled) layout
           if (meta) {
@@ -448,7 +436,6 @@ const [editBuchung, setEditBuchung] = useState(null);
   }, [editBuchung]);
 
   const [alleShowAll, setAlleShowAll] = useState(false);
-  useEffect(() => { try { window.dispatchEvent(new Event("resize")); } catch {} }, [alleShowAll]); // vx__fire_resize_after_alleshow
   // Sichtfeld für Notizen ohne Steuer‑Tags (CT/DX)
   const [editBemerkungPlain, setEditBemerkungPlain] = useState("");
 
@@ -606,27 +593,6 @@ function __mergeBemerkungWithTags(plain, originalBem) {
   }, [auth, suchtext, sort]);
 
   useEffect(() => { if (tab !== "alle") setAlleShowAll(false); }, [tab]);
-  // Single scroll in "Alle" & when "Alle Buchungen" erweitert wurde:
-  useEffect(() => {
-    try {
-      const html = document.documentElement;
-      const body = document.body;
-      const root = document.getElementById("vx-root");
-      if (!html || !body) return;
-      if (tab === "alle") {
-        // HTML scrollt, innere Container nicht
-        html.style.overflowY = 'auto';
-        body.style.overflowY = 'visible';
-        if (root) root.style.overflowY = 'visible';
-      } else {
-        // zurücksetzen
-        html.style.overflowY = '';
-        body.style.overflowY = '';
-        if (root) root.style.overflowY = '';
-      }
-    } catch {}
-  }, [tab, alleShowAll]);
-
 
   let filtered = list;
   const today = new Date();
@@ -796,9 +762,7 @@ for (const k of Object.keys(groupsByDate)) {
               <style>{`
           html, body, #__next { margin: 0; padding: 0; width: 100%; }
           * { box-sizing: border-box; }
-          html, body { overflow-x: hidden; }
-          #__next { height: auto !important; overflow-y: visible !important; }
-          #vx-root { overflow-y: visible !important; }
+          @media (min-width: 1024px) { html, body { overflow-x: hidden; } }
         `}</style>
       </Head>
       {!auth ? (
