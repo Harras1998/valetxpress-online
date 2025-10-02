@@ -293,91 +293,52 @@ export default function FahrerListe() {
   
   
   
-  // JQM-kompatible Viewport‑Skalierung (Parkxpress 1:1): 
-// - Gerätbreite statt Fixed-Design (width=device-width, initial-scale=1)
-// - Kein Transform-Scaling des Root‑Containers
-// - iOS: Zoom während Input‑Focus deaktivieren (analog jQuery Mobile 1.1.1)
-// - Text-Size-Auto-Adjust deaktivieren wie in .ui-mobile-viewport
-useEffect(() => {
-  try {
-    // Ensure <meta name="viewport"> exists and set base like jQuery Mobile
-    let meta = document.querySelector('meta[name="viewport"]');
-    if (!meta) {
-      meta = document.createElement('meta');
-      meta.setAttribute('name', 'viewport');
-      document.head && document.head.appendChild(meta);
-    }
-    const base = 'width=device-width, initial-scale=1, viewport-fit=cover';
-    const disable = base + ', maximum-scale=1, user-scalable=no';
-    const enable = base + ', maximum-scale=10, user-scalable=yes';
-    meta.setAttribute('content', base);
+  // Dynamische Viewport-Auto-Fit (ersetzt: Parkxpress identisches Verhalten ohne Transform-Scaling)
+  useEffect(() => {
+    try {
+      // Viewport identisch zu Parkxpress/jQuery Mobile-Setup
+      let meta = document.querySelector('meta[name="viewport"]');
+      if (!meta) {
+        meta = document.createElement('meta');
+        meta.setAttribute('name', 'viewport');
+        document.head && document.head.appendChild(meta);
+      }
+      // Parkxpress verhält sich ohne dynamische Transform-Skalierung; wir setzen ein fixes, nicht-zoombares Viewport-Setup
+      meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover');
 
-    // Match JQM: prevent text auto-zooming
-    const html = document.documentElement;
-    const prevWk = html && html.style ? html.style.webkitTextSizeAdjust : undefined;
-    const prevMs = html && html.style ? html.style.msTextSizeAdjust : undefined;
-    if (html && html.style) {
-      try { html.style.webkitTextSizeAdjust = 'none'; } catch {}
-      try { html.style.msTextSizeAdjust = 'none'; } catch {}
-    }
+      const el = document.getElementById('vx-root');
+      if (el && el.style) {
+        // KEINE feste 1440px-Breite, KEIN Transform-Scaling
+        el.style.maxWidth = '';
+        el.style.minWidth = '';
+        el.style.width = '100%';
+        el.style.transform = 'none';
+        el.style.transformOrigin = '';
+        el.style.left = '';
+        el.style.position = '';
+        el.style.overflowX = 'hidden';
+      }
+      if (document.body && document.body.style) {
+        document.body.style.overflowX = 'hidden';
+      }
 
-    // Remove any fixed-width/transform scaling on our root container
-    const el = document.getElementById('vx-root');
-    if (el && el.style) {
-      el.style.maxWidth = '';
-      el.style.minWidth = '';
-      el.style.width = '100%';
-      el.style.transform = 'none';
-      el.style.transformOrigin = '';
-      el.style.position = '';
-      el.style.left = '';
-    }
-    if (document.body && document.body.style) {
-      document.body.style.overflowX = 'hidden';
-    }
-
-    // iOS WebKit detection (like jQuery Mobile zoom handling)
-    const isiOSWebKit = (typeof navigator !== 'undefined'
-      && /iP(hone|od|ad)/.test(navigator.platform || '')
-      && (navigator.userAgent || '').indexOf('AppleWebKit') > -1);
-
-    const onFocus = () => { try { meta.setAttribute('content', disable); } catch {} };
-    const onBlur  = () => { try { meta.setAttribute('content', enable); } catch {} };
-
-    if (isiOSWebKit) {
-      document.addEventListener('focusin', onFocus);
-      document.addEventListener('focusout', onBlur);
-      window.addEventListener('orientationchange', onBlur);
-    }
-
-    const onResize = () => {
-      try {
-        // Keep the baseline device-width setup (no transforms)
-        meta.setAttribute('content', base);
+      const onResize = () => {
+        // Nichts weiter nötig: Layout bleibt fluid; sichern Overflow
         if (document.body && document.body.style) document.body.style.overflowX = 'hidden';
-      } catch {}
-    };
-    window.addEventListener('resize', onResize);
-    window.addEventListener('load', onResize);
+      };
+      window.addEventListener('resize', onResize);
+      window.addEventListener('orientationchange', onResize);
+      window.addEventListener('load', onResize);
 
-    return () => {
-      try {
+      return () => {
         window.removeEventListener('resize', onResize);
+        window.removeEventListener('orientationchange', onResize);
         window.removeEventListener('load', onResize);
-        if (isiOSWebKit) {
-          document.removeEventListener('focusin', onFocus);
-          document.removeEventListener('focusout', onBlur);
-          window.removeEventListener('orientationchange', onBlur);
-        }
-        // Restore previous text-size-adjust values
-        if (html && html.style) {
-          if (typeof prevWk !== 'undefined') html.style.webkitTextSizeAdjust = prevWk;
-          if (typeof prevMs !== 'undefined') html.style.msTextSizeAdjust = prevMs;
-        }
-      } catch {}
-    };
-  } catch {}
-}, []);// Login aus localStorage wiederherstellen
+      };
+    } catch {}
+  }, []);
+
+// Login aus localStorage wiederherstellen
   useEffect(() => {
     try {
       const savedAuth = localStorage.getItem("vx_auth");
@@ -802,14 +763,13 @@ for (const k of Object.keys(groupsByDate)) {
       {!auth ? (
         <div id="vx-root"
           style={{
-            maxWidth: 1440,
-            minWidth: 1440,
+            width: '100%',
             background: "#fff",
             fontFamily: "Arial",
             margin: "0 auto",
             minHeight: "100vh",
             overflowX: "hidden"
-          }}>
+            }}>
           <PXHeader
             username=""
             tab={tab}
@@ -894,14 +854,13 @@ for (const k of Object.keys(groupsByDate)) {
       ) : (
         <div id="vx-root"
           style={{
-            maxWidth: 1440,
-            minWidth: 1440,
+            width: '100%',
             background: "#fff",
             fontFamily: "Arial",
             margin: "0 auto",
             minHeight: "100vh",
             overflowX: "hidden"
-          }}>
+            }}>
           <PXHeader
             username={username}
             tab={tab}
