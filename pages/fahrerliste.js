@@ -1140,7 +1140,7 @@ onClick={() => {
               background: "#fff", zIndex: 10000, overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch"
             }}>
               <div style={{
-                width: 1440, minHeight: "100vh", fontFamily: "Arial", transformOrigin: "top left", position: "relative", px`
+                width: "100%", minHeight: "100vh", fontFamily: "Arial", position: "relative"
               }}>
                 {/* Header */}
                 <div style={{
