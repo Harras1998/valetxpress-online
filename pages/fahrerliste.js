@@ -323,37 +323,37 @@ export default function FahrerListe() {
         el.style.maxWidth = design + "px";
         el.style.minWidth = design + "px";
 
-        if (w < design) {
-          // 1) Viewport-Skalierung
-          const scale = Math.max(0.2, Math.min(1, w / design));
-          if (meta) {
-            meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
-          }
-
-          // 2) Fallback/Ergänzung: CSS-Transform (hilft, wenn Browser die Meta-Änderung
-          //    erst spät oder gar nicht übernimmt – z.B. in DevTools/Emulation).
-          el.style.transformOrigin = "top left";
-          el.style.transform = `scale(${scale})`;
-          el.style.position = "relative";
-          // horizontal mittig darstellen (ohne Überlauf):
-          const left = Math.max(0, Math.floor((w - design * scale) / 2));
-          el.style.left = left + "px";
-
-          // Scrollbalken vermeiden:
-          document.body && (document.body.style.overflowX = "hidden");
         
+if (w < design) {
+  const scale = Math.max(0.2, Math.min(1, w / design));
+  // Use browser zoom via meta viewport so layout metrics (including scroll height) stay correct.
+  if (meta) {
+    meta.setAttribute('content',
+      `width=${design}, initial-scale=${scale}, minimum-scale=${scale}, maximum-scale=${scale}, viewport-fit=cover`
+    );
+  }
+  // No CSS transform here to avoid paint/layout mismatch that can break bottom scrolling.
+  el.style.transformOrigin = "top left";
+  el.style.transform = "none";
+  el.style.position = "relative";
+  // Center horizontally at scaled visual width (handled by meta), keep overflowX hidden.
+  const left = Math.max(0, Math.floor((w - design) / 2));
+  el.style.left = left + "px";
+  document.body && (document.body.style.overflowX = "hidden");
+
 } else if (w > design) {
-  // FIX: Do not upscale the root on wide viewports. Upscaling via CSS transform
-  // inflates the painted height without affecting layout height, which broke
-  // scrolling at the bottom of long lists (e.g., "Alle Buchungen").
+  // Wide viewports: no upscaling; use native layout and center the 1440px canvas.
   if (meta) {
     meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
   }
+  el.style.transformOrigin = "top left";
   el.style.transform = "none";
-  el.style.left = "0";
-  el.style.position = "static";
+  el.style.position = "relative";
+  const left = Math.max(0, Math.floor((w - design) / 2));
+  el.style.left = left + "px";
   document.body && (document.body.style.overflowX = "hidden");
 } else {
+
 
           // Exactly 1440px: native (unscaled) layout
           if (meta) {
