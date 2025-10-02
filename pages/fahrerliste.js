@@ -607,8 +607,8 @@ function __mergeBemerkungWithTags(plain, originalBem) {
       const prevRootY = root ? root.style.overflowY : undefined;
 
       if (tab === "alle") {
-        // Hide html scroll, use body scroll, keep inner containers visible
-        html.style.overflowY = "hidden";
+        // Use default scrollbars on both html & body for maximum compatibility across devices
+        html.style.overflowY = "auto";
         body.style.overflowY = "auto";
         if (root) root.style.overflowY = "visible";
       } else {
