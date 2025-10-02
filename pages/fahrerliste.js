@@ -607,11 +607,11 @@ function __mergeBemerkungWithTags(plain, originalBem) {
       const prevRootY = root ? root.style.overflowY : undefined;
 
       if (tab === "alle") {
-        // Use html scroll (single root scrollbar), hide body scroll, keep inner containers visible
+        // Hide html scroll, use body scroll, keep inner containers visible
         html.style.overflowY = "auto";
-        body.style.overflowY = "hidden";
+        body.style.overflowY = "visible";
         if (root) root.style.overflowY = "visible";
-      } else {
+      }} else {
         // Reset when leaving the tab
         html.style.overflowY = prevHtmlY || "";
         body.style.overflowY = prevBodyY || "";
@@ -800,7 +800,7 @@ for (const k of Object.keys(groupsByDate)) {
           * { box-sizing: border-box; }
           html, body { overflow-x: hidden; }
           #__next { height: auto !important; overflow-y: visible !important; }
-          #vx-root { overflow-y: visible !important; } html { overflow-y: auto; scrollbar-gutter: stable both-edges; } body { overflow-y: hidden; }
+          #vx-root { overflow-y: visible !important; } html { overflow-y: auto; scrollbar-gutter: stable; } body { overflow-y: visible; }
         `}</style>
       </Head>
       {!auth ? (
