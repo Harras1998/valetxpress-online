@@ -607,9 +607,9 @@ function __mergeBemerkungWithTags(plain, originalBem) {
       const prevRootY = root ? root.style.overflowY : undefined;
 
       if (tab === "alle") {
-        // Use default scrollbars on both html & body for maximum compatibility across devices
+        // Use html scroll (single root scrollbar), hide body scroll, keep inner containers visible
         html.style.overflowY = "auto";
-        body.style.overflowY = "auto";
+        body.style.overflowY = "hidden";
         if (root) root.style.overflowY = "visible";
       } else {
         // Reset when leaving the tab
@@ -800,7 +800,7 @@ for (const k of Object.keys(groupsByDate)) {
           * { box-sizing: border-box; }
           html, body { overflow-x: hidden; }
           #__next { height: auto !important; overflow-y: visible !important; }
-          #vx-root { overflow-y: visible !important; } html { overflow-y: auto; } body { overflow-y: auto; }
+          #vx-root { overflow-y: visible !important; } html { overflow-y: auto; scrollbar-gutter: stable both-edges; } body { overflow-y: hidden; }
         `}</style>
       </Head>
       {!auth ? (
