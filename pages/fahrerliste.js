@@ -611,7 +611,7 @@ function __mergeBemerkungWithTags(plain, originalBem) {
         html.style.overflowY = "auto";
         body.style.overflowY = "hidden";
         if (root) root.style.overflowY = "visible";
-      }} else {
+      } else {
         // Reset when leaving the tab
         html.style.overflowY = prevHtmlY || "";
         body.style.overflowY = prevBodyY || "";
