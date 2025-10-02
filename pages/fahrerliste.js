@@ -293,95 +293,91 @@ export default function FahrerListe() {
   
   
   
-  // Dynamische Viewport-Auto-Fit (robust für alle Breakpoints inkl. 320px & 1024px)
-  useEffect(() => {
-    try {
-      const meta = document.querySelector('meta[name="viewport"]');
-      const root = () => document.getElementById('vx-root');
-      // iPad pinch-zoom guard: remember the base width when not zooming
-      let __vx_baseW = window.innerWidth || document.documentElement.clientWidth || 0;
-      const apply = () => {
-        let w = window.innerWidth || document.documentElement.clientWidth || 0;
-        // iPad: während eines aktiven Pinch‑Zooms (visualViewport.scale != 1)
-        // nutzen wir die zuletzt bekannte Basisbreite, damit das Layout
-        // nicht neu berechnet/jittert. Außerhalb von Zoom-Phasen aktualisieren
-        // wir die Basis automatisch.
-        const vv = (typeof window !== 'undefined' && window.visualViewport) ? window.visualViewport : null;
-        if (vv && typeof vv.scale === 'number') {
-          if (Math.abs(vv.scale - 1) > 0.001) {
-            w = __vx_baseW; // fixiere Breite während des Zooms
-          } else {
-            __vx_baseW = w; // Basisbreite aktualisieren, wenn kein Zoom aktiv ist
-          }
+  // JQM-kompatible Viewport‑Skalierung (Parkxpress 1:1): 
+// - Gerätbreite statt Fixed-Design (width=device-width, initial-scale=1)
+// - Kein Transform-Scaling des Root‑Containers
+// - iOS: Zoom während Input‑Focus deaktivieren (analog jQuery Mobile 1.1.1)
+// - Text-Size-Auto-Adjust deaktivieren wie in .ui-mobile-viewport
+useEffect(() => {
+  try {
+    // Ensure <meta name="viewport"> exists and set base like jQuery Mobile
+    let meta = document.querySelector('meta[name="viewport"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.setAttribute('name', 'viewport');
+      document.head && document.head.appendChild(meta);
+    }
+    const base = 'width=device-width, initial-scale=1, viewport-fit=cover';
+    const disable = base + ', maximum-scale=1, user-scalable=no';
+    const enable = base + ', maximum-scale=10, user-scalable=yes';
+    meta.setAttribute('content', base);
+
+    // Match JQM: prevent text auto-zooming
+    const html = document.documentElement;
+    const prevWk = html && html.style ? html.style.webkitTextSizeAdjust : undefined;
+    const prevMs = html && html.style ? html.style.msTextSizeAdjust : undefined;
+    if (html && html.style) {
+      try { html.style.webkitTextSizeAdjust = 'none'; } catch {}
+      try { html.style.msTextSizeAdjust = 'none'; } catch {}
+    }
+
+    // Remove any fixed-width/transform scaling on our root container
+    const el = document.getElementById('vx-root');
+    if (el && el.style) {
+      el.style.maxWidth = '';
+      el.style.minWidth = '';
+      el.style.width = '100%';
+      el.style.transform = 'none';
+      el.style.transformOrigin = '';
+      el.style.position = '';
+      el.style.left = '';
+    }
+    if (document.body && document.body.style) {
+      document.body.style.overflowX = 'hidden';
+    }
+
+    // iOS WebKit detection (like jQuery Mobile zoom handling)
+    const isiOSWebKit = (typeof navigator !== 'undefined'
+      && /iP(hone|od|ad)/.test(navigator.platform || '')
+      && (navigator.userAgent || '').indexOf('AppleWebKit') > -1);
+
+    const onFocus = () => { try { meta.setAttribute('content', disable); } catch {} };
+    const onBlur  = () => { try { meta.setAttribute('content', enable); } catch {} };
+
+    if (isiOSWebKit) {
+      document.addEventListener('focusin', onFocus);
+      document.addEventListener('focusout', onBlur);
+      window.addEventListener('orientationchange', onBlur);
+    }
+
+    const onResize = () => {
+      try {
+        // Keep the baseline device-width setup (no transforms)
+        meta.setAttribute('content', base);
+        if (document.body && document.body.style) document.body.style.overflowX = 'hidden';
+      } catch {}
+    };
+    window.addEventListener('resize', onResize);
+    window.addEventListener('load', onResize);
+
+    return () => {
+      try {
+        window.removeEventListener('resize', onResize);
+        window.removeEventListener('load', onResize);
+        if (isiOSWebKit) {
+          document.removeEventListener('focusin', onFocus);
+          document.removeEventListener('focusout', onBlur);
+          window.removeEventListener('orientationchange', onBlur);
         }
-        const design = 1440; // feste Layoutbreite
-
-        const el = root && root();
-        if (!el) return;
-
-        // Basis: immer klare Root-Breite setzen
-        el.style.maxWidth = design + "px";
-        el.style.minWidth = design + "px";
-
-        if (w < design) {
-          // 1) Viewport-Skalierung
-          const scale = Math.max(0.2, Math.min(1, w / design));
-          if (meta) {
-            meta.setAttribute(
-              'content',
-              `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, minimum-scale=${scale}, user-scalable=no, viewport-fit=cover`
-            );
-          }
-
-          // 2) Fallback/Ergänzung: CSS-Transform (hilft, wenn Browser die Meta-Änderung
-          //    erst spät oder gar nicht übernimmt – z.B. in DevTools/Emulation).
-          el.style.transformOrigin = "top left";
-          el.style.transform = `scale(${scale})`;
-          el.style.position = "relative";
-          // horizontal mittig darstellen (ohne Überlauf):
-          const left = Math.max(0, Math.floor((w - design * scale) / 2));
-          el.style.left = left + "px";
-
-          // Scrollbalken vermeiden:
-          document.body && (document.body.style.overflowX = "hidden");
-        } else if (w > design) {
-          // NEW: scale UP to fill wide viewports (no white bars), keep <=1440px unchanged
-          const scale = w / design;
-          if (meta) {
-            meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
-          }
-          el.style.transformOrigin = "top left";
-          el.style.transform = `scale(${scale})`;
-          el.style.position = "relative";
-          // Compensate the default centering (margin: auto) so the scaled root starts at x=0
-          const left = -Math.floor((w - design) / 2);
-          el.style.left = left + "px";
-          document.body && (document.body.style.overflowX = "hidden");
-        } else {
-          // Exactly 1440px: native (unscaled) layout
-          if (meta) {
-            meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
-          }
-          el.style.transform = "none";
-          el.style.left = "0";
-          el.style.position = "static";
-          document.body && (document.body.style.overflowX = "hidden");
+        // Restore previous text-size-adjust values
+        if (html && html.style) {
+          if (typeof prevWk !== 'undefined') html.style.webkitTextSizeAdjust = prevWk;
+          if (typeof prevMs !== 'undefined') html.style.msTextSizeAdjust = prevMs;
         }
-      };
-      const t = setTimeout(apply, 0);
-      window.addEventListener('resize', apply);
-      window.addEventListener('orientationchange', apply);
-      document.fonts && document.fonts.ready && document.fonts.ready.then(apply).catch(()=>{});
-      window.addEventListener('load', apply);
-      return () => {
-        clearTimeout(t);
-        window.removeEventListener('resize', apply);
-        window.removeEventListener('orientationchange', apply);
-        window.removeEventListener('load', apply);
-      };
-    } catch {}
-  }, []);
-// Login aus localStorage wiederherstellen
+      } catch {}
+    };
+  } catch {}
+}, []);// Login aus localStorage wiederherstellen
   useEffect(() => {
     try {
       const savedAuth = localStorage.getItem("vx_auth");
