@@ -609,9 +609,9 @@ function __mergeBemerkungWithTags(plain, originalBem) {
       if (tab === "alle") {
         // Hide html scroll, use body scroll, keep inner containers visible
         html.style.overflowY = "auto";
-        body.style.overflowY = "visible";
+        body.style.overflowY = "hidden";
         if (root) root.style.overflowY = "visible";
-      } else {
+      }} else {
         // Reset when leaving the tab
         html.style.overflowY = prevHtmlY || "";
         body.style.overflowY = prevBodyY || "";
@@ -794,13 +794,13 @@ for (const k of Object.keys(groupsByDate)) {
   return (
     <>
       <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
               <style>{`
           html, body, #__next { margin: 0; padding: 0; width: 100%; }
           * { box-sizing: border-box; }
           html, body { overflow-x: hidden; }
           #__next { height: auto !important; overflow-y: visible !important; }
-          #vx-root { overflow-y: visible !important; } html { overflow-y: auto; scrollbar-gutter: stable; } body { overflow-y: visible; }
+          #vx-root { overflow-y: visible !important; } html { overflow-y: auto; scrollbar-gutter: stable; } body { overflow-y: hidden; }
         `}</style>
       </Head>
       {!auth ? (
