@@ -293,50 +293,27 @@ export default function FahrerListe() {
   
   
   
-  // Dynamische Viewport-Auto-Fit (ersetzt: Parkxpress identisches Verhalten ohne Transform-Scaling)
+  // Dynamische Viewport-Auto-Fit (deaktiviert; Parkxpress manipuliert den Viewport nicht per JS)
   useEffect(() => {
     try {
-      // Viewport identisch zu Parkxpress/jQuery Mobile-Setup
-      let meta = document.querySelector('meta[name="viewport"]');
-      if (!meta) {
-        meta = document.createElement('meta');
-        meta.setAttribute('name', 'viewport');
-        document.head && document.head.appendChild(meta);
+      if (document && document.body && document.body.style) {
+        document.body.style.overflowX = 'hidden';
       }
-      // Parkxpress verhält sich ohne dynamische Transform-Skalierung; wir setzen ein fixes, nicht-zoombares Viewport-Setup
-      meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover');
-
       const el = document.getElementById('vx-root');
       if (el && el.style) {
-        // KEINE feste 1440px-Breite, KEIN Transform-Scaling
-        el.style.maxWidth = '';
-        el.style.minWidth = '';
-        el.style.width = '100%';
+        el.style.overflowX = 'hidden';
         el.style.transform = 'none';
         el.style.transformOrigin = '';
         el.style.left = '';
         el.style.position = '';
-        el.style.overflowX = 'hidden';
+        el.style.maxWidth = '';
+        el.style.minWidth = '';
+        el.style.width = '100%';
+        el.style.margin = '0';
       }
-      if (document.body && document.body.style) {
-        document.body.style.overflowX = 'hidden';
-      }
-
-      const onResize = () => {
-        // Nichts weiter nötig: Layout bleibt fluid; sichern Overflow
-        if (document.body && document.body.style) document.body.style.overflowX = 'hidden';
-      };
-      window.addEventListener('resize', onResize);
-      window.addEventListener('orientationchange', onResize);
-      window.addEventListener('load', onResize);
-
-      return () => {
-        window.removeEventListener('resize', onResize);
-        window.removeEventListener('orientationchange', onResize);
-        window.removeEventListener('load', onResize);
-      };
     } catch {}
   }, []);
+
 
 // Login aus localStorage wiederherstellen
   useEffect(() => {
@@ -1163,7 +1140,7 @@ onClick={() => {
               background: "#fff", zIndex: 10000, overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch"
             }}>
               <div style={{
-                width: 1440, minHeight: "100vh", fontFamily: "Arial", transformOrigin: "top left", transform: `scale(${editScale})`, position: "relative", left: `${editLeft}px`
+                width: 1440, minHeight: "100vh", fontFamily: "Arial", transformOrigin: "top left", position: "relative", px`
               }}>
                 {/* Header */}
                 <div style={{
