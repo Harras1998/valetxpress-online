@@ -997,7 +997,8 @@ body { -webkit-text-size-adjust: none; -ms-text-size-adjust: none; -webkit-tap-h
 }
 <PXFooter />
 
-{editBuchung && createPortal((
+{editBuchung && (
+{editBuchung && (
 <div style={{
               position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
               background: "#fff", zIndex: 10000, overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch"
@@ -1224,8 +1225,8 @@ body { -webkit-text-size-adjust: none; -ms-text-size-adjust: none; -webkit-tap-h
     {/* Dialog-Inhalt */}
   </div>
 </div>
+)}
 
-, (typeof document !== 'undefined' ? document.body : null))}
     </>
   );
 }
