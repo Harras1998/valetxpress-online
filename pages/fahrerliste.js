@@ -1214,11 +1214,18 @@ body { -webkit-text-size-adjust: none; -ms-text-size-adjust: none; -webkit-tap-h
                     </button>
                   </div>
                 </form>
-              <PXEditFooter name={`${(editBuchung.vorname || "").trim()} ${(editBuchung.nachname || "").trim()}`.trim()} />
-            </div>
-            
-            </div>
-)), (typeof document !== 'undefined' ? document.body : null))}
+                            <PXEditFooter name={`${(editBuchung.vorname || "").trim()} ${(editBuchung.nachname || "").trim()}`.trim()} />
+
+<div style={{
+  position: "fixed", inset: 0, background: "#fff",
+  zIndex: 10000, overflowY: "auto", WebkitOverflowScrolling: "touch"
+}}>
+  <div style={{ maxWidth: 980, margin: "0 auto", padding: 16 }}>
+    {/* Dialog-Inhalt */}
+  </div>
+</div>
+
+, (typeof document !== 'undefined' ? document.body : null))}
     </>
   );
 }
