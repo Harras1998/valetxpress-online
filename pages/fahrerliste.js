@@ -293,28 +293,94 @@ export default function FahrerListe() {
   
   
   
-  // Dynamische Viewport-Auto-Fit (deaktiviert; Parkxpress manipuliert den Viewport nicht per JS)
+  // Dynamische Viewport-Auto-Fit (robust für alle Breakpoints inkl. 320px & 1024px)
   useEffect(() => {
     try {
-      if (document && document.body && document.body.style) {
-        document.body.style.overflowX = 'hidden';
-      }
-      const el = document.getElementById('vx-root');
-      if (el && el.style) {
-        el.style.overflowX = 'hidden';
-        el.style.transform = 'none';
-        el.style.transformOrigin = '';
-        el.style.left = '';
-        el.style.position = '';
-        el.style.maxWidth = '';
-        el.style.minWidth = '';
-        el.style.width = '100%';
-        el.style.margin = '0';
-      }
+      const meta = document.querySelector('meta[name="viewport"]');
+      const root = () => document.getElementById('vx-root');
+      // iPad pinch-zoom guard: remember the base width when not zooming
+      let __vx_baseW = window.innerWidth || document.documentElement.clientWidth || 0;
+      const apply = () => {
+        let w = window.innerWidth || document.documentElement.clientWidth || 0;
+        // iPad: während eines aktiven Pinch‑Zooms (visualViewport.scale != 1)
+        // nutzen wir die zuletzt bekannte Basisbreite, damit das Layout
+        // nicht neu berechnet/jittert. Außerhalb von Zoom-Phasen aktualisieren
+        // wir die Basis automatisch.
+        const vv = (typeof window !== 'undefined' && window.visualViewport) ? window.visualViewport : null;
+        if (vv && typeof vv.scale === 'number') {
+          if (Math.abs(vv.scale - 1) > 0.001) {
+            w = __vx_baseW; // fixiere Breite während des Zooms
+          } else {
+            __vx_baseW = w; // Basisbreite aktualisieren, wenn kein Zoom aktiv ist
+          }
+        }
+        const design = 1440; // feste Layoutbreite
+
+        const el = root && root();
+        if (!el) return;
+
+        // Basis: immer klare Root-Breite setzen
+        el.style.maxWidth = design + "px";
+        el.style.minWidth = design + "px";
+
+        if (w < design) {
+          // 1) Viewport-Skalierung
+          const scale = Math.max(0.2, Math.min(1, w / design));
+          if (meta) {
+            meta.setAttribute(
+              'content',
+              `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, minimum-scale=${scale}, user-scalable=no, viewport-fit=cover`
+            );
+          }
+
+          // 2) Fallback/Ergänzung: CSS-Transform (hilft, wenn Browser die Meta-Änderung
+          //    erst spät oder gar nicht übernimmt – z.B. in DevTools/Emulation).
+          el.style.transformOrigin = "top left";
+          el.style.transform = `scale(${scale})`;
+          el.style.position = "relative";
+          // horizontal mittig darstellen (ohne Überlauf):
+          const left = Math.max(0, Math.floor((w - design * scale) / 2));
+          el.style.left = left + "px";
+
+          // Scrollbalken vermeiden:
+          document.body && (document.body.style.overflowX = "hidden");
+        } else if (w > design) {
+          // NEW: scale UP to fill wide viewports (no white bars), keep <=1440px unchanged
+          const scale = w / design;
+          if (meta) {
+            meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+          }
+          el.style.transformOrigin = "top left";
+          el.style.transform = `scale(${scale})`;
+          el.style.position = "relative";
+          // Compensate the default centering (margin: auto) so the scaled root starts at x=0
+          const left = -Math.floor((w - design) / 2);
+          el.style.left = left + "px";
+          document.body && (document.body.style.overflowX = "hidden");
+        } else {
+          // Exactly 1440px: native (unscaled) layout
+          if (meta) {
+            meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+          }
+          el.style.transform = "none";
+          el.style.left = "0";
+          el.style.position = "static";
+          document.body && (document.body.style.overflowX = "hidden");
+        }
+      };
+      const t = setTimeout(apply, 0);
+      window.addEventListener('resize', apply);
+      window.addEventListener('orientationchange', apply);
+      document.fonts && document.fonts.ready && document.fonts.ready.then(apply).catch(()=>{});
+      window.addEventListener('load', apply);
+      return () => {
+        clearTimeout(t);
+        window.removeEventListener('resize', apply);
+        window.removeEventListener('orientationchange', apply);
+        window.removeEventListener('load', apply);
+      };
     } catch {}
   }, []);
-
-
 // Login aus localStorage wiederherstellen
   useEffect(() => {
     try {
@@ -542,8 +608,8 @@ function __mergeBemerkungWithTags(plain, originalBem) {
 
       if (tab === "alle") {
         // Hide html scroll, use body scroll, keep inner containers visible
-        html.style.overflowY = "auto";
-        body.style.overflowY = "hidden";
+        html.style.overflowY = "hidden";
+        body.style.overflowY = "auto";
         if (root) root.style.overflowY = "visible";
       } else {
         // Reset when leaving the tab
@@ -728,25 +794,26 @@ for (const k of Object.keys(groupsByDate)) {
   return (
     <>
       <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
               <style>{`
           html, body, #__next { margin: 0; padding: 0; width: 100%; }
           * { box-sizing: border-box; }
           html, body { overflow-x: hidden; }
           #__next { height: auto !important; overflow-y: visible !important; }
-          #vx-root { overflow-y: visible !important; } html { overflow-y: auto; scrollbar-gutter: stable; } body { overflow-y: hidden; }
+          #vx-root { overflow-y: visible !important; } html { overflow-y: auto; } body { overflow-y: auto; }
         `}</style>
       </Head>
       {!auth ? (
         <div id="vx-root"
           style={{
-            width: '100%',
+            maxWidth: 1440,
+            minWidth: 1440,
             background: "#fff",
             fontFamily: "Arial",
             margin: "0 auto",
             minHeight: "100vh",
             overflowX: "hidden"
-            }}>
+          }}>
           <PXHeader
             username=""
             tab={tab}
@@ -831,13 +898,14 @@ for (const k of Object.keys(groupsByDate)) {
       ) : (
         <div id="vx-root"
           style={{
-            width: '100%',
+            maxWidth: 1440,
+            minWidth: 1440,
             background: "#fff",
             fontFamily: "Arial",
             margin: "0 auto",
             minHeight: "100vh",
             overflowX: "hidden"
-            }}>
+          }}>
           <PXHeader
             username={username}
             tab={tab}
@@ -1140,7 +1208,7 @@ onClick={() => {
               background: "#fff", zIndex: 10000, overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch"
             }}>
               <div style={{
-                width: "100%", minHeight: "100vh", fontFamily: "Arial", position: "relative"
+                width: 1440, minHeight: "100vh", fontFamily: "Arial", transformOrigin: "top left", transform: `scale(${editScale})`, position: "relative", left: `${editLeft}px`
               }}>
                 {/* Header */}
                 <div style={{
