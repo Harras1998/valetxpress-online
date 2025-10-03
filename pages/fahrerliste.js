@@ -994,6 +994,7 @@ body { -webkit-text-size-adjust: none; -ms-text-size-adjust: none; -webkit-tap-h
     </div>
   </div>
 </JQMScope>
+}
 <PXFooter />
 
 {editBuchung && createPortal((
