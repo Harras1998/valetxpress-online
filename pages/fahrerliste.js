@@ -202,8 +202,8 @@ function PXFooter() {
     >
       <div
         style={{
-          maxWidth: 1440,
-          minWidth: 1440,
+          maxWidth: 980,
+          minWidth: 980,
           margin: "0 auto",
           height: 56,
           display: "flex",
@@ -236,8 +236,8 @@ function PXEditFooter({ name }) {
     >
       <div
         style={{
-          maxWidth: 1440,
-          minWidth: 1440,
+          maxWidth: 980,
+          minWidth: 980,
           margin: "0 auto",
           height: 56,
           display: "flex",
@@ -293,9 +293,7 @@ export default function FahrerListe() {
   
   
   
-  
-  // Parkxpress-konformes Viewport-Verhalten (kein Auto-Scale, wie jQuery Mobile)
-  // Hinweis: Skalierung und Layout folgen jetzt 1:1 dem device-width Viewport.
+  // Parkxpress: kein Auto-Scale, festes Layout wie Original
 
 // Login aus localStorage wiederherstellen
   useEffect(() => {
@@ -710,7 +708,7 @@ for (const k of Object.keys(groupsByDate)) {
   return (
     <>
       <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta name="viewport" content="width=980, initial-scale=1, maximum-scale=1, user-scalable=no" />
               <style>{`
           html, body, #__next { margin: 0; padding: 0; width: 100%; }
           * { box-sizing: border-box; }
@@ -718,18 +716,17 @@ for (const k of Object.keys(groupsByDate)) {
           #__next { height: auto !important; overflow-y: visible !important; }
           #vx-root { overflow-y: visible !important; } html { overflow-y: auto; } body { overflow-y: auto; }
         
+/* Parkxpress-like viewport rules */
+body { -webkit-text-size-adjust: none; -ms-text-size-adjust: none; -webkit-tap-highlight-color: rgba(0,0,0,0); }
 
-/* iPad overflow rule like Parkxpress / jQuery Mobile */
-@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) {
-  .ui-li .ui-btn-text { overflow: visible; }
-}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) { .ui-li .ui-btn-text { overflow: visible; } }
 `}</style>
       </Head>
       {!auth ? (
         <div id="vx-root"
           style={{
-            width: "100%", maxWidth: "100%",
-            minWidth: 0,
+            maxWidth: 980,
+            minWidth: 980,
             background: "#fff",
             fontFamily: "Arial",
             margin: "0 auto",
@@ -820,8 +817,8 @@ for (const k of Object.keys(groupsByDate)) {
       ) : (
         <div id="vx-root"
           style={{
-            maxWidth: 1440,
-            minWidth: 1440,
+            maxWidth: 980,
+            minWidth: 980,
             background: "#fff",
             fontFamily: "Arial",
             margin: "0 auto",
