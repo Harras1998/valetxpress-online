@@ -37,6 +37,8 @@ function JQMScope({ children }) {
     const root = hostRef.current.attachShadow({ mode: "open" });
     // Inject jQM CSS + a couple of small fixes like Parkxpress
     const style = document.createElement("style");
+    const container = document.createElement('div');
+    container.setAttribute('class', 'jqm-shadow-root');
     style.textContent = `
       html,body { font-family: Helvetica, Arial, sans-serif; }
       .ui-mobile-viewport { margin:0; overflow-x:hidden; }
@@ -74,9 +76,10 @@ function JQMScope({ children }) {
       }
     `;
     root.appendChild(style);
-    setShadow(root);
+    root.appendChild(container);
+    setShadow(container);
   }, [shadow]);
-  return React.createElement("div", { ref: hostRef }, shadow ? React.createPortal(children, shadow) : null);
+  return React.createElement("div", { ref: hostRef }, shadow ? createPortal(children, shadow) : null);
 }
 import { createPortal } from "react-dom";
 import Head from "next/head";
@@ -991,7 +994,7 @@ body { -webkit-text-size-adjust: none; -ms-text-size-adjust: none; -webkit-tap-h
     </div>
   </div>
 </JQMScope>
-PXFooter />
+<PXFooter />
 
 {editBuchung && createPortal((
             <div style={{
