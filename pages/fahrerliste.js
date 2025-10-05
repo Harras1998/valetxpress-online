@@ -294,93 +294,134 @@ export default function FahrerListe() {
   
   
   // Dynamische Viewport-Auto-Fit (robust für alle Breakpoints inkl. 320px & 1024px)
-  useEffect(() => {
-    try {
-      const meta = document.querySelector('meta[name="viewport"]');
-      const root = () => document.getElementById('vx-root');
-      // iPad pinch-zoom guard: remember the base width when not zooming
-      let __vx_baseW = window.innerWidth || document.documentElement.clientWidth || 0;
-      const apply = () => {
-        let w = window.innerWidth || document.documentElement.clientWidth || 0;
-        // iPad: während eines aktiven Pinch‑Zooms (visualViewport.scale != 1)
-        // nutzen wir die zuletzt bekannte Basisbreite, damit das Layout
-        // nicht neu berechnet/jittert. Außerhalb von Zoom-Phasen aktualisieren
-        // wir die Basis automatisch.
-        const vv = (typeof window !== 'undefined' && window.visualViewport) ? window.visualViewport : null;
-        if (vv && typeof vv.scale === 'number') {
-          if (Math.abs(vv.scale - 1) > 0.001) {
-            w = __vx_baseW; // fixiere Breite während des Zooms
-          } else {
-            __vx_baseW = w; // Basisbreite aktualisieren, wenn kein Zoom aktiv ist
-          }
-        }
-        const design = 1440; // feste Layoutbreite
+useEffect(() => {
+  try {
+    const meta = document.querySelector('meta[name="viewport"]');
+    const root = () => document.getElementById('vx-root');
+    // iPad pinch-zoom guard: remember the base width when not zooming
+    let __vx_baseW = window.innerWidth || document.documentElement.clientWidth || 0;
 
-        const el = root && root();
-        if (!el) return;
-
-        // Basis: immer klare Root-Breite setzen
-        el.style.maxWidth = design + "px";
-        el.style.minWidth = design + "px";
-
-        if (w < design) {
-          // 1) Viewport-Skalierung
-          const scale = Math.max(0.2, Math.min(1, w / design));
-          if (meta) {
-            meta.setAttribute(
-              'content',
-              `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, minimum-scale=${scale}, user-scalable=no, viewport-fit=cover`
-            );
-          }
-
-          // 2) Fallback/Ergänzung: CSS-Transform (hilft, wenn Browser die Meta-Änderung
-          //    erst spät oder gar nicht übernimmt – z.B. in DevTools/Emulation).
-          el.style.transformOrigin = "top left";
-          el.style.transform = `scale(${scale})`;
-          el.style.position = "relative";
-          // horizontal mittig darstellen (ohne Überlauf):
-          const left = Math.max(0, Math.floor((w - design * scale) / 2));
-          el.style.left = left + "px";
-
-          // Scrollbalken vermeiden:
-          document.body && (document.body.style.overflowX = "hidden");
-        } else if (w > design) {
-          // NEW: scale UP to fill wide viewports (no white bars), keep <=1440px unchanged
-          const scale = w / design;
-          if (meta) {
-            meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
-          }
-          el.style.transformOrigin = "top left";
-          el.style.transform = `scale(${scale})`;
-          el.style.position = "relative";
-          // Compensate the default centering (margin: auto) so the scaled root starts at x=0
-          const left = -Math.floor((w - design) / 2);
-          el.style.left = left + "px";
-          document.body && (document.body.style.overflowX = "hidden");
+    // Helper to ensure we can always scroll to the visual bottom when we UPSCALE (>1).
+    // Idea: CSS transforms don't increase the layout height. We therefore inflate the
+    // element's minHeight to approximately the scaled content height.
+    const ensureScrollCapacity = (el, scale) => {
+      if (!el) return;
+      const BASE_MIN = "100vh"; // default from JSX
+      try {
+        if (scale && scale > 1.0001) {
+          const natural = el.scrollHeight || el.offsetHeight || 0; // unscaled layout height
+          const target = Math.ceil(natural * scale) + 2;           // +2 to avoid rounding cutoffs
+          el.style.minHeight = target + "px";
         } else {
-          // Exactly 1440px: native (unscaled) layout
-          if (meta) {
-            meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
-          }
-          el.style.transform = "none";
-          el.style.left = "0";
-          el.style.position = "static";
-          document.body && (document.body.style.overflowX = "hidden");
+          // reset to default so we don't accidentally keep a too-tall minHeight
+          el.style.minHeight = BASE_MIN;
         }
-      };
-      const t = setTimeout(apply, 0);
-      window.addEventListener('resize', apply);
-      window.addEventListener('orientationchange', apply);
-      document.fonts && document.fonts.ready && document.fonts.ready.then(apply).catch(()=>{});
-      window.addEventListener('load', apply);
-      return () => {
-        clearTimeout(t);
-        window.removeEventListener('resize', apply);
-        window.removeEventListener('orientationchange', apply);
-        window.removeEventListener('load', apply);
-      };
+      } catch {}
+    };
+
+    const apply = () => {
+      let w = window.innerWidth || document.documentElement.clientWidth || 0;
+      // iPad: während eines aktiven Pinch‑Zooms (visualViewport.scale != 1)
+      // nutzen wir die zuletzt bekannte Basisbreite, damit das Layout
+      // nicht neu berechnet/jittert. Außerhalb von Zoom-Phasen aktualisieren
+      // wir die Basis automatisch.
+      const vv = (typeof window !== 'undefined' && window.visualViewport) ? window.visualViewport : null;
+      if (vv && typeof vv.scale === 'number') {
+        if (Math.abs(vv.scale - 1) > 0.001) {
+          w = __vx_baseW; // fixiere Breite während des Zooms
+        } else {
+          __vx_baseW = w; // Basisbreite aktualisieren, wenn kein Zoom aktiv ist
+        }
+      }
+      const design = 1440; // feste Layoutbreite
+
+      const el = root && root();
+      if (!el) return;
+
+      // Basis: immer klare Root-Breite setzen
+      el.style.maxWidth = design + "px";
+      el.style.minWidth = design + "px";
+
+      if (w < design) {
+        // 1) Viewport-Skalierung
+        const scale = Math.max(0.2, Math.min(1, w / design));
+        if (meta) {
+          meta.setAttribute(
+            'content',
+            `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, minimum-scale=${scale}, user-scalable=no, viewport-fit=cover`
+          );
+        }
+
+        // 2) Fallback/Ergänzung: CSS-Transform (hilft, wenn Browser die Meta-Änderung
+        //    erst spät oder gar nicht übernimmt – z.B. in DevTools/Emulation).
+        el.style.transformOrigin = "top left";
+        el.style.transform = `scale(${scale})`;
+        el.style.position = "relative";
+        // horizontal mittig darstellen (ohne Überlauf):
+        const left = Math.max(0, Math.floor((w - design * scale) / 2));
+        el.style.left = left + "px";
+
+        // Scrollbalken vermeiden:
+        document.body && (document.body.style.overflowX = "hidden");
+
+        // no upscaling -> ensure default minHeight to keep behaviour
+        ensureScrollCapacity(el, 1);
+      } else if (w > design) {
+        // NEW: scale UP to fill wide viewports (no white bars), keep <=1440px unchanged
+        const scale = w / design;
+        if (meta) {
+          meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+        }
+        el.style.transformOrigin = "top left";
+        el.style.transform = `scale(${scale})`;
+        el.style.position = "relative";
+        // Compensate the default centering (margin: auto) so the scaled root starts at x=0
+        const left = -Math.floor((w - design) / 2);
+        el.style.left = left + "px";
+        document.body && (document.body.style.overflowX = "hidden");
+
+        // IMPORTANT: make sure we can scroll to the *scaled* bottom
+        ensureScrollCapacity(el, scale);
+      } else {
+        // Exactly 1440px: native (unscaled) layout
+        if (meta) {
+          meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+        }
+        el.style.transform = "none";
+        el.style.left = "0";
+        el.style.position = "static";
+        document.body && (document.body.style.overflowX = "hidden");
+
+        ensureScrollCapacity(el, 1);
+      }
+    };
+
+    const t = setTimeout(apply, 0);
+    window.addEventListener('resize', apply);
+    window.addEventListener('orientationchange', apply);
+    document.fonts && document.fonts.ready && document.fonts.ready.then(apply).catch(()=>{});
+    window.addEventListener('load', apply);
+
+    // NEW: react to content height changes (e.g. switching to "Alle Buchungen")
+    let ro = null;
+    try {
+      if (typeof ResizeObserver !== "undefined") {
+        ro = new ResizeObserver(() => apply());
+        const el = root && root();
+        if (el) ro.observe(el);
+      }
     } catch {}
-  }, []);
+
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener('resize', apply);
+      window.removeEventListener('orientationchange', apply);
+      window.removeEventListener('load', apply);
+      try { ro && ro.disconnect && ro.disconnect(); } catch {}
+    };
+  } catch {}
+}, []);
+
 // Login aus localStorage wiederherstellen
   useEffect(() => {
     try {
