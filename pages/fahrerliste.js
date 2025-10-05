@@ -323,41 +323,38 @@ export default function FahrerListe() {
         el.style.maxWidth = design + "px";
         el.style.minWidth = design + "px";
 
-        if (w < design) {
-          // 1) Viewport-Skalierung
-          const scale = Math.max(0.2, Math.min(1, w / design));
-          if (meta) {
-            meta.setAttribute(
-              'content',
-              `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, minimum-scale=${scale}, user-scalable=no, viewport-fit=cover`
-            );
-          }
+        
+if (w < design) {
+  const scale = Math.max(0.2, Math.min(1, w / design));
+  // Use browser zoom via meta viewport so layout metrics (including scroll height) stay correct.
+  if (meta) {
+    meta.setAttribute('content',
+      `width=${design}, initial-scale=${scale}, minimum-scale=${scale}, maximum-scale=${scale}, viewport-fit=cover`
+    );
+  }
+  // No CSS transform here to avoid paint/layout mismatch that can break bottom scrolling.
+  el.style.transformOrigin = "top left";
+  el.style.transform = "none";
+  el.style.position = "relative";
+  // Center horizontally at scaled visual width (handled by meta), keep overflowX hidden.
+  const left = Math.max(0, Math.floor((w - design) / 2));
+  el.style.left = left + "px";
+  document.body && (document.body.style.overflowX = "hidden");
 
-          // 2) Fallback/Ergänzung: CSS-Transform (hilft, wenn Browser die Meta-Änderung
-          //    erst spät oder gar nicht übernimmt – z.B. in DevTools/Emulation).
-          el.style.transformOrigin = "top left";
-          el.style.transform = `scale(${scale})`;
-          el.style.position = "relative";
-          // horizontal mittig darstellen (ohne Überlauf):
-          const left = Math.max(0, Math.floor((w - design * scale) / 2));
-          el.style.left = left + "px";
+} else if (w > design) {
+  // Wide viewports: no upscaling; use native layout and center the 1440px canvas.
+  if (meta) {
+    meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+  }
+  el.style.transformOrigin = "top left";
+  el.style.transform = "none";
+  el.style.position = "relative";
+  const left = Math.max(0, Math.floor((w - design) / 2));
+  el.style.left = left + "px";
+  document.body && (document.body.style.overflowX = "hidden");
+} else {
 
-          // Scrollbalken vermeiden:
-          document.body && (document.body.style.overflowX = "hidden");
-        } else if (w > design) {
-          // NEW: scale UP to fill wide viewports (no white bars), keep <=1440px unchanged
-          const scale = w / design;
-          if (meta) {
-            meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
-          }
-          el.style.transformOrigin = "top left";
-          el.style.transform = `scale(${scale})`;
-          el.style.position = "relative";
-          // Compensate the default centering (margin: auto) so the scaled root starts at x=0
-          const left = -Math.floor((w - design) / 2);
-          el.style.left = left + "px";
-          document.body && (document.body.style.overflowX = "hidden");
-        } else {
+
           // Exactly 1440px: native (unscaled) layout
           if (meta) {
             meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
