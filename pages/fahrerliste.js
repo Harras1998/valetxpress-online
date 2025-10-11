@@ -675,6 +675,13 @@ useEffect(() => {
       el.dataset.fullscroll = "1";
     } else {
       delete el.dataset.fullscroll;
+      // Cleanup: entferne Inline-Overrides aus dem Full-Scroll-Modus,
+      // damit die normale Auto-Fit-Logik ohne Verschiebung greift.
+      el.style.width = "";
+      el.style.maxWidth = "";
+      el.style.minWidth = "";
+      el.style.margin = "";
+      if (document && document.body) document.body.style.overflowX = "";
     }
     // Re-run layout apply logic
     try { window.dispatchEvent(new Event("resize")); } catch {}
