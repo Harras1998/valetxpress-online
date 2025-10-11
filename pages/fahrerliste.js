@@ -618,8 +618,8 @@ function __mergeBemerkungWithTags(plain, originalBem) {
             const rootEl = document.getElementById("vx-root");
             if (rootEl) {
               const rect = rootEl.getBoundingClientRect();
-              const extra = Math.max(rect.top, 0) + 80;
-              document.body.style.minHeight = Math.ceil(rect.height + extra) + "px";
+              const total = Math.max(Math.ceil(rect.top + rect.height), window.innerHeight || 0);
+              document.body.style.minHeight = total + "px";
             }
           } catch {}
         } else {
