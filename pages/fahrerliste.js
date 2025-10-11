@@ -316,33 +316,7 @@ export default function FahrerListe() {
         }
         const design = 1440; // feste Layoutbreite
 
-        
-const el = root && root();
-if (!el) return;
-
-// FULLSCROLL MODE: when the full list in "Alle Buchungen" is shown,
-// disable all transforms and use a normal viewport so we can scroll
-// to the very bottom reliably on all devices.
-
-
-
-if (el && el.dataset && el.dataset.fullscroll === '1') {
-  if (meta) {
-    meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
-  }
-  // FULLSCROLL: nur Skalierung/Position neutralisieren; Breiten nicht anfassen,
-  // damit die Ansicht exakt wie in der Standardansicht bleibt.
-  el.style.transform = "none";
-  el.style.transformOrigin = "top left";
-  el.style.position = "static";
-  el.style.left = "0";
-  if (document && document.body) document.body.style.overflowX = "hidden";
-  return; // skip scaling while fullscroll is active
-}
-
-
-
-
+        const el = root && root();
         if (!el) return;
 
         // Basis: immer klare Root-Breite setzen
@@ -632,20 +606,20 @@ function __mergeBemerkungWithTags(plain, originalBem) {
       const prevBodyY = body.style.overflowY;
       const prevRootY = root ? root.style.overflowY : undefined;
 
-      
-if (tab === "alle") {
-        // In "Alle Buchungen" with full list: let the browser handle scrolling normally
+      if (tab === "alle") {
+        // Im "Alle"-Tab: 
+        // - Standardansicht (alleShowAll=false): wie bisher EIN Scrollbalken auf body.
+        // - Vollansicht (alleShowAll=true): Browser-Scroll ganz normal erlauben (auch html),
+        //   damit man auf ALLEN Geräten bis ganz unten kommt – Optik bleibt unverändert.
         if (alleShowAll) {
-          html.style.overflowY = "auto";
-          body.style.overflowY = "auto";
+          document.documentElement.style.overflowY = "auto";
+          document.body.style.overflowY = "auto";
         } else {
-          // Default "Alle" (standardansicht): single scrollbar on body
-          html.style.overflowY = "hidden";
-          body.style.overflowY = "auto";
+          document.documentElement.style.overflowY = "hidden";
+          document.body.style.overflowY = "auto";
         }
         if (root) root.style.overflowY = "visible";
       } else {
-
         // Reset when leaving the tab
         html.style.overflowY = prevHtmlY || "";
         body.style.overflowY = prevBodyY || "";
@@ -662,37 +636,6 @@ if (tab === "alle") {
       };
     } catch {}
   }, [tab, alleShowAll]);
-
-// Toggle a data attribute on #vx-root to instruct the auto-fit to switch to fullscroll mode
-useEffect(() => {
-  try {
-    const el = document.getElementById("vx-root");
-    const meta = document.querySelector('meta[name="viewport"]');
-    if (!el) return;
-    if (tab === "alle" && alleShowAll) {
-      // Backup aktueller viewport-Content einmalig
-      if (meta && !el.dataset.metaBackup) {
-        el.dataset.metaBackup = meta.getAttribute("content") || "";
-      }
-      el.dataset.fullscroll = "1";
-    } else {
-      delete el.dataset.fullscroll;
-      // Viewport-Content wiederherstellen, damit die Auto-Fit-Logik 1:1 greift
-      if (meta && el.dataset.metaBackup !== undefined) {
-        meta.setAttribute("content", el.dataset.metaBackup);
-        delete el.dataset.metaBackup;
-      }
-      // Cleanup von evtl. Inline-Overrides
-      el.style.width = "";
-      el.style.maxWidth = "";
-      el.style.minWidth = "";
-      el.style.margin = "";
-      if (document && document.body) document.body.style.overflowX = "";
-    }
-    try { window.dispatchEvent(new Event("resize")); } catch {}
-  } catch {}
-}, [tab, alleShowAll]);
-
 
 
   let filtered = list;
