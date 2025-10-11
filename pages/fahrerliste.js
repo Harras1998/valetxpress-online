@@ -612,8 +612,8 @@ function __mergeBemerkungWithTags(plain, originalBem) {
         // - Vollansicht (alleShowAll=true): Browser-Scroll ganz normal erlauben (auch html),
         //   damit man auf ALLEN Geräten bis ganz unten kommt – Optik bleibt unverändert.
         if (alleShowAll) {
-          document.documentElement.style.overflowY = "auto";
-          document.body.style.overflowY = "visible"; // single scrollbar on <html>
+          document.documentElement.style.overflowY = "auto"; // outer scroller
+          document.body.style.overflowY = "hidden"; // prevent second scrollbar on body
         } else {
           document.documentElement.style.overflowY = "hidden";
           document.body.style.overflowY = "auto";
