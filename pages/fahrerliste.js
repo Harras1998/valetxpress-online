@@ -344,18 +344,21 @@ export default function FahrerListe() {
 
           // Scrollbalken vermeiden:
           document.body && (document.body.style.overflowX = "hidden");
-        
-} else if (w > design) {
-  // Disabled scale-up to avoid scroll issues on some devices.
-  if (meta) {
-    meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
-  }
-  el.style.transform = "none";
-  el.style.left = "0";
-  el.style.position = "static";
-  document.body && (document.body.style.overflowX = "hidden");
-} else {
-// Exactly 1440px: native (unscaled) layout
+        } else if (w > design) {
+          // NEW: scale UP to fill wide viewports (no white bars), keep <=1440px unchanged
+          const scale = w / design;
+          if (meta) {
+            meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+          }
+          el.style.transformOrigin = "top left";
+          el.style.transform = `scale(${scale})`;
+          el.style.position = "relative";
+          // Compensate the default centering (margin: auto) so the scaled root starts at x=0
+          const left = -Math.floor((w - design) / 2);
+          el.style.left = left + "px";
+          document.body && (document.body.style.overflowX = "hidden");
+        } else {
+          // Exactly 1440px: native (unscaled) layout
           if (meta) {
             meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
           }
@@ -626,6 +629,22 @@ function __mergeBemerkungWithTags(plain, originalBem) {
     } catch {}
   }, [tab, alleShowAll]);
 
+// Alternative: toggle an HTML class instead of data-attribute to disable transforms
+useEffect(() => {
+  try {
+    const html = document.documentElement;
+    const meta = document.querySelector('meta[name="viewport"]');
+    if (tab === "alle" && alleShowAll) {
+      html.classList.add("vx-fullscroll");
+      if (meta) meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+    } else {
+      html.classList.remove("vx-fullscroll");
+    }
+    try { window.dispatchEvent(new Event("resize")); } catch {}
+  } catch {}
+}, [tab, alleShowAll]);
+
+
 
   let filtered = list;
   const today = new Date();
@@ -798,7 +817,10 @@ for (const k of Object.keys(groupsByDate)) {
           html, body { overflow-x: hidden; }
           #__next { height: auto !important; overflow-y: visible !important; }
           #vx-root { overflow-y: visible !important; } html { overflow-y: auto; } body { overflow-y: auto; }
-        `}</style>
+        
+          /* Fullscroll mode neutralizes transforms for reliable scrolling */
+          .vx-fullscroll #vx-root { transform: none !important; left: 0 !important; position: static !important; }
+`}</style>
       </Head>
       {!auth ? (
         <div id="vx-root"
