@@ -316,26 +316,7 @@ export default function FahrerListe() {
         }
         const design = 1440; // feste Layoutbreite
 
-        
-const el = root && root();
-if (!el) return;
-
-// FULLSCROLL MODE: when the full list in "Alle Buchungen" is shown,
-// disable all transforms and use a normal viewport so we can scroll
-// to the very bottom reliably on all devices.
-if (el && el.dataset && el.dataset.fullscroll === '1') {
-  if (meta) {
-    meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
-  }
-  el.style.maxWidth = design + "px";
-  el.style.minWidth = design + "px";
-  el.style.transform = "none";
-  el.style.left = "0";
-  el.style.position = "static";
-  document.body && (document.body.style.overflowX = "hidden");
-  return; // skip scaling while fullscroll is active
-}
-
+        const el = root && root();
         if (!el) return;
 
         // Basis: immer klare Root-Breite setzen
@@ -363,21 +344,18 @@ if (el && el.dataset && el.dataset.fullscroll === '1') {
 
           // Scrollbalken vermeiden:
           document.body && (document.body.style.overflowX = "hidden");
-        } else if (w > design) {
-          // NEW: scale UP to fill wide viewports (no white bars), keep <=1440px unchanged
-          const scale = w / design;
-          if (meta) {
-            meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
-          }
-          el.style.transformOrigin = "top left";
-          el.style.transform = `scale(${scale})`;
-          el.style.position = "relative";
-          // Compensate the default centering (margin: auto) so the scaled root starts at x=0
-          const left = -Math.floor((w - design) / 2);
-          el.style.left = left + "px";
-          document.body && (document.body.style.overflowX = "hidden");
-        } else {
-          // Exactly 1440px: native (unscaled) layout
+        
+} else if (w > design) {
+  // Disabled scale-up to avoid scroll issues on some devices.
+  if (meta) {
+    meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+  }
+  el.style.transform = "none";
+  el.style.left = "0";
+  el.style.position = "static";
+  document.body && (document.body.style.overflowX = "hidden");
+} else {
+// Exactly 1440px: native (unscaled) layout
           if (meta) {
             meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
           }
@@ -625,20 +603,12 @@ function __mergeBemerkungWithTags(plain, originalBem) {
       const prevBodyY = body.style.overflowY;
       const prevRootY = root ? root.style.overflowY : undefined;
 
-      
-if (tab === "alle") {
-        // In "Alle Buchungen" with full list: let the browser handle scrolling normally
-        if (alleShowAll) {
-          html.style.overflowY = "auto";
-          body.style.overflowY = "auto";
-        } else {
-          // Default "Alle" (standardansicht): single scrollbar on body
-          html.style.overflowY = "hidden";
-          body.style.overflowY = "auto";
-        }
+      if (tab === "alle") {
+        // Hide html scroll, use body scroll, keep inner containers visible
+        html.style.overflowY = "hidden";
+        body.style.overflowY = "auto";
         if (root) root.style.overflowY = "visible";
       } else {
-
         // Reset when leaving the tab
         html.style.overflowY = prevHtmlY || "";
         body.style.overflowY = prevBodyY || "";
@@ -655,22 +625,6 @@ if (tab === "alle") {
       };
     } catch {}
   }, [tab, alleShowAll]);
-
-// Toggle a data attribute on #vx-root to instruct the auto-fit to switch to fullscroll mode
-useEffect(() => {
-  try {
-    const el = document.getElementById("vx-root");
-    if (!el) return;
-    if (tab === "alle" && alleShowAll) {
-      el.dataset.fullscroll = "1";
-    } else {
-      delete el.dataset.fullscroll;
-    }
-    // Re-run layout apply logic
-    try { window.dispatchEvent(new Event("resize")); } catch {}
-  } catch {}
-}, [tab, alleShowAll]);
-
 
 
   let filtered = list;
