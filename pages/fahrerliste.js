@@ -607,25 +607,69 @@ function __mergeBemerkungWithTags(plain, originalBem) {
       const prevRootY = root ? root.style.overflowY : undefined;
 
       if (tab === "alle") {
-        // Im "Alle"-Tab: 
-        // - Standardansicht (alleShowAll=false): wie bisher EIN Scrollbalken auf body.
-        // - Vollansicht (alleShowAll=true): Browser-Scroll ganz normal erlauben (auch html),
-        //   damit man auf ALLEN Geräten bis ganz unten kommt – Optik bleibt unverändert.
+        // Cross-device scroll logic:
+        // - Default "Alle": single scrollbar on body (wie bisher).
+        // - "Alle Buchungen" aktiv (alleShowAll=true): EIN Scrollbalken auf <html>,
+        //   Body blocken und Seitenhöhe dynamisch auf Root-Höhe setzen (inkl. Beobachter).
         if (alleShowAll) {
-          document.documentElement.style.overflowY = "auto"; // outer scroller
-          document.body.style.overflowY = "hidden"; // prevent second scrollbar on body
+          const html = document.documentElement;
+          const body = document.body;
+          html.style.overflowY = "auto";   // outer scroller
+          body.style.overflowY = "hidden"; // prevent second scrollbar
+
           try {
             const rootEl = document.getElementById("vx-root");
             if (rootEl) {
-              const rect = rootEl.getBoundingClientRect();
-              const total = Math.max(Math.ceil(rect.top + rect.height), window.innerHeight || 0);
-              document.body.style.minHeight = total + "px";
+              // Defensive: ggf. alte Watcher entfernen
+              if (rootEl.__vxFullListCleanup) { try { rootEl.__vxFullListCleanup(); } catch {} }
+
+              const updateHeight = () => {
+                try {
+                  const rect = rootEl.getBoundingClientRect();
+                  const vvH = (window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : 0;
+                  const viewportH = Math.max(vvH, window.innerHeight || 0);
+                  const total = Math.max(Math.ceil(rect.top + rect.height), viewportH);
+                  body.style.minHeight = total + "px";
+                } catch {}
+              };
+
+              // Erstmalig berechnen
+              updateHeight();
+
+              // Watcher für alle Geräte/Browservarianten
+              const listeners = [];
+              const add = (target, ev, fn, opts) => { target.addEventListener(ev, fn, opts || {passive:true}); listeners.push([target, ev, fn, opts]); };
+              add(window, "resize", updateHeight);
+              add(window, "orientationchange", updateHeight);
+              if (window.visualViewport) {
+                add(window.visualViewport, "resize", updateHeight);
+                add(window.visualViewport, "scroll", updateHeight);
+              }
+
+              let ro = null, mo = null;
+              if (window.ResizeObserver) {
+                ro = new ResizeObserver(() => updateHeight());
+                try { ro.observe(rootEl); } catch {}
+              } else if (window.MutationObserver) {
+                mo = new MutationObserver(() => updateHeight());
+                try { mo.observe(rootEl, {subtree:true, childList:true, attributes:true, characterData:true}); } catch {}
+              }
+
+              // Cleanup registrieren
+              rootEl.__vxFullListCleanup = () => {
+                try { listeners.forEach(([t, ev, fn, opts]) => t.removeEventListener(ev, fn, opts || {passive:true})); } catch {}
+                try { if (ro) ro.disconnect(); } catch {}
+                try { if (mo) mo.disconnect(); } catch {}
+              };
             }
           } catch {}
         } else {
-          document.documentElement.style.overflowY = "hidden";
-          document.body.style.overflowY = "auto";
-          document.body.style.minHeight = "";
+          // Standard "Alle": wie bisher EIN Scrollbalken auf dem Body
+          html.style.overflowY = "hidden";
+          body.style.overflowY = "auto";
+          // Fallback-Cleanup, falls man aus Vollansicht zurückkommt
+          try { const el = document.getElementById("vx-root"); if (el && el.__vxFullListCleanup) { el.__vxFullListCleanup(); delete el.__vxFullListCleanup; } } catch {}
+          body.style.minHeight = "";
         }
         if (root) root.style.overflowY = "visible";
       } else {
