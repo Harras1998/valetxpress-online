@@ -325,24 +325,21 @@ if (!el) return;
 // to the very bottom reliably on all devices.
 
 
+
 if (el && el.dataset && el.dataset.fullscroll === '1') {
   if (meta) {
     meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
   }
-  // FULLSCROLL: echte Breite nutzen und alle Breiten-Limits neutralisieren,
-  // damit KEIN Weißrand links/rechts entsteht.
-  const viewportWidth = Math.max((typeof w !== 'undefined' && w) ? w : (window.innerWidth || design), design);
+  // FULLSCROLL: nur Skalierung/Position neutralisieren; Breiten nicht anfassen,
+  // damit die Ansicht exakt wie in der Standardansicht bleibt.
   el.style.transform = "none";
   el.style.transformOrigin = "top left";
   el.style.position = "static";
   el.style.left = "0";
-  el.style.width = viewportWidth + "px";
-  el.style.maxWidth = "none";
-  el.style.minWidth = "0";
-  el.style.margin = "0";
   if (document && document.body) document.body.style.overflowX = "hidden";
   return; // skip scaling while fullscroll is active
 }
+
 
 
 
@@ -670,20 +667,28 @@ if (tab === "alle") {
 useEffect(() => {
   try {
     const el = document.getElementById("vx-root");
+    const meta = document.querySelector('meta[name="viewport"]');
     if (!el) return;
     if (tab === "alle" && alleShowAll) {
+      // Backup aktueller viewport-Content einmalig
+      if (meta && !el.dataset.metaBackup) {
+        el.dataset.metaBackup = meta.getAttribute("content") || "";
+      }
       el.dataset.fullscroll = "1";
     } else {
       delete el.dataset.fullscroll;
-      // Cleanup: entferne Inline-Overrides aus dem Full-Scroll-Modus,
-      // damit die normale Auto-Fit-Logik ohne Verschiebung greift.
+      // Viewport-Content wiederherstellen, damit die Auto-Fit-Logik 1:1 greift
+      if (meta && el.dataset.metaBackup !== undefined) {
+        meta.setAttribute("content", el.dataset.metaBackup);
+        delete el.dataset.metaBackup;
+      }
+      // Cleanup von evtl. Inline-Overrides
       el.style.width = "";
       el.style.maxWidth = "";
       el.style.minWidth = "";
       el.style.margin = "";
       if (document && document.body) document.body.style.overflowX = "";
     }
-    // Re-run layout apply logic
     try { window.dispatchEvent(new Event("resize")); } catch {}
   } catch {}
 }, [tab, alleShowAll]);
