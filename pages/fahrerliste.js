@@ -613,7 +613,7 @@ function __mergeBemerkungWithTags(plain, originalBem) {
         //   damit man auf ALLEN Geräten bis ganz unten kommt – Optik bleibt unverändert.
         if (alleShowAll) {
           document.documentElement.style.overflowY = "auto";
-          document.body.style.overflowY = "auto";
+          document.body.style.overflowY = "visible"; // single scrollbar on <html>
         } else {
           document.documentElement.style.overflowY = "hidden";
           document.body.style.overflowY = "auto";
