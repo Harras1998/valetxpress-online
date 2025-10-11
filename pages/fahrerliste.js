@@ -607,51 +607,57 @@ function __mergeBemerkungWithTags(plain, originalBem) {
       const prevRootY = root ? root.style.overflowY : undefined;
 
       if (tab === "alle") {
-        // ULTRA-stabile Lösung:
-        // - Standard "Alle": unverändert (Body-Scroll).
-        // - "Alle Buchungen": EIN Scrollbalken auf <html>; Höhe exakt auf visuelles Ende;
-        //   exakte Rundung auf Gerätepixel (DPR), um 1‑px-Gaps auf manchen Geräten zu vermeiden.
         if (alleShowAll) {
           const html = document.documentElement;
           const body = document.body;
-          html.style.overflowY = "auto";    // einziger Scrollbalken
+          html.style.overflowY = "auto";    // EIN Scrollbalken nur hier
           body.style.overflowY = "hidden";  // zweiten Scrollbalken verhindern
-          // sicherheitshalber keine unteren Offsets
+          // keine unteren Offsets
           body.style.marginBottom = "0";
           body.style.paddingBottom = "0";
           html.style.marginBottom = "0";
           html.style.paddingBottom = "0";
+
+          // Hilfsfunktion: Safe-Area-Inset-Bottom in px (iOS)
+          const getSafeAreaBottomPx = () => {
+            try {
+              const probe = document.createElement("div");
+              probe.setAttribute("style",
+                "position:fixed;bottom:0;left:0;width:0;height:constant(safe-area-inset-bottom);height:env(safe-area-inset-bottom);padding:0;margin:0;border:0;"
+              );
+              document.body.appendChild(probe);
+              const h = Math.max(0, Math.round(probe.getBoundingClientRect().height));
+              probe.remove();
+              return h || 0;
+            } catch { return 0; }
+          };
 
           try {
             const rootEl = document.getElementById("vx-root");
             if (rootEl) {
               if (rootEl.__vxFullListCleanup) { try { rootEl.__vxFullListCleanup(); } catch {} }
 
-              const px = (v) => {
-                const dpr = Math.max(window.devicePixelRatio || 1, 1);
-                // auf physische Pixel runden und in CSS-Pixel zurückwandeln
-                return Math.ceil(v * dpr) / dpr;
-              };
+              const dpr = Math.max(window.devicePixelRatio || 1, 1);
+              const toCssPx = (v) => Math.ceil(v * dpr) / dpr;
 
               const updateHeight = () => {
                 try {
                   const rect = rootEl.getBoundingClientRect();
-                  const bottom = rect.top + rect.height;
-                  const total = px(bottom); // exakte untere Kante des sichtbaren Inhalts
-                  // Sowohl auf body als auch auf html setzen – browserübergreifend stabil
+                  const inset = getSafeAreaBottomPx();
+                  const bottom = rect.top + rect.height + inset;
+                  // mindestens Viewport-Höhe berücksichtigen
+                  const vvH = (window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : 0;
+                  const viewportH = Math.max(vvH, window.innerHeight || 0);
+                  const total = Math.max(toCssPx(bottom), viewportH);
+                  // auf beiden setzen: engine-spezifische Stabilität
                   body.style.minHeight = total + "px";
                   html.style.minHeight = total + "px";
                 } catch {}
               };
 
               // initial nach Layout
-              if ("requestAnimationFrame" in window) {
-                requestAnimationFrame(() => updateHeight());
-              } else {
-                updateHeight();
-              }
+              if ("requestAnimationFrame" in window) { requestAnimationFrame(updateHeight); } else { updateHeight(); }
 
-              // Watcher
               const listeners = [];
               const add = (t, ev, fn, opts) => { t.addEventListener(ev, fn, opts || {passive:true}); listeners.push([t, ev, fn, opts]); };
               add(window, "resize", updateHeight);
@@ -662,13 +668,8 @@ function __mergeBemerkungWithTags(plain, originalBem) {
               }
 
               let ro = null, mo = null;
-              if (window.ResizeObserver) {
-                ro = new ResizeObserver(updateHeight);
-                try { ro.observe(rootEl); } catch {}
-              } else if (window.MutationObserver) {
-                mo = new MutationObserver(updateHeight);
-                try { mo.observe(rootEl, {subtree:true, childList:true, attributes:true, characterData:true}); } catch {}
-              }
+              if (window.ResizeObserver) { ro = new ResizeObserver(updateHeight); try { ro.observe(rootEl); } catch {} }
+              else if (window.MutationObserver) { mo = new MutationObserver(updateHeight); try { mo.observe(rootEl, {subtree:true, childList:true, attributes:true, characterData:true}); } catch {} }
 
               rootEl.__vxFullListCleanup = () => {
                 try { listeners.forEach(([t, ev, fn, opts]) => t.removeEventListener(ev, fn, opts || {passive:true})); } catch {}
@@ -678,10 +679,10 @@ function __mergeBemerkungWithTags(plain, originalBem) {
             }
           } catch {}
         } else {
-          // Standard "Alle": EIN Scrollbalken auf dem Body (Original-Verhalten)
+          // Standard "Alle" bleibt unverändert: EIN Scrollbalken auf body
           html.style.overflowY = "hidden";
           body.style.overflowY = "auto";
-          // Cleanup & Reset beim Verlassen
+          // Cleanup/Reset
           try { const el = document.getElementById("vx-root"); if (el && el.__vxFullListCleanup) { el.__vxFullListCleanup(); delete el.__vxFullListCleanup; } } catch {}
           body.style.minHeight = "";
           html.style.minHeight = "";
