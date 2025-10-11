@@ -323,18 +323,23 @@ if (!el) return;
 // FULLSCROLL MODE: when the full list in "Alle Buchungen" is shown,
 // disable all transforms and use a normal viewport so we can scroll
 // to the very bottom reliably on all devices.
+
 if (el && el.dataset && el.dataset.fullscroll === '1') {
   if (meta) {
     meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
   }
-  el.style.maxWidth = design + "px";
-  el.style.minWidth = design + "px";
+  // Use real viewport width so there are NO side margins on wide screens,
+  // while keeping transform disabled to allow reliable vertical scrolling.
+  const viewportWidth = Math.max((typeof w !== 'undefined' && w) ? w : (window.innerWidth || design), design);
   el.style.transform = "none";
   el.style.left = "0";
   el.style.position = "static";
-  document.body && (document.body.style.overflowX = "hidden");
+  el.style.width = viewportWidth + "px";
+  // Avoid horizontal overflow on mobile where 100vw can include the scrollbar
+  if (document && document.body) document.body.style.overflowX = "hidden";
   return; // skip scaling while fullscroll is active
 }
+
 
         if (!el) return;
 
