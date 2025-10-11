@@ -324,21 +324,26 @@ if (!el) return;
 // disable all transforms and use a normal viewport so we can scroll
 // to the very bottom reliably on all devices.
 
+
 if (el && el.dataset && el.dataset.fullscroll === '1') {
   if (meta) {
     meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
   }
-  // Use real viewport width so there are NO side margins on wide screens,
-  // while keeping transform disabled to allow reliable vertical scrolling.
+  // FULLSCROLL: echte Breite nutzen und alle Breiten-Limits neutralisieren,
+  // damit KEIN Weißrand links/rechts entsteht.
   const viewportWidth = Math.max((typeof w !== 'undefined' && w) ? w : (window.innerWidth || design), design);
   el.style.transform = "none";
-  el.style.left = "0";
+  el.style.transformOrigin = "top left";
   el.style.position = "static";
+  el.style.left = "0";
   el.style.width = viewportWidth + "px";
-  // Avoid horizontal overflow on mobile where 100vw can include the scrollbar
+  el.style.maxWidth = "none";
+  el.style.minWidth = "0";
+  el.style.margin = "0";
   if (document && document.body) document.body.style.overflowX = "hidden";
   return; // skip scaling while fullscroll is active
 }
+
 
 
         if (!el) return;
