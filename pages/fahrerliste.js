@@ -614,9 +614,18 @@ function __mergeBemerkungWithTags(plain, originalBem) {
         if (alleShowAll) {
           document.documentElement.style.overflowY = "auto"; // outer scroller
           document.body.style.overflowY = "hidden"; // prevent second scrollbar on body
+          try {
+            const rootEl = document.getElementById("vx-root");
+            if (rootEl) {
+              const rect = rootEl.getBoundingClientRect();
+              const extra = Math.max(rect.top, 0) + 80;
+              document.body.style.minHeight = Math.ceil(rect.height + extra) + "px";
+            }
+          } catch {}
         } else {
           document.documentElement.style.overflowY = "hidden";
           document.body.style.overflowY = "auto";
+          document.body.style.minHeight = "";
         }
         if (root) root.style.overflowY = "visible";
       } else {
