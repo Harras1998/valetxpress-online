@@ -316,7 +316,26 @@ export default function FahrerListe() {
         }
         const design = 1440; // feste Layoutbreite
 
-        const el = root && root();
+        
+const el = root && root();
+if (!el) return;
+
+// FULLSCROLL MODE: when the full list in "Alle Buchungen" is shown,
+// disable all transforms and use a normal viewport so we can scroll
+// to the very bottom reliably on all devices.
+if (el && el.dataset && el.dataset.fullscroll === '1') {
+  if (meta) {
+    meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+  }
+  el.style.maxWidth = design + "px";
+  el.style.minWidth = design + "px";
+  el.style.transform = "none";
+  el.style.left = "0";
+  el.style.position = "static";
+  document.body && (document.body.style.overflowX = "hidden");
+  return; // skip scaling while fullscroll is active
+}
+
         if (!el) return;
 
         // Basis: immer klare Root-Breite setzen
@@ -606,12 +625,20 @@ function __mergeBemerkungWithTags(plain, originalBem) {
       const prevBodyY = body.style.overflowY;
       const prevRootY = root ? root.style.overflowY : undefined;
 
-      if (tab === "alle") {
-        // Hide html scroll, use body scroll, keep inner containers visible
-        html.style.overflowY = "hidden";
-        body.style.overflowY = "auto";
+      
+if (tab === "alle") {
+        // In "Alle Buchungen" with full list: let the browser handle scrolling normally
+        if (alleShowAll) {
+          html.style.overflowY = "auto";
+          body.style.overflowY = "auto";
+        } else {
+          // Default "Alle" (standardansicht): single scrollbar on body
+          html.style.overflowY = "hidden";
+          body.style.overflowY = "auto";
+        }
         if (root) root.style.overflowY = "visible";
       } else {
+
         // Reset when leaving the tab
         html.style.overflowY = prevHtmlY || "";
         body.style.overflowY = prevBodyY || "";
@@ -628,6 +655,22 @@ function __mergeBemerkungWithTags(plain, originalBem) {
       };
     } catch {}
   }, [tab, alleShowAll]);
+
+// Toggle a data attribute on #vx-root to instruct the auto-fit to switch to fullscroll mode
+useEffect(() => {
+  try {
+    const el = document.getElementById("vx-root");
+    if (!el) return;
+    if (tab === "alle" && alleShowAll) {
+      el.dataset.fullscroll = "1";
+    } else {
+      delete el.dataset.fullscroll;
+    }
+    // Re-run layout apply logic
+    try { window.dispatchEvent(new Event("resize")); } catch {}
+  } catch {}
+}, [tab, alleShowAll]);
+
 
 
   let filtered = list;
