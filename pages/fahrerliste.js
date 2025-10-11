@@ -607,94 +607,25 @@ function __mergeBemerkungWithTags(plain, originalBem) {
       const prevRootY = root ? root.style.overflowY : undefined;
 
       if (tab === "alle") {
-        // Cross-device SPACER-Lösung:
-        // - Standard "Alle": unverändert (Body-Scroll).
-        // - "Alle Buchungen": EIN Scrollbalken auf <html> und ein unsichtbarer Spacer am Body-Ende,
-        //   dessen Höhe exakt das Delta bis zur Unterkante ausgleicht. Damit endet die Seite überall
-        //   auf den Pixel genau, unabhängig von DPR/Safe-Area/Zoom.
+        // Im "Alle"-Tab: 
+        // - Standardansicht (alleShowAll=false): wie bisher EIN Scrollbalken auf body.
+        // - Vollansicht (alleShowAll=true): Browser-Scroll ganz normal erlauben (auch html),
+        //   damit man auf ALLEN Geräten bis ganz unten kommt – Optik bleibt unverändert.
         if (alleShowAll) {
-          const html = document.documentElement;
-          const body = document.body;
-          html.style.overflowY = "auto";    // ein Scrollbalken
-          body.style.overflowY = "hidden";  // keinen zweiten Scrollbalken
-          body.style.marginBottom = "0";
-          body.style.paddingBottom = "0";
-          html.style.marginBottom = "0";
-          html.style.paddingBottom = "0";
-
-          // Hilfsfunktion: Safe-Area-Inset-Bottom (iOS)
-          const getSafeAreaBottomPx = () => {
-            try {
-              const probe = document.createElement("div");
-              probe.setAttribute("style","position:fixed;bottom:0;left:0;width:0;height:constant(safe-area-inset-bottom);height:env(safe-area-inset-bottom);padding:0;margin:0;border:0;");
-              document.body.appendChild(probe);
-              const h = Math.max(0, Math.round(probe.getBoundingClientRect().height));
-              probe.remove();
-              return h || 0;
-            } catch { return 0; }
-          };
-
-          // Unsichtbarer Spacer (einmalig anlegen/merken)
-          let spacer = document.getElementById("vx-bottom-spacer");
-          if (!spacer) {
-            spacer = document.createElement("div");
-            spacer.id = "vx-bottom-spacer";
-            spacer.setAttribute("style","width:1px;height:0;pointer-events:none;background:transparent;");
-            body.appendChild(spacer);
-          }
-
+          document.documentElement.style.overflowY = "auto"; // outer scroller
+          document.body.style.overflowY = "hidden"; // prevent second scrollbar on body
           try {
             const rootEl = document.getElementById("vx-root");
             if (rootEl) {
-              if (rootEl.__vxFullListCleanup) { try { rootEl.__vxFullListCleanup(); } catch {} }
-
-              const dpr = Math.max(window.devicePixelRatio || 1, 1);
-              const roundCss = (v) => Math.ceil(v * dpr) / dpr;
-
-              const updateTail = () => {
-                try {
-                  const rect = rootEl.getBoundingClientRect();
-                  const inset = getSafeAreaBottomPx();
-                  const vvH = (window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : 0;
-                  const viewportH = Math.max(vvH, window.innerHeight || 0);
-                  const contentBottom = rect.top + rect.height + inset;
-                  // Benötigtes Delta bis zur Unterkante; auf physische Pixel runden
-                  const need = Math.max(0, roundCss(contentBottom) - viewportH);
-                  spacer.style.height = Math.max(0, Math.round(need)) + "px";
-                } catch {}
-              };
-
-              // initial nach Layout
-              if ("requestAnimationFrame" in window) { requestAnimationFrame(updateTail); } else { updateTail(); }
-
-              const listeners = [];
-              const add = (t, ev, fn, opts) => { t.addEventListener(ev, fn, opts || {passive:true}); listeners.push([t, ev, fn, opts]); };
-              add(window, "resize", updateTail);
-              add(window, "orientationchange", updateTail);
-              if (window.visualViewport) {
-                add(window.visualViewport, "resize", updateTail);
-                add(window.visualViewport, "scroll", updateTail);
-              }
-
-              let ro = null, mo = null;
-              if (window.ResizeObserver) { ro = new ResizeObserver(updateTail); try { ro.observe(rootEl); } catch {} }
-              else if (window.MutationObserver) { mo = new MutationObserver(updateTail); try { mo.observe(rootEl, {subtree:true, childList:true, attributes:true, characterData:true}); } catch {} }
-
-              rootEl.__vxFullListCleanup = () => {
-                try { listeners.forEach(([t, ev, fn, opts]) => t.removeEventListener(ev, fn, opts || {passive:true})); } catch {}
-                try { if (ro) ro.disconnect(); } catch {}
-                try { if (mo) mo.disconnect(); } catch {}
-                try { if (spacer && spacer.parentNode) spacer.parentNode.removeChild(spacer); } catch {}
-              };
+              const rect = rootEl.getBoundingClientRect();
+              const total = Math.max(Math.ceil(rect.top + rect.height), window.innerHeight || 0);
+              document.body.style.minHeight = total + "px";
             }
           } catch {}
         } else {
-          // Standard "Alle": Body-Scroll (Original)
-          html.style.overflowY = "hidden";
-          body.style.overflowY = "auto";
-          // Cleanup & Reset
-          try { const el = document.getElementById("vx-root"); if (el && el.__vxFullListCleanup) { el.__vxFullListCleanup(); delete el.__vxFullListCleanup; } } catch {}
-          const s = document.getElementById("vx-bottom-spacer"); if (s && s.parentNode) { try { s.parentNode.removeChild(s); } catch {} }
+          document.documentElement.style.overflowY = "hidden";
+          document.body.style.overflowY = "auto";
+          document.body.style.minHeight = "";
         }
         if (root) root.style.overflowY = "visible";
       } else {
