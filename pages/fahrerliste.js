@@ -735,39 +735,29 @@ for (const k of Object.keys(groupsByDate)) {
           html, body { overflow-x: hidden; }
           #__next, #vx-root { height: auto !important; overflow: visible !important; }
 @media (min-width: 1441px) {
-  /* Edit overlay inner canvas: remove 1440px lock & scaling */
-  [style*="position: fixed"][style*="100vw"][style*="100vh"] > div[style*="width: 1440px"] {
-    width: 100vw !important;
-    max-width: none !important;
-    min-width: 100vw !important;
-    left: 0 !important;
-    transform: none !important;
-  }
-  /* Fallback: any element scaled for edit mode should not scale >1440px */
-  [style*="transform: scale("] {
-    transform: none !important;
-    left: 0 !important;
-  }
-}
-@media (min-width: 1441px) {
-  /* Global fluid >1440 (normal view) */
-  /* Make root full-bleed */
-  #vx-root {
-    max-width: none !important;
-    min-width: 100% !important;
-    width: 100vw !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-  /* Any element locked to 1440px becomes fluid */
-  [style*="max-width: 1440px"],
-  [style*="min-width: 1440px"],
-  [style*="width: 1440px"] {
-    max-width: none !important;
+  /* Edit overlay becomes inline (no overlay) >1440 */
+  /* Turn the full-screen fixed overlay container into a normal flow container */
+  [style*="position: fixed"][style*="100vw"][style*="100vh"] {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
     width: 100% !important;
+    height: auto !important;
+    z-index: auto !important;
+    overflow: visible !important;
+    overscroll-behavior: auto !important;
+    -webkit-overflow-scrolling: auto !important;
+    background: transparent !important; /* inner keeps its own background */
+  }
+  /* Ensure the inner edit canvas fills width without scaling */
+  [style*="position: fixed"][style*="100vw"][style*="100vh"] > div[style*="width: 1440px"] {
+    width: 100% !important;
+    max-width: none !important;
     min-width: 0 !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
+    min-height: auto !important;
+    left: 0 !important;
+    transform: none !important;
+    transform-origin: initial !important;
   }
 }
 `}</style>
