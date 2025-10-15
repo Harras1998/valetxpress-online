@@ -734,8 +734,29 @@ for (const k of Object.keys(groupsByDate)) {
           * { box-sizing: border-box; }
           html, body { overflow-x: hidden; }
           #__next, #vx-root { height: auto !important; overflow: visible !important; }
-@media (min-width: 1440px) {
-  html, body { background: #ededed; }
+@media (min-width: 1441px) {
+  /* Root container becomes fluid */
+  #vx-root {
+    max-width: none !important;
+    min-width: 100% !important;
+    width: 100vw !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* Centered wrappers that lock to 1440px: make them fluid when viewport is wider */
+  [style*="max-width: 1440px"][style*="margin: 0px auto"],
+  [style*="min-width: 1440px"][style*="margin: 0px auto"],
+  [style*="width: 1440px"][style*="margin: 0px auto"],
+  [style*="max-width: 1440px"][style*="margin: 0 auto"],
+  [style*="min-width: 1440px"][style*="margin: 0 auto"],
+  [style*="width: 1440px"][style*="margin: 0 auto"] {
+    max-width: none !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
 }
 `}</style>
       </Head>
