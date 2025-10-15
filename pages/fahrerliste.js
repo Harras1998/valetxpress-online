@@ -734,7 +734,10 @@ for (const k of Object.keys(groupsByDate)) {
           * { box-sizing: border-box; }
           html, body { overflow-x: hidden; }
           #__next, #vx-root { height: auto !important; overflow: visible !important; }
-        `}</style>
+@media (min-width: 1440px) {
+  html, body { background: #ededed; }
+}
+`}</style>
       </Head>
       {!auth ? (
         <div id="vx-root"
