@@ -735,27 +735,18 @@ for (const k of Object.keys(groupsByDate)) {
           html, body { overflow-x: hidden; }
           #__next, #vx-root { height: auto !important; overflow: visible !important; }
 @media (min-width: 1441px) {
-  /* Root container becomes fluid */
-  #vx-root {
-    max-width: none !important;
-    min-width: 100% !important;
+  /* Edit overlay inner canvas: remove 1440px lock & scaling */
+  [style*="position: fixed"][style*="100vw"][style*="100vh"] > div[style*="width: 1440px"] {
     width: 100vw !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-
-  /* Centered wrappers that lock to 1440px: make them fluid when viewport is wider */
-  [style*="max-width: 1440px"][style*="margin: 0px auto"],
-  [style*="min-width: 1440px"][style*="margin: 0px auto"],
-  [style*="width: 1440px"][style*="margin: 0px auto"],
-  [style*="max-width: 1440px"][style*="margin: 0 auto"],
-  [style*="min-width: 1440px"][style*="margin: 0 auto"],
-  [style*="width: 1440px"][style*="margin: 0 auto"] {
     max-width: none !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
+    min-width: 100vw !important;
+    left: 0 !important;
+    transform: none !important;
+  }
+  /* Fallback: any element scaled for edit mode should not scale >1440px */
+  [style*="transform: scale("] {
+    transform: none !important;
+    left: 0 !important;
   }
 }
 `}</style>
