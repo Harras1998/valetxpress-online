@@ -262,7 +262,31 @@ export default function FahrerListe() {
   const [list, setList] = useState([]);
   const [auth, setAuth] = useState("");
   // Beim Einloggen immer zuerst den "heute"-Tab zeigen
-  useEffect(() => {
+  /* vx-body-edit-flag */
+    useEffect(() => {
+      if (typeof window === 'undefined') return;
+      const apply = () => {
+        try {
+          const usp = new URLSearchParams(location.search);
+          const active = (window.innerWidth > 1440) && usp.has('edit');
+          if (active) {
+            document.body.setAttribute('data-vx-has-edit', '1');
+          } else {
+            document.body.removeAttribute('data-vx-has-edit');
+          }
+        } catch {}
+      };
+      apply();
+      window.addEventListener('popstate', apply);
+      window.addEventListener('resize', apply);
+      window.addEventListener('orientationchange', apply);
+      return () => {
+        window.removeEventListener('popstate', apply);
+        window.removeEventListener('resize', apply);
+        window.removeEventListener('orientationchange', apply);
+      };
+    }, []);
+useEffect(() => {
     if (auth) setTab("heute");
   }, [auth]);
 
@@ -799,6 +823,15 @@ for (const k of Object.keys(groupsByDate)) {
     overscroll-behavior: auto !important;
     -webkit-overflow-scrolling: auto !important;
     background: transparent !important;
+  }
+}
+@media (min-width: 1441px) {
+  /* Edit as real page >1440: hide all non-edit content regardless of order */
+  body[data-vx-has-edit="1"] #vx-root > *:not([data-vx-edit-page="1"]) {
+    display: none !important;
+  }
+  body[data-vx-has-edit="1"] #vx-root [data-vx-edit-page="1"] {
+    display: block !important;
   }
 }
 `}</style>
