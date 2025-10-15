@@ -348,14 +348,45 @@ useEffect(() => {
     } catch {}
   }, []);
 const [editBuchung, setEditBuchung] = useState(null);
-  const [editSaving, setEditSaving] = useState(false);
+  
+/* vx-popstate-edit */
+/* vx-sync-edit-url */
+    useEffect(() => {
+      if (typeof window === 'undefined') return;
+      if (window.innerWidth <= 1440) return;
+      try {
+        const usp = new URLSearchParams(location.search);
+        if (editBuchung) {
+          if (!usp.get('edit')) {
+            usp.set('edit', '1');
+            history.replaceState({}, '', location.pathname + '?' + usp.toString());
+          }
+          window.scrollTo(0,0);
+        } else {
+          if (usp.has('edit')) {
+            usp.delete('edit');
+            const query = usp.toString();
+            history.replaceState({}, '', location.pathname + (query ? '?' + query : ''));
+          }
+        }
+      } catch(_) {}
+    }, [editBuchung]);
+
+    useEffect(() => {
+      if (typeof window === 'undefined') return;
+      if (window.innerWidth <= 1440) return;
+      const onPop = () => setEditBuchung(null);
+      window.addEventListener('popstate', onPop);
+      return () => window.removeEventListener('popstate', onPop);
+    }, [setEditBuchung]);
+const [editSaving, setEditSaving] = useState(false);
   // --- Edit-Overlay: responsive Skalierung + Scroll-Lock (verhindert doppelte Scrollbalken) ---
   const designW = 1440;
   const [editScale, setEditScale] = useState(1);
   const [editLeft, setEditLeft] = useState(0);
 
   useEffect(() => {
-    if (!editBuchung) return;
+    if (!editBuchung || (typeof window !== "undefined" && window.innerWidth > 1440)) return;
     const calc = () => {
       try {
         const w = window.innerWidth || document.documentElement.clientWidth || 0;
@@ -375,7 +406,7 @@ const [editBuchung, setEditBuchung] = useState(null);
   }, [editBuchung]);
 
   useEffect(() => {
-    if (!editBuchung) return;
+    if (!editBuchung || (typeof window !== "undefined" && window.innerWidth > 1440)) return;
     const body = document.body;
     if (!body) return;
     const prevOverflow = body.style.overflow;
@@ -760,10 +791,76 @@ for (const k of Object.keys(groupsByDate)) {
     transform-origin: initial !important;
   }
 }
+@media (min-width: 1441px) {
+  /* Global fluid >1440 (normal view) */
+  #vx-root {
+    max-width: none !important;
+    min-width: 100% !important;
+    width: 100vw !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  [style*="max-width: 1440px"],
+  [style*="min-width: 1440px"],
+  [style*="width: 1440px"] {
+    max-width: none !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
+@media (min-width: 1441px) {
+  /* Edit overlay inner canvas: remove 1440px lock & scaling */
+  [style*="position: fixed"][style*="100vw"][style*="100vh"] > div[style*="width: 1440px"] {
+    width: 100vw !important;
+    max-width: none !important;
+    min-width: 100vw !important;
+    left: 0 !important;
+    transform: none !important;
+  }
+  /* Fallback: any element scaled for edit mode should not scale >1440px */
+  [style*="transform: scale("] {
+    transform: none !important;
+    left: 0 !important;
+  }
+}
+@media (min-width: 1441px) {
+  /* Edit overlay becomes inline (no overlay) >1440 */
+  [style*="position: fixed"][style*="100vw"][style*="100vh"] {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    z-index: auto !important;
+    overflow: visible !important;
+    overscroll-behavior: auto !important;
+    -webkit-overflow-scrolling: auto !important;
+    background: transparent !important;
+  }
+  /* Ensure the inner edit canvas fills width without scaling */
+  [style*="position: fixed"][style*="100vw"][style*="100vh"] > div[style*="width: 1440px"] {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    min-height: auto !important;
+    left: 0 !important;
+    transform: none !important;
+    transform-origin: initial !important;
+  }
+  /* Edit page isolation >1440: hide non-edit children when edit active */
+  #vx-root[data-vx-has-edit="1"] > *:not([data-vx-edit-page="1"]) {
+    display: none !important;
+  }
+  [data-vx-edit-page="1"] {
+    display: block !important;
+  }
+}
 `}</style>
       </Head>
       {!auth ? (
-        <div id="vx-root"
+        <div id="vx-root" data-vx-has-edit={editBuchung ? "1" : undefined}
           style={{
             maxWidth: 1440,
             minWidth: 1440,
@@ -1003,7 +1100,7 @@ for (const k of Object.keys(groupsByDate)) {
                         <span
                           style={{ fontSize: 20, color: "#444", cursor: "pointer" }}
                           title="Bearbeiten"
-                          onClick={() => setEditBuchung({ ...row })}
+                          onClick={(e) => { const __vx = { ...row }; setEditBuchung(__vx); try { if (window.innerWidth > 1440) { const usp = new URLSearchParams(location.search); const idGuess = __vx && (__vx.id || __vx._id || __vx.buchungsnummer || __vx.buchungId || __vx.buchungID); usp.set("edit", idGuess ? String(idGuess) : "1"); history.pushState({}, "", location.pathname + "?" + usp.toString()); window.scrollTo(0,0); } } catch(_){} }}
                         >✏️</span>
                         {tab === "2tage" ? (<>
 <span style={{ fontSize: 20, color: "#444", cursor: "default", visibility: "hidden" }}>✔️</span>
@@ -1160,7 +1257,7 @@ onClick={() => {
 <PXFooter />
 
 {editBuchung && createPortal((
-            <div style={{
+            <div data-vx-edit-page="1" style={{
               position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
               background: "#fff", zIndex: 10000, overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch"
             }}>
@@ -1174,7 +1271,7 @@ onClick={() => {
                   borderRadius: "0 0 8px 8px", position: "relative"
                 }}>
                   <button
-                    onClick={() => setEditBuchung(null)}
+                    onClick={(e) => { const __vx = null; setEditBuchung(__vx); try { if (window.innerWidth > 1440) { const usp = new URLSearchParams(location.search); const idGuess = __vx && (__vx.id || __vx._id || __vx.buchungsnummer || __vx.buchungId || __vx.buchungID); usp.set("edit", idGuess ? String(idGuess) : "1"); history.pushState({}, "", location.pathname + "?" + usp.toString()); window.scrollTo(0,0); } } catch(_){} }}
                     style={{
                       position: "absolute", left: 12, top: 7, fontSize: 18,
                       background: "#222", color: "#fff", border: "none", borderRadius: 6,
