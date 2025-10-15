@@ -357,20 +357,19 @@ const [editBuchung, setEditBuchung] = useState(null);
       const eid = usp.get('edit');
       if (!eid) return;
       try {
-        if (Array.isArray(buchungen) && buchungen.length) {
-          const match = buchungen.find(b => String(b?.id || b?._id || b?.buchungsnummer || b?.buchungId || b?.buchungID || b?.nr || b?.nummer) === String(eid));
+        if (Array.isArray(list) && list.length) {
+          const match = list.find(b => String(b?.id || b?._id || b?.buchungsnummer || b?.buchungId || b?.buchungID || b?.nr || b?.nummer) === String(eid));
           if (match) setEditBuchung({ ...match });
         }
       } catch {}
-    }, [buchungen]);
+    }, [list]);
 const [editSaving, setEditSaving] = useState(false);
   // --- Edit-Overlay: responsive Skalierung + Scroll-Lock (verhindert doppelte Scrollbalken) ---
   const designW = 1440;
   const [editScale, setEditScale] = useState(1);
   const [editLeft, setEditLeft] = useState(0);
 
-  useEffect(() => {
-    if (!editBuchung) return;
+  useEffect(() => { if (!editBuchung || (typeof window !== "undefined" && window.innerWidth > 1440)) return;
     const calc = () => {
       try {
         const w = window.innerWidth || document.documentElement.clientWidth || 0;
@@ -389,9 +388,7 @@ const [editSaving, setEditSaving] = useState(false);
     };
   }, [editBuchung]);
 
-  useEffect(() => {
-    if (!editBuchung) return;
-    const body = document.body;
+  useEffect(() => { if (!editBuchung || (typeof window !== "undefined" && window.innerWidth > 1440)) return; const body = document.body;
     if (!body) return;
     const prevOverflow = body.style.overflow;
     const prevOverflowX = body.style.overflowX;
@@ -749,7 +746,62 @@ for (const k of Object.keys(groupsByDate)) {
           * { box-sizing: border-box; }
           html, body { overflow-x: hidden; }
           #__next, #vx-root { height: auto !important; overflow: visible !important; }
-        `}</style>
+@media (min-width: 1441px) {
+  /* Hide siblings when edit page is present >1440 */
+  [data-vx-edit-page="1"] ~ * { display: none !important; }
+  /* Ensure edit page displays */
+  [data-vx-edit-page="1"] { display: block !important; }
+}
+@media (min-width: 1441px) {
+  /* Global fluid >1440 (normal view) */
+  #vx-root {
+    max-width: none !important;
+    min-width: 100% !important;
+    width: 100vw !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  [style*="max-width: 1440px"],
+  [style*="min-width: 1440px"],
+  [style*="width: 1440px"] {
+    max-width: none !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
+@media (min-width: 1441px) {
+  /* Edit overlay inner canvas: remove 1440px lock & scaling */
+  [style*="position: fixed"][style*="100vw"][style*="100vh"] > div[style*="width: 1440px"] {
+    width: 100vw !important;
+    max-width: none !important;
+    min-width: 100vw !important;
+    left: 0 !important;
+    transform: none !important;
+  }
+  /* Fallback: any element scaled for edit mode should not scale >1440px */
+  [style*="transform: scale("] {
+    transform: none !important;
+    left: 0 !important;
+  }
+}
+@media (min-width: 1441px) {
+  /* Edit overlay becomes inline (no overlay) >1440 */
+  [style*="position: fixed"][style*="100vw"][style*="100vh"] {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    z-index: auto !important;
+    overflow: visible !important;
+    overscroll-behavior: auto !important;
+    -webkit-overflow-scrolling: auto !important;
+    background: transparent !important;
+  }
+}
+`}</style>
       </Head>
       {!auth ? (
         <div id="vx-root"
@@ -1149,7 +1201,7 @@ onClick={() => {
 <PXFooter />
 
 {editBuchung && createPortal((
-            <div style={{
+            <div data-vx-edit-page="1" style={{
               position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
               background: "#fff", zIndex: 10000, overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch"
             }}>
