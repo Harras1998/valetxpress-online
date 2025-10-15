@@ -749,6 +749,27 @@ for (const k of Object.keys(groupsByDate)) {
     left: 0 !important;
   }
 }
+@media (min-width: 1441px) {
+  /* Global fluid >1440 (normal view) */
+  /* Make root full-bleed */
+  #vx-root {
+    max-width: none !important;
+    min-width: 100% !important;
+    width: 100vw !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  /* Any element locked to 1440px becomes fluid */
+  [style*="max-width: 1440px"],
+  [style*="min-width: 1440px"],
+  [style*="width: 1440px"] {
+    max-width: none !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
 `}</style>
       </Head>
       {!auth ? (
