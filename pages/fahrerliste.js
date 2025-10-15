@@ -344,23 +344,20 @@ export default function FahrerListe() {
 
           // Scrollbalken vermeiden:
           document.body && (document.body.style.overflowX = "hidden");
-        
         } else if (w > design) {
-          // Wide viewports: kein Upscaling – statt dessen volle Breite nutzen, damit keine weißen Ränder sichtbar sind.
+          // NEW: scale UP to fill wide viewports (no white bars), keep <=1440px unchanged
+          const scale = w / design;
           if (meta) {
             meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
           }
-          el.style.transform = "none";
-          el.style.transformOrigin = "";
-          el.style.position = "static";
-          el.style.left = "0";
-          el.style.width = "100vw";
-          el.style.maxWidth = "100vw";
-          el.style.minWidth = "100vw";
-          el.style.height = "";
+          el.style.transformOrigin = "top left";
+          el.style.transform = `scale(${scale})`;
+          el.style.position = "relative";
+          // Compensate the default centering (margin: auto) so the scaled root starts at x=0
+          const left = -Math.floor((w - design) / 2);
+          el.style.left = left + "px";
           document.body && (document.body.style.overflowX = "hidden");
         } else {
-
           // Exactly 1440px: native (unscaled) layout
           if (meta) {
             meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
@@ -820,7 +817,7 @@ for (const k of Object.keys(groupsByDate)) {
           * { box-sizing: border-box; }
           html, body { overflow-x: hidden; }
           #__next { height: auto !important; overflow-y: visible !important; }
-          #vx-root { overflow-y: visible !important; } html { overflow-y: auto; } body { overflow-y: auto; }
+          #vx-root { overflow-y: visible !important; }
         `}</style>
       </Head>
       {!auth ? (
