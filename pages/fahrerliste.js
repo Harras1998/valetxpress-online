@@ -293,53 +293,98 @@ export default function FahrerListe() {
   
   
   
-  // Dynamische // Viewport-Auto-Fit: skaliert das 1440px-Layout proportional auf die Fensterbreite,
-// ohne eigene Scrollcontainer zu erzeugen (nur ein Seiten-Scroller).
-useEffect(() => {
-  try {
-    const meta = document.querySelector('meta[name="viewport"]');
-    if (meta) meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+  // Dynamische Viewport-Auto-Fit (robust für alle Breakpoints inkl. 320px & 1024px)
+  useEffect(() => {
+    try {
+      const meta = document.querySelector('meta[name="viewport"]');
+      const root = () => document.getElementById('vx-root');
+      // iPad pinch-zoom guard: remember the base width when not zooming
+      let __vx_baseW = window.innerWidth || document.documentElement.clientWidth || 0;
+      const apply = () => {
+        let w = window.innerWidth || document.documentElement.clientWidth || 0;
+        // iPad: während eines aktiven Pinch‑Zooms (visualViewport.scale != 1)
+        // nutzen wir die zuletzt bekannte Basisbreite, damit das Layout
+        // nicht neu berechnet/jittert. Außerhalb von Zoom-Phasen aktualisieren
+        // wir die Basis automatisch.
+        const vv = (typeof window !== 'undefined' && window.visualViewport) ? window.visualViewport : null;
+        if (vv && typeof vv.scale === 'number') {
+          if (Math.abs(vv.scale - 1) > 0.001) {
+            w = __vx_baseW; // fixiere Breite während des Zooms
+          } else {
+            __vx_baseW = w; // Basisbreite aktualisieren, wenn kein Zoom aktiv ist
+          }
+        }
+        const design = 1440; // feste Layoutbreite
 
-    const ROOT_ID = 'vx-root';
-    const DESIGN_WIDTH = 1440;
+        const el = root && root();
+        if (!el) return;
 
-    const apply = () => {
-      const el = document.getElementById(ROOT_ID);
-      if (!el) return;
+        // Basis: immer klare Root-Breite setzen
+        el.style.maxWidth = design + "px";
+        el.style.minWidth = design + "px";
 
-      // Vor Messung ggf. alten Zustand entfernen
-      el.style.transform = '';
-      el.style.transformOrigin = '';
-      el.style.left = '';
-      el.style.position = '';
-      el.style.height = '';
+        if (w < design) {
+          // 1) Viewport-Skalierung
+          const scale = Math.max(0.2, Math.min(1, w / design));
+          if (meta) {
+            meta.setAttribute(
+              'content',
+              `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, minimum-scale=${scale}, user-scalable=no, viewport-fit=cover`
+            );
+          }
 
-      const vw = window.innerWidth;
-      const s = Math.min(1, vw / DESIGN_WIDTH);
+          // 2) Fallback/Ergänzung: CSS-Transform (hilft, wenn Browser die Meta-Änderung
+          //    erst spät oder gar nicht übernimmt – z.B. in DevTools/Emulation).
+          el.style.transformOrigin = "top left";
+          el.style.transform = `scale(${scale})`;
+          el.style.position = "relative";
+          // horizontal mittig darstellen (ohne Überlauf):
+          const left = Math.max(0, Math.floor((w - design * scale) / 2));
+          el.style.left = left + "px";
 
-      if (s < 1) {
-        const usedWidth = DESIGN_WIDTH * s;
-        const left = Math.max(0, Math.round((vw - usedWidth) / 2));
+          // Scrollbalken vermeiden:
+          document.body && (document.body.style.overflowX = "hidden");
+        
+        } else if (w > design) {
+          // Wide viewports: kein Upscaling – statt dessen volle Breite nutzen, damit keine weißen Ränder sichtbar sind.
+          if (meta) {
+            meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+          }
+          el.style.transform = "none";
+          el.style.transformOrigin = "";
+          el.style.position = "static";
+          el.style.left = "0";
+          el.style.width = "100vw";
+          el.style.maxWidth = "100vw";
+          el.style.minWidth = "100vw";
+          el.style.height = "";
+          document.body && (document.body.style.overflowX = "hidden");
+        } else {
 
-        // Skaliere visuell, zentriere und setze die Layout‑Höhe passend,
-        // damit der Body die richtige (skalierte) Scrollhöhe hat.
-        el.style.transform = `scale(${s})`;
-        el.style.transformOrigin = 'top left';
-        el.style.position = 'relative';
-        el.style.left = `${left}px`;
-
-        // Layout-Höhe anpassen (Skalierungs-Höhe), damit nur der Body scrollt.
-        const contentHeight = el.scrollHeight; // unskaliert
-        const scaledHeight = Math.ceil(contentHeight * s);
-        el.style.height = `${scaledHeight}px`;
-      }
-    };
-
-    apply();
-    window.addEventListener('resize', apply);
-    return () => window.removeEventListener('resize', apply);
-  } catch {}
-}, []);// Login aus localStorage wiederherstellen
+          // Exactly 1440px: native (unscaled) layout
+          if (meta) {
+            meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+          }
+          el.style.transform = "none";
+          el.style.left = "0";
+          el.style.position = "static";
+          document.body && (document.body.style.overflowX = "hidden");
+        }
+      };
+      const t = setTimeout(apply, 0);
+      window.addEventListener('resize', apply);
+      window.addEventListener('orientationchange', apply);
+      document.fonts && document.fonts.ready && document.fonts.ready.then(apply).catch(()=>{});
+      window.addEventListener('load', apply);
+      return () => {
+        clearTimeout(t);
+        window.removeEventListener('resize', apply);
+        window.removeEventListener('orientationchange', apply);
+        window.removeEventListener('load', apply);
+      };
+    } catch {}
+  }, []);
+// Login aus localStorage wiederherstellen
   useEffect(() => {
     try {
       const savedAuth = localStorage.getItem("vx_auth");
@@ -551,20 +596,61 @@ function __mergeBemerkungWithTags(plain, originalBem) {
   }, [auth, suchtext, sort]);
 
   useEffect(() => { if (tab !== "alle") setAlleShowAll(false); }, [tab]);
-  
-  // Einheitliches Scrollverhalten: KEINE expliziten overflow‑Styles mehr.
-  // Wir räumen nur mögliche Altzustände auf, damit immer der Seiten‑Scroller gilt.
+  // Ensure only ONE vertical scrollbar in "Alle Buchungen":
+  // We make the window (body) the single scroll container when the "alle" tab is active.
   useEffect(() => {
     try {
       const html = document.documentElement;
       const body = document.body;
+      if (!html || !body) return;
+
       const root = document.getElementById("vx-root");
-      if (html) html.style.overflowY = "";
-      if (body) { body.style.overflow = ""; body.style.overflowX = ""; body.style.overflowY = ""; body.style.minHeight = ""; }
-      if (root) root.style.overflowY = "";
+      const prevHtmlY = html.style.overflowY;
+      const prevBodyY = body.style.overflowY;
+      const prevRootY = root ? root.style.overflowY : undefined;
+
+      if (tab === "alle") {
+        // Im "Alle"-Tab: 
+        // - Standardansicht (alleShowAll=false): wie bisher EIN Scrollbalken auf body.
+        // - Vollansicht (alleShowAll=true): Browser-Scroll ganz normal erlauben (auch html),
+        //   damit man auf ALLEN Geräten bis ganz unten kommt – Optik bleibt unverändert.
+        if (alleShowAll) {
+          document.documentElement.style.overflowY = "auto"; // outer scroller
+          document.body.style.overflowY = "hidden"; // prevent second scrollbar on body
+          try {
+            const rootEl = document.getElementById("vx-root");
+            if (rootEl) {
+              const rect = rootEl.getBoundingClientRect();
+              const total = Math.max(Math.ceil(rect.top + rect.height), window.innerHeight || 0);
+              document.body.style.minHeight = total + "px";
+            }
+          } catch {}
+        } else {
+          document.documentElement.style.overflowY = "hidden";
+          document.body.style.overflowY = "auto";
+          document.body.style.minHeight = "";
+        }
+        if (root) root.style.overflowY = "visible";
+      } else {
+        // Reset when leaving the tab
+        html.style.overflowY = prevHtmlY || "";
+        body.style.overflowY = prevBodyY || "";
+        if (root && prevRootY !== undefined) root.style.overflowY = prevRootY || "";
+      }
+
+      return () => {
+        // Cleanup on unmount or tab switch
+        try {
+          html.style.overflowY = prevHtmlY || "";
+          body.style.overflowY = prevBodyY || "";
+          if (root && prevRootY !== undefined) root.style.overflowY = prevRootY || "";
+        } catch {}
+      };
     } catch {}
   }, [tab, alleShowAll]);
-let filtered = list;
+
+
+  let filtered = list;
   const today = new Date();
   if (tab === "heute") {
   const isoToday = today.toISOString().slice(0, 10);
@@ -733,7 +819,8 @@ for (const k of Object.keys(groupsByDate)) {
           html, body, #__next { margin: 0; padding: 0; width: 100%; }
           * { box-sizing: border-box; }
           html, body { overflow-x: hidden; }
-          #__next, #vx-root { height: auto !important; overflow: visible !important; }
+          #__next { height: auto !important; overflow-y: visible !important; }
+          #vx-root { overflow-y: visible !important; } html { overflow-y: auto; } body { overflow-y: auto; }
         `}</style>
       </Head>
       {!auth ? (
@@ -744,7 +831,8 @@ for (const k of Object.keys(groupsByDate)) {
             background: "#fff",
             fontFamily: "Arial",
             margin: "0 auto",
-            minHeight: "100vh"
+            minHeight: "100vh",
+            overflowX: "hidden"
           }}>
           <PXHeader
             username=""
@@ -835,7 +923,8 @@ for (const k of Object.keys(groupsByDate)) {
             background: "#fff",
             fontFamily: "Arial",
             margin: "0 auto",
-            minHeight: "100vh"
+            minHeight: "100vh",
+            overflowX: "hidden"
           }}>
           <PXHeader
             username={username}
