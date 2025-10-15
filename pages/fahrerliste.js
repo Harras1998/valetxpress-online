@@ -293,22 +293,51 @@ export default function FahrerListe() {
   
   
   
-  // Dynamische // Deaktiviert die frühere Auto-Fit/Scaling-Logik: alles bleibt statisch.
-// Wir räumen nur evtl. Alt-Styles auf, damit kein zweiter Scrollbalken entsteht.
+  // Dynamische // Viewport-Auto-Fit: skaliert das 1440px-Layout proportional auf die Fensterbreite,
+// ohne eigene Scrollcontainer zu erzeugen (nur ein Seiten-Scroller).
 useEffect(() => {
   try {
     const meta = document.querySelector('meta[name="viewport"]');
     if (meta) meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
-    const el = document.getElementById('vx-root');
-    if (el) {
+
+    const ROOT_ID = 'vx-root';
+    const DESIGN_WIDTH = 1440;
+
+    const apply = () => {
+      const el = document.getElementById(ROOT_ID);
+      if (!el) return;
+
+      // Vor Messung ggf. alten Zustand entfernen
       el.style.transform = '';
       el.style.transformOrigin = '';
       el.style.left = '';
       el.style.position = '';
-    }
-    document.body && (document.body.style.overflowX = '');
-    document.body && (document.body.style.overflowY = '');
-    document.body && (document.body.style.overflow = '');
+      el.style.height = '';
+
+      const vw = window.innerWidth;
+      const s = Math.min(1, vw / DESIGN_WIDTH);
+
+      if (s < 1) {
+        const usedWidth = DESIGN_WIDTH * s;
+        const left = Math.max(0, Math.round((vw - usedWidth) / 2));
+
+        // Skaliere visuell, zentriere und setze die Layout‑Höhe passend,
+        // damit der Body die richtige (skalierte) Scrollhöhe hat.
+        el.style.transform = `scale(${s})`;
+        el.style.transformOrigin = 'top left';
+        el.style.position = 'relative';
+        el.style.left = `${left}px`;
+
+        // Layout-Höhe anpassen (Skalierungs-Höhe), damit nur der Body scrollt.
+        const contentHeight = el.scrollHeight; // unskaliert
+        const scaledHeight = Math.ceil(contentHeight * s);
+        el.style.height = `${scaledHeight}px`;
+      }
+    };
+
+    apply();
+    window.addEventListener('resize', apply);
+    return () => window.removeEventListener('resize', apply);
   } catch {}
 }, []);// Login aus localStorage wiederherstellen
   useEffect(() => {
