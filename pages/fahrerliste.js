@@ -593,61 +593,20 @@ function __mergeBemerkungWithTags(plain, originalBem) {
   }, [auth, suchtext, sort]);
 
   useEffect(() => { if (tab !== "alle") setAlleShowAll(false); }, [tab]);
-  // Ensure only ONE vertical scrollbar in "Alle Buchungen":
-  // We make the window (body) the single scroll container when the "alle" tab is active.
+  
+  // Einheitliches Scrollverhalten: KEINE expliziten overflow‑Styles mehr.
+  // Wir räumen nur mögliche Altzustände auf, damit immer der Seiten‑Scroller gilt.
   useEffect(() => {
     try {
       const html = document.documentElement;
       const body = document.body;
-      if (!html || !body) return;
-
       const root = document.getElementById("vx-root");
-      const prevHtmlY = html.style.overflowY;
-      const prevBodyY = body.style.overflowY;
-      const prevRootY = root ? root.style.overflowY : undefined;
-
-      if (tab === "alle") {
-        // Im "Alle"-Tab: 
-        // - Standardansicht (alleShowAll=false): wie bisher EIN Scrollbalken auf body.
-        // - Vollansicht (alleShowAll=true): Browser-Scroll ganz normal erlauben (auch html),
-        //   damit man auf ALLEN Geräten bis ganz unten kommt – Optik bleibt unverändert.
-        if (alleShowAll) {
-          document.documentElement.style.overflowY = "auto"; // outer scroller
-          document.body.style.overflowY = "hidden"; // prevent second scrollbar on body
-          try {
-            const rootEl = document.getElementById("vx-root");
-            if (rootEl) {
-              const rect = rootEl.getBoundingClientRect();
-              const total = Math.max(Math.ceil(rect.top + rect.height), window.innerHeight || 0);
-              document.body.style.minHeight = total + "px";
-            }
-          } catch {}
-        } else {
-          document.documentElement.style.overflowY = "hidden";
-          document.body.style.overflowY = "auto";
-          document.body.style.minHeight = "";
-        }
-        if (root) root.style.overflowY = "visible";
-      } else {
-        // Reset when leaving the tab
-        html.style.overflowY = prevHtmlY || "";
-        body.style.overflowY = prevBodyY || "";
-        if (root && prevRootY !== undefined) root.style.overflowY = prevRootY || "";
-      }
-
-      return () => {
-        // Cleanup on unmount or tab switch
-        try {
-          html.style.overflowY = prevHtmlY || "";
-          body.style.overflowY = prevBodyY || "";
-          if (root && prevRootY !== undefined) root.style.overflowY = prevRootY || "";
-        } catch {}
-      };
+      if (html) html.style.overflowY = "";
+      if (body) { body.style.overflow = ""; body.style.overflowX = ""; body.style.overflowY = ""; body.style.minHeight = ""; }
+      if (root) root.style.overflowY = "";
     } catch {}
   }, [tab, alleShowAll]);
-
-
-  let filtered = list;
+let filtered = list;
   const today = new Date();
   if (tab === "heute") {
   const isoToday = today.toISOString().slice(0, 10);
@@ -816,8 +775,7 @@ for (const k of Object.keys(groupsByDate)) {
           html, body, #__next { margin: 0; padding: 0; width: 100%; }
           * { box-sizing: border-box; }
           html, body { overflow-x: hidden; }
-          #__next { height: auto !important; overflow-y: visible !important; }
-          #vx-root { overflow-y: visible !important; } html { overflow-y: auto; } body { overflow-y: auto; }
+          #__next, #vx-root { height: auto !important; overflow: visible !important; }
         `}</style>
       </Head>
       {!auth ? (
