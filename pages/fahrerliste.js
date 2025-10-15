@@ -367,11 +367,6 @@ el.style.maxWidth = design + "px";
 el.style.minWidth = design + "px";
 document.body && (document.body.style.overflowX = "hidden");
         }
-          el.style.transform = "none";
-          el.style.left = "0";
-          el.style.position = "static";
-          document.body && (document.body.style.overflowX = "hidden");
-        }
       };
       const t = setTimeout(apply, 0);
       window.addEventListener('resize', apply);
