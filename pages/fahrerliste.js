@@ -324,48 +324,51 @@ export default function FahrerListe() {
         el.style.minWidth = design + "px";
 
         if (w < design) {
-// Kleine Viewports: nur per CSS-Transform skalieren, ohne Meta-Viewport-Tricks.
-const s = Math.max(0.2, Math.min(1, w / design));
-if (meta) {
-  meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
-}
-el.style.transformOrigin = "top left";
-el.style.transform = `scale(${s})`;
-el.style.position = "relative";
-const left = Math.max(0, Math.floor((w - design * s) / 2));
-el.style.left = left + "px";
-// Höhe kompensieren, damit nur der Body scrollt und keine Doppel-Scrollbars entstehen.
-const h = el.scrollHeight; // unskaliert
-el.style.height = Math.ceil(h * s) + "px";
-document.body && (document.body.style.overflowX = "hidden");
+          // 1) Viewport-Skalierung
+          const scale = Math.max(0.2, Math.min(1, w / design));
+          if (meta) {
+            meta.setAttribute(
+              'content',
+              `width=${design}, initial-scale=${scale}, maximum-scale=${scale}, minimum-scale=${scale}, user-scalable=no, viewport-fit=cover`
+            );
+          }
+
+          // 2) Fallback/Ergänzung: CSS-Transform (hilft, wenn Browser die Meta-Änderung
+          //    erst spät oder gar nicht übernimmt – z.B. in DevTools/Emulation).
+          el.style.transformOrigin = "top left";
+          el.style.transform = `scale(${scale})`;
+          el.style.position = "relative";
+          // horizontal mittig darstellen (ohne Überlauf):
+          const left = Math.max(0, Math.floor((w - design * scale) / 2));
+          el.style.left = left + "px";
+
+          // Scrollbalken vermeiden:
+          document.body && (document.body.style.overflowX = "hidden");
+        
         } else if (w > design) {
-// Breitere Viewports: keine Skalierung, stattdessen volle Breite nutzen.
-if (meta) {
-  meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
-}
-el.style.transform = "none";
-el.style.transformOrigin = "";
-el.style.position = "static";
-el.style.left = "0";
-el.style.height = "";
-el.style.width = "100%";
-el.style.maxWidth = "100%";
-el.style.minWidth = design + "px";
-document.body && (document.body.style.overflowX = "hidden");
+          // Wide viewports: kein Upscaling – statt dessen volle Breite nutzen, damit keine weißen Ränder sichtbar sind.
+          if (meta) {
+            meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+          }
+          el.style.transform = "none";
+          el.style.transformOrigin = "";
+          el.style.position = "static";
+          el.style.left = "0";
+          el.style.width = "100vw";
+          el.style.maxWidth = "100vw";
+          el.style.minWidth = "100vw";
+          el.style.height = "";
+          document.body && (document.body.style.overflowX = "hidden");
         } else {
-// Exakt 1440px: native (unskaliertes) Layout
-if (meta) {
-  meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
-}
-el.style.transform = "none";
-el.style.transformOrigin = "";
-el.style.left = "0";
-el.style.position = "static";
-el.style.height = "";
-el.style.width = "";
-el.style.maxWidth = design + "px";
-el.style.minWidth = design + "px";
-document.body && (document.body.style.overflowX = "hidden");
+
+          // Exactly 1440px: native (unscaled) layout
+          if (meta) {
+            meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+          }
+          el.style.transform = "none";
+          el.style.left = "0";
+          el.style.position = "static";
+          document.body && (document.body.style.overflowX = "hidden");
         }
       };
       const t = setTimeout(apply, 0);
