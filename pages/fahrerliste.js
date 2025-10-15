@@ -593,41 +593,61 @@ function __mergeBemerkungWithTags(plain, originalBem) {
   }, [auth, suchtext, sort]);
 
   useEffect(() => { if (tab !== "alle") setAlleShowAll(false); }, [tab]);
-  // Ensure full-page scrolling in the "Alle" tab so the list AND footer are always reachable,
-// without touching anything else.
-useEffect(() => {
-  try {
-    const html = document.documentElement;
-    const body = document.body;
-    if (!html || !body) return;
+  // Ensure only ONE vertical scrollbar in "Alle Buchungen":
+  // We make the window (body) the single scroll container when the "alle" tab is active.
+  useEffect(() => {
+    try {
+      const html = document.documentElement;
+      const body = document.body;
+      if (!html || !body) return;
 
-    const root = document.getElementById("vx-root");
-    const prevHtmlY = html.style.overflowY;
-    const prevBodyY = body.style.overflowY;
-    const prevRootY = root ? root.style.overflowY : undefined;
+      const root = document.getElementById("vx-root");
+      const prevHtmlY = html.style.overflowY;
+      const prevBodyY = body.style.overflowY;
+      const prevRootY = root ? root.style.overflowY : undefined;
 
-    if (tab === "alle") {
-      // Allow the browser's normal scrolling all the way to the bottom (incl. footer).
-      html.style.overflowY = "auto";
-      body.style.overflowY = "auto";
-      if (root) root.style.overflowY = "visible";
-    } else {
-      // Reset when leaving the tab
-      html.style.overflowY = prevHtmlY || "";
-      body.style.overflowY = prevBodyY || "";
-      if (root && prevRootY !== undefined) root.style.overflowY = prevRootY || "";
-    }
-
-    return () => {
-      // Cleanup on unmount or tab switch
-      try {
+      if (tab === "alle") {
+        // Im "Alle"-Tab: 
+        // - Standardansicht (alleShowAll=false): wie bisher EIN Scrollbalken auf body.
+        // - Vollansicht (alleShowAll=true): Browser-Scroll ganz normal erlauben (auch html),
+        //   damit man auf ALLEN Geräten bis ganz unten kommt – Optik bleibt unverändert.
+        if (alleShowAll) {
+          document.documentElement.style.overflowY = "auto"; // outer scroller
+          document.body.style.overflowY = "hidden"; // prevent second scrollbar on body
+          try {
+            const rootEl = document.getElementById("vx-root");
+            if (rootEl) {
+              const rect = rootEl.getBoundingClientRect();
+              const total = Math.max(Math.ceil(rect.top + rect.height), window.innerHeight || 0);
+              document.body.style.minHeight = total + "px";
+            }
+          } catch {}
+        } else {
+          document.documentElement.style.overflowY = "hidden";
+          document.body.style.overflowY = "auto";
+          document.body.style.minHeight = "";
+        }
+        if (root) root.style.overflowY = "visible";
+      } else {
+        // Reset when leaving the tab
         html.style.overflowY = prevHtmlY || "";
         body.style.overflowY = prevBodyY || "";
         if (root && prevRootY !== undefined) root.style.overflowY = prevRootY || "";
-      } catch {}
-    };
-  } catch {}
-}, [tab, alleShowAll]);let filtered = list;
+      }
+
+      return () => {
+        // Cleanup on unmount or tab switch
+        try {
+          html.style.overflowY = prevHtmlY || "";
+          body.style.overflowY = prevBodyY || "";
+          if (root && prevRootY !== undefined) root.style.overflowY = prevRootY || "";
+        } catch {}
+      };
+    } catch {}
+  }, [tab, alleShowAll]);
+
+
+  let filtered = list;
   const today = new Date();
   if (tab === "heute") {
   const isoToday = today.toISOString().slice(0, 10);
