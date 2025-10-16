@@ -834,6 +834,13 @@ for (const k of Object.keys(groupsByDate)) {
     display: block !important;
   }
 }
+
+@media (min-width: 1441px) {
+  /* Custom Fix: Weißer Abstand oben auf der Edit-Seite entfernen, indem das Root-Layout
+     ausgeblendet wird, sobald eine Edit-Seite aktiv ist. Dadurch startet die Edit-Seite
+     pixelgenau am oberen Rand (Header). */
+  body[data-vx-has-edit="1"] #vx-root { display: none !important; }
+}
 `}</style>
       </Head>
       {!auth ? (
