@@ -728,7 +728,7 @@ for (const k of Object.keys(groupsByDate)) {
   return (
     <>
       <Head>
-<script dangerouslySetInnerHTML={__html: `/*! vx-head-edit-flag-bootstrap */(function(){try{var usp=new URLSearchParams(location.search);if(usp.has("edit")){document.documentElement.setAttribute("data-vx-has-edit","1");document.addEventListener("DOMContentLoaded",function(){try{document.body.setAttribute("data-vx-has-edit","1");}catch(e){}});}}catch(e){}})();`} />
+<script dangerouslySetInnerHTML={{__html: `/*! vx-head-edit-flag-bootstrap */(function(){try{var usp=new URLSearchParams(location.search);if(usp.has("edit")){document.documentElement.setAttribute("data-vx-has-edit","1");document.addEventListener("DOMContentLoaded",function(){try{document.body.setAttribute("data-vx-has-edit","1");}catch(e){}});}}catch(e){}})();`}} />
 
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
               <style>{`
