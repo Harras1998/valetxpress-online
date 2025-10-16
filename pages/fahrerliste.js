@@ -728,6 +728,8 @@ for (const k of Object.keys(groupsByDate)) {
   return (
     <>
       <Head>
+<script dangerouslySetInnerHTML={__html: `/*! vx-head-edit-flag-bootstrap */(function(){try{var usp=new URLSearchParams(location.search);if(usp.has("edit")){document.documentElement.setAttribute("data-vx-has-edit","1");document.addEventListener("DOMContentLoaded",function(){try{document.body.setAttribute("data-vx-has-edit","1");}catch(e){}});}}catch(e){}})();`} />
+
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
               <style>{`
           html, body, #__next { margin: 0; padding: 0; width: 100%; }
@@ -783,6 +785,26 @@ body[data-vx-has-edit="1"] > [data-vx-edit-page="1"] {
 body[data-vx-has-edit="1"] #vx-root,
 body[data-vx-has-edit="1"] #vx-root [data-vx-edit-page="1"],
 body[data-vx-has-edit="1"] #vx-root [data-vx-edit-page="1"] > *:first-child {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+/* HTML-level edit flag mirrors (all widths) */
+html[data-vx-has-edit="1"] #vx-root > *:not([data-vx-edit-page="1"]) {
+  display: none !important;
+}
+html[data-vx-has-edit="1"] #__next {
+  display: none !important;
+}
+html[data-vx-has-edit="1"] > [data-vx-edit-page="1"] {
+  display: block !important;
+  position: static !important;
+  top: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+html[data-vx-has-edit="1"] #vx-root,
+html[data-vx-has-edit="1"] #vx-root [data-vx-edit-page="1"],
+html[data-vx-has-edit="1"] #vx-root [data-vx-edit-page="1"] > *:first-child {
   margin-top: 0 !important;
   padding-top: 0 !important;
 }
