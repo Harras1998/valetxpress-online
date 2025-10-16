@@ -738,10 +738,7 @@ for (const k of Object.keys(groupsByDate)) {
           #__next, #vx-root { height: auto !important; overflow: visible !important; }
 @media (min-width: 1441px) {
   /* Edit page: ensure no top gap, hide #__next, zero portal margins >1440 */
-  body[data-vx-has-edit="1"] #__next {
-    display: none !important;
-  }
-  body[data-vx-has-edit="1"] > [data-vx-edit-page="1"] {
+body[data-vx-has-edit="1"] > [data-vx-edit-page="1"] {
     display: block !important;
     position: static !important;
     top: auto !important;
@@ -772,9 +769,6 @@ for (const k of Object.keys(groupsByDate)) {
 body[data-vx-has-edit="1"] #vx-root > *:not([data-vx-edit-page="1"]) {
   display: none !important;
 }
-body[data-vx-has-edit="1"] #__next {
-  display: none !important;
-}
 body[data-vx-has-edit="1"] > [data-vx-edit-page="1"] {
   display: block !important;
   position: static !important;
@@ -792,9 +786,6 @@ body[data-vx-has-edit="1"] #vx-root [data-vx-edit-page="1"] > *:first-child {
 html[data-vx-has-edit="1"] #vx-root > *:not([data-vx-edit-page="1"]) {
   display: none !important;
 }
-html[data-vx-has-edit="1"] #__next {
-  display: none !important;
-}
 html[data-vx-has-edit="1"] > [data-vx-edit-page="1"] {
   display: block !important;
   position: static !important;
@@ -807,6 +798,17 @@ html[data-vx-has-edit="1"] #vx-root [data-vx-edit-page="1"],
 html[data-vx-has-edit="1"] #vx-root [data-vx-edit-page="1"] > *:first-child {
   margin-top: 0 !important;
   padding-top: 0 !important;
+}
+/* Keep only edit page inside #__next when active */
+body[data-vx-has-edit="1"] #__next > *:not([data-vx-edit-page="1"]) {
+  display: none !important;
+}
+html[data-vx-has-edit="1"] #__next > *:not([data-vx-edit-page="1"]) {
+  display: none !important;
+}
+body[data-vx-has-edit="1"] [data-vx-edit-page="1"],
+html[data-vx-has-edit="1"] [data-vx-edit-page="1"] {
+  display: block !important;
 }
 `}</style>
       </Head>
