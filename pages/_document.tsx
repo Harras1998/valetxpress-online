@@ -1,12 +1,10 @@
-import { Html, Head, Main, NextScript } from 'next/document'
+import { Html, Head, Main, NextScript } from "next/document";
 
 export default function Document() {
   return (
     <Html lang="de">
       <Head>
-        {/* Favicon bleibt erhalten */}
-        <link rel="icon" href="/favicon.png" />
-        {/* Additiv: CSS-Override für >1440 px */}
+        {/* Additiv: bindet das CSS-Override aus /public ein */}
         <link rel="stylesheet" href="/vx-edit-override.css" />
       </Head>
       <body>
@@ -14,5 +12,5 @@ export default function Document() {
         <NextScript />
       </body>
     </Html>
-  )
+  );
 }
