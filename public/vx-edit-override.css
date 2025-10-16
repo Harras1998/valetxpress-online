@@ -1,0 +1,49 @@
+/* vx-edit-override.css — rein additiv, keine bestehenden Regeln löschen */
+/* Ziel: >1440 px soll das Edit-Menü wie bei 1440 px als eigene Seite ohne Ränder erscheinen. */
+
+@media (min-width: 1441px) {
+  body[data-vx-force-edit="1"] {
+    overflow: hidden !important; /* Hintergrund sperren */
+    background: #fff !important;
+  }
+
+  body[data-vx-force-edit="1"] .edit-overlay,
+  body[data-vx-force-edit="1"] #edit-root,
+  body[data-vx-force-edit="1"] [role="dialog"][aria-modal="true"],
+  body[data-vx-force-edit="1"] [class*="edit"],
+  body[data-vx-force-edit="1"] [id*="edit"],
+  body[data-vx-force-edit="1"] [data-vx-edit-page="1"] {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    z-index: 99999 !important;
+    overflow: auto !important;
+  }
+
+  body[data-vx-force-edit="1"] .edit-overlay > .edit-inner,
+  body[data-vx-force-edit="1"] #edit-root > .edit-inner,
+  body[data-vx-force-edit="1"] [data-vx-edit-page="1"] > .edit-inner,
+  body[data-vx-force-edit="1"] [class*="edit"] > .edit-inner,
+  body[data-vx-force-edit="1"] [id*="edit"] > .edit-inner,
+  body[data-vx-force-edit="1"] [role="dialog"][aria-modal="true"] > .edit-inner,
+  body[data-vx-force-edit="1"] .container-1440,
+  body[data-vx-force-edit="1"] .container1440,
+  body[data-vx-force-edit="1"] .px-1440 {
+    width: 1440px !important;
+    max-width: 1440px !important;
+    min-width: 1440px !important;
+    margin: 0 auto !important;
+    transform: none !important;
+    left: auto !important;
+    position: relative !important;
+  }
+
+  html, body {
+    background: #fff !important;
+  }
+}
