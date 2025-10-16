@@ -262,43 +262,7 @@ export default function FahrerListe() {
   const [list, setList] = useState([]);
   const [auth, setAuth] = useState("");
   // Beim Einloggen immer zuerst den "heute"-Tab zeigen
-  /* vx-body-edit-flag */
-/* vx-edit-initial-scroll */
-    useEffect(() => {
-      if (typeof window === 'undefined') return;
-      const usp = new URLSearchParams(location.search);
-      if (window.innerWidth > 1440 && usp.has('edit')) {
-        try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch {}
-        try { window.scrollTo(0,0); } catch {}
-      }
-    }, []);
-
-    useEffect(() => {
-      if (typeof window === 'undefined') return;
-      const apply = () => {
-        try { if ("scrollRestoration" in history) history.scrollRestoration = "manual"; } catch {}
-        try {
-          const usp = new URLSearchParams(location.search);
-          const active = (window.innerWidth > 1440) && usp.has('edit');
-          if (active) {
-            try { requestAnimationFrame(() => window.scrollTo(0,0)); } catch {}
-            document.body.setAttribute('data-vx-has-edit', '1');
-          } else {
-            document.body.removeAttribute('data-vx-has-edit');
-          }
-        } catch {}
-      };
-      apply();
-      window.addEventListener('popstate', apply);
-      window.addEventListener('resize', apply);
-      window.addEventListener('orientationchange', apply);
-      return () => {
-        window.removeEventListener('popstate', apply);
-        window.removeEventListener('resize', apply);
-        window.removeEventListener('orientationchange', apply);
-      };
-    }, []);
-useEffect(() => {
+  useEffect(() => {
     if (auth) setTab("heute");
   }, [auth]);
 
@@ -384,28 +348,14 @@ useEffect(() => {
     } catch {}
   }, []);
 const [editBuchung, setEditBuchung] = useState(null);
-  
-/* vx-open-edit-from-url */
-    useEffect(() => {
-      if (typeof window === 'undefined') return;
-      if (window.innerWidth <= 1440) return;
-      const usp = new URLSearchParams(location.search);
-      const eid = usp.get('edit');
-      if (!eid) return;
-      try {
-        if (Array.isArray(list) && list.length) {
-          const match = list.find(b => String(b?.id || b?._id || b?.buchungsnummer || b?.buchungId || b?.buchungID || b?.nr || b?.nummer) === String(eid));
-          if (match) setEditBuchung({ ...match });
-        }
-      } catch {}
-    }, [list]);
-const [editSaving, setEditSaving] = useState(false);
+  const [editSaving, setEditSaving] = useState(false);
   // --- Edit-Overlay: responsive Skalierung + Scroll-Lock (verhindert doppelte Scrollbalken) ---
   const designW = 1440;
   const [editScale, setEditScale] = useState(1);
   const [editLeft, setEditLeft] = useState(0);
 
-  useEffect(() => { if (!editBuchung || (typeof window !== "undefined" && window.innerWidth > 1440)) return;
+  useEffect(() => {
+    if (!editBuchung) return;
     const calc = () => {
       try {
         const w = window.innerWidth || document.documentElement.clientWidth || 0;
@@ -424,7 +374,9 @@ const [editSaving, setEditSaving] = useState(false);
     };
   }, [editBuchung]);
 
-  useEffect(() => { if (!editBuchung || (typeof window !== "undefined" && window.innerWidth > 1440)) return; const body = document.body;
+  useEffect(() => {
+    if (!editBuchung) return;
+    const body = document.body;
     if (!body) return;
     const prevOverflow = body.style.overflow;
     const prevOverflowX = body.style.overflowX;
@@ -783,81 +735,16 @@ for (const k of Object.keys(groupsByDate)) {
           html, body { overflow-x: hidden; }
           #__next, #vx-root { height: auto !important; overflow: visible !important; }
 @media (min-width: 1441px) {
-  /* Hide siblings when edit page is present >1440 */
-  [data-vx-edit-page="1"] ~ * { display: none !important; }
-  /* Ensure edit page displays */
-  [data-vx-edit-page="1"] { display: block !important; }
-}
-@media (min-width: 1441px) {
-  /* Global fluid >1440 (normal view) */
-  #vx-root {
-    max-width: none !important;
-    min-width: 100% !important;
-    width: 100vw !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-  [style*="max-width: 1440px"],
-  [style*="min-width: 1440px"],
-  [style*="width: 1440px"] {
-    max-width: none !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-}
-@media (min-width: 1441px) {
-  /* Edit overlay inner canvas: remove 1440px lock & scaling */
-  [style*="position: fixed"][style*="100vw"][style*="100vh"] > div[style*="width: 1440px"] {
-    width: 100vw !important;
-    max-width: none !important;
-    min-width: 100vw !important;
-    left: 0 !important;
-    transform: none !important;
-  }
-  /* Fallback: any element scaled for edit mode should not scale >1440px */
-  [style*="transform: scale("] {
-    transform: none !important;
-    left: 0 !important;
-  }
-}
-@media (min-width: 1441px) {
-  /* Edit overlay becomes inline (no overlay) >1440 */
-  [style*="position: fixed"][style*="100vw"][style*="100vh"] {
-    position: static !important;
-    top: auto !important;
-    left: auto !important;
-    width: 100% !important;
-    height: auto !important;
-    z-index: auto !important;
-    overflow: visible !important;
-    overscroll-behavior: auto !important;
-    -webkit-overflow-scrolling: auto !important;
-    background: transparent !important;
-  }
-}
-@media (min-width: 1441px) {
-  /* Edit as real page >1440: hide all non-edit content regardless of order */
-  body[data-vx-has-edit="1"] #vx-root > *:not([data-vx-edit-page="1"]) {
+  /* Edit page: ensure no top gap, hide #__next, zero portal margins >1440 */
+  body[data-vx-has-edit="1"] #__next {
     display: none !important;
   }
-  body[data-vx-has-edit="1"] #vx-root [data-vx-edit-page="1"] {
+  body[data-vx-has-edit="1"] > [data-vx-edit-page="1"] {
     display: block !important;
-  }
-}
-@media (min-width: 1441px) {
-  /* Edit page top-spacing fix >1440: start flush with header */
-  body[data-vx-has-edit="1"] #vx-root {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-  }
-  body[data-vx-has-edit="1"] #vx-root [data-vx-edit-page="1"] {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-  }
-  body[data-vx-has-edit="1"] #vx-root [data-vx-edit-page="1"] > *:first-child {
-    margin-top: 0 !important;
+    position: static !important;
+    top: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 }
 `}</style>
@@ -1103,7 +990,7 @@ for (const k of Object.keys(groupsByDate)) {
                         <span
                           style={{ fontSize: 20, color: "#444", cursor: "pointer" }}
                           title="Bearbeiten"
-                          onClick={() => { if (typeof window !== "undefined" && window.innerWidth > 1440) { const id = String(row?.id || row?._id || row?.buchungsnummer || row?.buchungId || row?.buchungID || row?.nr || row?.nummer || "1"); const usp = new URLSearchParams(location.search); usp.set("edit", id); location.href = location.pathname + "?" + usp.toString(); } else { setEditBuchung({ ...row }); } }}
+                          onClick={() => setEditBuchung({ ...row })}
                         >✏️</span>
                         {tab === "2tage" ? (<>
 <span style={{ fontSize: 20, color: "#444", cursor: "default", visibility: "hidden" }}>✔️</span>
@@ -1260,7 +1147,7 @@ onClick={() => {
 <PXFooter />
 
 {editBuchung && createPortal((
-            <div data-vx-edit-page="1" style={{
+            <div style={{
               position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
               background: "#fff", zIndex: 10000, overflowY: "auto", overscrollBehavior: "contain", WebkitOverflowScrolling: "touch"
             }}>
@@ -1274,7 +1161,7 @@ onClick={() => {
                   borderRadius: "0 0 8px 8px", position: "relative"
                 }}>
                   <button
-                    onClick={() => { if (typeof window !== "undefined" && window.innerWidth > 1440) { const usp = new URLSearchParams(location.search); usp.delete("edit"); const q = usp.toString(); location.href = location.pathname + (q ? "?" + q : ""); } else { setEditBuchung(null); } }}
+                    onClick={() => setEditBuchung(null)}
                     style={{
                       position: "absolute", left: 12, top: 7, fontSize: 18,
                       background: "#222", color: "#fff", border: "none", borderRadius: 6,
