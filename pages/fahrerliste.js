@@ -766,6 +766,26 @@ for (const k of Object.keys(groupsByDate)) {
     margin-right: 0 !important;
   }
 }
+/* Edit as real page (all widths): hide non-edit content */
+body[data-vx-has-edit="1"] #vx-root > *:not([data-vx-edit-page="1"]) {
+  display: none !important;
+}
+body[data-vx-has-edit="1"] #__next {
+  display: none !important;
+}
+body[data-vx-has-edit="1"] > [data-vx-edit-page="1"] {
+  display: block !important;
+  position: static !important;
+  top: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+body[data-vx-has-edit="1"] #vx-root,
+body[data-vx-has-edit="1"] #vx-root [data-vx-edit-page="1"],
+body[data-vx-has-edit="1"] #vx-root [data-vx-edit-page="1"] > *:first-child {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
 `}</style>
       </Head>
       {!auth ? (
@@ -1009,7 +1029,7 @@ for (const k of Object.keys(groupsByDate)) {
                         <span
                           style={{ fontSize: 20, color: "#444", cursor: "pointer" }}
                           title="Bearbeiten"
-                          onClick={() => { if (typeof window !== "undefined" && window.innerWidth > 1440) { const id = String(row?.id || row?._id || row?.buchungsnummer || row?.buchungId || row?.buchungID || row?.nr || row?.nummer || "1"); const usp = new URLSearchParams(location.search); usp.set("edit", id); location.href = location.pathname + "?" + usp.toString(); } else { setEditBuchung({ ...row }); } }}
+                          onClick={() => { try { const id = String(row?.id || row?._id || row?.buchungsnummer || row?.buchungId || row?.buchungID || row?.nr || row?.nummer || "1"); const usp = new URLSearchParams(location.search); usp.set("edit", id); location.href = location.pathname + "?" + usp.toString(); } catch(_){} }}
                         >✏️</span>
                         {tab === "2tage" ? (<>
 <span style={{ fontSize: 20, color: "#444", cursor: "default", visibility: "hidden" }}>✔️</span>
