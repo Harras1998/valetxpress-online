@@ -747,6 +747,25 @@ for (const k of Object.keys(groupsByDate)) {
     padding: 0 !important;
   }
 }
+@media (min-width: 1441px) {
+  /* Global fluid >1440 (normal view) */
+  #vx-root {
+    max-width: none !important;
+    min-width: 100% !important;
+    width: 100vw !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  [style*="max-width: 1440px"],
+  [style*="min-width: 1440px"],
+  [style*="width: 1440px"] {
+    max-width: none !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
 `}</style>
       </Head>
       {!auth ? (
@@ -990,7 +1009,7 @@ for (const k of Object.keys(groupsByDate)) {
                         <span
                           style={{ fontSize: 20, color: "#444", cursor: "pointer" }}
                           title="Bearbeiten"
-                          onClick={() => setEditBuchung({ ...row })}
+                          onClick={() => { if (typeof window !== "undefined" && window.innerWidth > 1440) { const id = String(row?.id || row?._id || row?.buchungsnummer || row?.buchungId || row?.buchungID || row?.nr || row?.nummer || "1"); const usp = new URLSearchParams(location.search); usp.set("edit", id); location.href = location.pathname + "?" + usp.toString(); } else { setEditBuchung({ ...row }); } }}
                         >✏️</span>
                         {tab === "2tage" ? (<>
 <span style={{ fontSize: 20, color: "#444", cursor: "default", visibility: "hidden" }}>✔️</span>
