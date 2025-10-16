@@ -842,7 +842,51 @@ for (const k of Object.keys(groupsByDate)) {
   body[data-vx-has-edit="1"] #vx-root { display: none !important; }
 }
 `}</style>
-      </Head>
+      <style>{`
+/* VX Add-On Override: >1440 px soll exakt wie 1440 px wirken (eigene Seite, keine Ränder) */
+@media (min-width: 1441px) {
+  /* Erzwinge Overlay-Ansicht wie bei 1440 px */
+  [data-vx-edit-page="1"] {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow-y: auto !important;
+    background: #fff !important;
+    z-index: 10000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  /* Innere 1440px-Leinwand wieder strikt 1440px breit & zentriert */
+  [data-vx-edit-page="1"] > div {
+    width: 1440px !important;
+    max-width: 1440px !important;
+    min-width: 1440px !important;
+    transform: none !important;
+    position: relative !important;
+    left: auto !important;         /* überschreibt inline left:0 */
+    margin: 0 auto !important;     /* horizontal zentrieren */
+  }
+
+  /* Neutralisiere frühere Inline‑Umwandlung: es bleibt ein echtes Overlay */
+  [style*="position: fixed"][style*="100vw"][style*="100vh"] {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 10000 !important;
+    overflow-y: auto !important;
+    background: #fff !important;
+  }
+
+  /* Safety: keine weißen Außenränder irgendwoher */
+  html, body {
+    background: #fff !important;
+  }
+}
+`}</style>
+</Head>
       {!auth ? (
         <div id="vx-root"
           style={{
