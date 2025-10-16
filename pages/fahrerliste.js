@@ -834,6 +834,20 @@ for (const k of Object.keys(groupsByDate)) {
     display: block !important;
   }
 }
+@media (min-width: 1441px) {
+  /* Edit page top-spacing fix >1440: start flush with header */
+  body[data-vx-has-edit="1"] #vx-root {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+  body[data-vx-has-edit="1"] #vx-root [data-vx-edit-page="1"] {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+  body[data-vx-has-edit="1"] #vx-root [data-vx-edit-page="1"] > *:first-child {
+    margin-top: 0 !important;
+  }
+}
 `}</style>
       </Head>
       {!auth ? (
