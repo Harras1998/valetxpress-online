@@ -263,13 +263,25 @@ export default function FahrerListe() {
   const [auth, setAuth] = useState("");
   // Beim Einloggen immer zuerst den "heute"-Tab zeigen
   /* vx-body-edit-flag */
+/* vx-edit-initial-scroll */
+    useEffect(() => {
+      if (typeof window === 'undefined') return;
+      const usp = new URLSearchParams(location.search);
+      if (window.innerWidth > 1440 && usp.has('edit')) {
+        try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch {}
+        try { window.scrollTo(0,0); } catch {}
+      }
+    }, []);
+
     useEffect(() => {
       if (typeof window === 'undefined') return;
       const apply = () => {
+        try { if ("scrollRestoration" in history) history.scrollRestoration = "manual"; } catch {}
         try {
           const usp = new URLSearchParams(location.search);
           const active = (window.innerWidth > 1440) && usp.has('edit');
           if (active) {
+            try { requestAnimationFrame(() => window.scrollTo(0,0)); } catch {}
             document.body.setAttribute('data-vx-has-edit', '1');
           } else {
             document.body.removeAttribute('data-vx-has-edit');
