@@ -4,10 +4,7 @@ export default function Document() {
   return (
     <Html lang="de">
       <Head>
-        {/* Favicon bleibt erhalten */}
         <link rel="icon" href="/favicon.png" />
-        {/* Additiv: CSS-Override für >1440 px */}
-        <link rel="stylesheet" href="/vx-edit-override.css" />
       </Head>
       <body>
         <Main />
