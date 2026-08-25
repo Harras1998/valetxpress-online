@@ -331,31 +331,40 @@ useEffect(() => {
       const el = document.getElementById(ROOT_ID);
       if (!el) return;
 
-      // Vor Messung ggf. alten Zustand entfernen
-      el.style.transform = '';
-      el.style.transformOrigin = '';
-      el.style.left = '';
-      el.style.position = '';
-      el.style.height = '';
-
       const vw = window.innerWidth;
       const s = Math.min(1, vw / DESIGN_WIDTH);
 
+      // Hinweis: "transform" verändert nicht die Layout-Größe des Elements –
+      // scrollHeight lässt sich also messen, ohne vorher Transform/Höhe
+      // zurückzusetzen. Der frühere Reset-vor-Messung erzwang bei jedem
+      // Aufruf einen synchronen Browser-Reflow und veränderte dabei selbst
+      // die von ResizeObserver beobachtete Höhe von #vx-root – das löste
+      // den Observer erneut aus (Rückkopplungsschleife) und erzeugte beim
+      // Scrollen kurz vor dem Footer sichtbares Ruckeln, v. a. nachdem
+      // "Alle Buchungen" die Liste verlängert hatte.
       if (s < 1) {
         const usedWidth = DESIGN_WIDTH * s;
         const left = Math.max(0, Math.round((vw - usedWidth) / 2));
-
-        // Skaliere visuell, zentriere und setze die Layout‑Höhe passend,
-        // damit der Body die richtige (skalierte) Scrollhöhe hat.
-        el.style.transform = `scale(${s})`;
-        el.style.transformOrigin = 'top left';
-        el.style.position = 'relative';
-        el.style.left = `${left}px`;
-
-        // Layout-Höhe anpassen (Skalierungs-Höhe), damit nur der Body scrollt.
         const contentHeight = el.scrollHeight; // unskaliert
         const scaledHeight = Math.ceil(contentHeight * s);
-        el.style.height = `${scaledHeight}px`;
+
+        const transform = `scale(${s})`;
+        const leftPx = `${left}px`;
+        const heightPx = `${scaledHeight}px`;
+
+        // Nur schreiben, wenn sich etwas geändert hat, damit keine
+        // No-Op-Style-Änderungen den ResizeObserver unnötig erneut feuern.
+        if (el.style.transform !== transform) el.style.transform = transform;
+        if (el.style.transformOrigin !== 'top left') el.style.transformOrigin = 'top left';
+        if (el.style.position !== 'relative') el.style.position = 'relative';
+        if (el.style.left !== leftPx) el.style.left = leftPx;
+        if (el.style.height !== heightPx) el.style.height = heightPx;
+      } else {
+        if (el.style.transform) el.style.transform = '';
+        if (el.style.transformOrigin) el.style.transformOrigin = '';
+        if (el.style.left) el.style.left = '';
+        if (el.style.position) el.style.position = '';
+        if (el.style.height) el.style.height = '';
       }
     };
 
