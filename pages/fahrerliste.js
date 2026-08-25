@@ -793,6 +793,11 @@ for (const k of Object.keys(groupsByDate)) {
           html, body, #__next { margin: 0; padding: 0; width: 100%; }
           * { box-sizing: border-box; }
           html, body { overflow-x: hidden; }
+          /* Verhindert den elastischen "Bounce" beim Überscrollen auf iOS/Android,
+             durch den man auf dem Handy optisch über den Footer hinaus ins Leere
+             scrollen konnte. Die Seite scrollt weiterhin normal, stoppt aber
+             hart am Anfang/Ende des Inhalts (also am Footer). */
+          html, body { overscroll-behavior-y: none; }
           #__next, #vx-root { height: auto !important; overflow: visible !important; }
 @media (min-width: 1441px) {
   /* Hide siblings when edit page is present >1440 */
