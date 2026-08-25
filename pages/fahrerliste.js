@@ -361,7 +361,31 @@ useEffect(() => {
 
     apply();
     window.addEventListener('resize', apply);
-    return () => window.removeEventListener('resize', apply);
+
+    // Zusätzlich auf Inhalts-Höhenänderungen reagieren (z. B. Tab-Wechsel,
+    // Klick auf "Alle Buchungen", Suche, Nachladen der Liste). Der bisherige
+    // Code hat "apply" nur beim Mounten und bei window-resize neu berechnet.
+    // Wenn sich die Listenlänge änderte, ohne dass sich die Fensterbreite
+    // änderte, blieb die zuletzt berechnete Scroll-Höhe bestehen – dadurch
+    // konnte man auf dem Handy über den Footer hinaus (ins Leere) scrollen,
+    // sobald "Alle Buchungen" mehr Einträge nachlud. Ein ResizeObserver auf
+    // #vx-root selbst erkennt genau diese Höhenänderung und ruft "apply"
+    // erneut auf, damit die Scrollhöhe wieder exakt am Footer endet.
+    let ro;
+    const rootEl = document.getElementById(ROOT_ID);
+    if (rootEl && typeof ResizeObserver !== 'undefined') {
+      let raf = null;
+      ro = new ResizeObserver(() => {
+        if (raf) cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(apply);
+      });
+      ro.observe(rootEl);
+    }
+
+    return () => {
+      window.removeEventListener('resize', apply);
+      if (ro) ro.disconnect();
+    };
   } catch {}
 }, []);// Login aus localStorage wiederherstellen
   useEffect(() => {
@@ -769,6 +793,11 @@ for (const k of Object.keys(groupsByDate)) {
           html, body, #__next { margin: 0; padding: 0; width: 100%; }
           * { box-sizing: border-box; }
           html, body { overflow-x: hidden; }
+          /* Verhindert den elastischen "Bounce" beim Überscrollen auf iOS/Android,
+             durch den man auf dem Handy optisch über den Footer hinaus ins Leere
+             scrollen konnte. Die Seite scrollt weiterhin normal, stoppt aber
+             hart am Anfang/Ende des Inhalts (also am Footer). */
+          html, body { overscroll-behavior-y: none; }
           #__next, #vx-root { height: auto !important; overflow: visible !important; }
 @media (min-width: 1441px) {
   /* Hide siblings when edit page is present >1440 */
