@@ -793,12 +793,18 @@ for (const k of Object.keys(groupsByDate)) {
           html, body, #__next { margin: 0; padding: 0; width: 100%; }
           * { box-sizing: border-box; }
           html, body { overflow-x: hidden; }
-          /* Verhindert den elastischen "Bounce" beim Überscrollen auf iOS/Android,
-             durch den man auf dem Handy optisch über den Footer hinaus ins Leere
-             scrollen konnte. Die Seite scrollt weiterhin normal, stoppt aber
-             hart am Anfang/Ende des Inhalts (also am Footer). */
-          html, body { overscroll-behavior-y: none; }
-          #__next, #vx-root { height: auto !important; overflow: visible !important; }
+          #__next { height: auto !important; overflow: visible !important; }
+          /* #vx-root bekommt bewusst KEIN "height: auto !important" mehr:
+             Das JavaScript weiter unten (Viewport-Auto-Fit) berechnet für
+             Handys die exakte, zur Skalierung passende Höhe und setzt sie
+             per style.height direkt am Element. Die vorherige CSS-Regel
+             hat dieses berechnete Ergebnis aber sofort wieder mit "auto"
+             überschrieben – der Browser musste die Scroll-Höhe dadurch
+             selbst schätzen, was auf dem Handy mal zu kurz (Footer nicht
+             erreichbar) und mal zu lang (Scrollen über den Footer hinaus)
+             ausfiel. overflow bleibt weiterhin sichtbar, nur die Höhe wird
+             jetzt nicht mehr erzwungen. */
+          #vx-root { overflow: visible !important; }
 @media (min-width: 1441px) {
   /* Hide siblings when edit page is present >1440 */
   [data-vx-edit-page="1"] ~ * { display: none !important; }
