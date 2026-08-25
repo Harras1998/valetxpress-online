@@ -610,6 +610,32 @@ function __mergeBemerkungWithTags(plain, originalBem) {
       .catch(() => { setError("Fehler beim Laden"); setLoading(false); });
   }, [auth, suchtext, sort]);
 
+  // Geräte-übergreifender Abgleich: lädt die Liste (inkl. Anruf-Timer aus
+  // [CT:...] in der Bemerkung) im Hintergrund regelmäßig neu, damit z. B.
+  // ein auf einem anderen Gerät gestarteter Anruf-Timer auch hier zeitnah
+  // sichtbar wird, statt nur beim nächsten manuellen Neuladen der Liste.
+  useEffect(() => {
+    if (!auth) return;
+    const iv = setInterval(() => {
+      let url = `/api/proxy?path=api/admin/buchungen&sort=${sort}&dir=asc`;
+      if (suchtext) url += `&suchtext=${encodeURIComponent(suchtext)}`;
+      fetch(url, { headers: { Authorization: `Basic ${auth}` } })
+        .then(r => r.json())
+        .then(data => {
+          const rows = data.buchungen || [];
+          setList(rows);
+          const timers = {};
+          for (const r of rows) {
+            const ts = parseCallTimerFromBem(r.bemerkung);
+            if (ts) timers[r.id] = ts;
+          }
+          setCallTimers(timers);
+        })
+        .catch(() => {});
+    }, 5000);
+    return () => clearInterval(iv);
+  }, [auth, suchtext, sort]);
+
   useEffect(() => { if (tab !== "alle") setAlleShowAll(false); }, [tab]);
   
   // Einheitliches Scrollverhalten: KEINE expliziten overflow‑Styles mehr.
