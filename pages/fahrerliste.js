@@ -190,6 +190,40 @@ function isRueckHeuteOder2(b) {
 
 
 
+// Eigenständige Timer-Anzeige: rendert sich jede Sekunde nur selbst neu,
+// statt (wie zuvor über einen globalen setInterval-State) die komplette
+// Seite inkl. der ganzen Buchungsliste. Der globale Re-Render pro Sekunde
+// führte beim Scrollen (v. a. Richtung Footer) zu spürbarem Ruckeln.
+function CallTimerBadge({ startTs }) {
+  const [, forceTick] = useState(0);
+  useEffect(() => {
+    const iv = setInterval(() => forceTick(t => (t + 1) % 3600), 1000);
+    return () => clearInterval(iv);
+  }, []);
+  const elapsed = Math.floor((Date.now() - startTs) / 1000) % 3600;
+  const mm = Math.floor(elapsed / 60);
+  const ss = elapsed % 60;
+  const text = String(mm).padStart(1, "0") + ":" + String(ss).padStart(2, "0");
+  return (
+    <span
+      style={{
+        fontSize: 36,
+        fontWeight: 900,
+        color: elapsed >= 600 ? "red" : "#fff",
+        minWidth: 96,
+        textAlign: "right",
+        letterSpacing: 1,
+        userSelect: "none",
+        textShadow: "0 1px 3px #000a",
+        cursor: "default"
+      }}
+      title="Timer läuft"
+    >
+      {text}
+    </span>
+  );
+}
+
 function PXFooter() {
   return (
     <div
@@ -499,25 +533,6 @@ const [editSaving, setEditSaving] = useState(false);
     } catch {}
   }, [callTimers]);
  // { [buchungId]: startTimestampMs }
-  const [timerTick, setTimerTick] = useState(0);
-  useEffect(() => {
-    const iv = setInterval(() => {
-      setTimerTick(t => (t + 1) % 3600); // trigger re-render each second
-    }, 1000);
-    return () => clearInterval(iv);
-  }, []);
-
-  function timerElapsedSec(id) {
-    const start = callTimers[id];
-    if (!start) return 0;
-    const diff = Math.floor((Date.now() - start) / 1000);
-    return diff % 3600; // loop every hour
-  }
-  function formatMMSS(totalSec) {
-    const mm = Math.floor(totalSec / 60);
-    const ss = totalSec % 60;
-    return String(mm).padStart(1, "0") + ":" + String(ss).padStart(2, "0");
-  }
   // ---- Universal Timer via [CT:timestamp] Tag in bemerkung ----
   function parseCallTimerFromBem(bem) {
     const m = (bem || "").match(/\[CT:(\d{10,})\]/);
@@ -1283,21 +1298,7 @@ onClick={() => {
   } catch {} })();
 }}>✔️</span>
                         {callTimers[row.id] ? (
-                          <span
-                            style={{
-                              fontSize: 36,
-                              fontWeight: 900,
-                              color: (timerElapsedSec(row.id) >= 600) ? "red" : "#fff",
-                              minWidth: 96,
-                              textAlign: "right",
-                              letterSpacing: 1,
-                              userSelect: "none",
-                              textShadow: "0 1px 3px #000a",
-                              cursor: "default" }}
-                            title="Timer läuft"
-                          >
-                            {formatMMSS(timerElapsedSec(row.id))}
-                          </span>
+                          <CallTimerBadge startTs={callTimers[row.id]} />
                         ) : (
                           <span onClick={() => { setCallTimers(prev => { const next = { ...prev }; if (next[row.id]) delete next[row.id]; else next[row.id] = Date.now(); return next; }); (async () => { try {
               const ts = Date.now();
