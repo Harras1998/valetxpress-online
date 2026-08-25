@@ -190,40 +190,6 @@ function isRueckHeuteOder2(b) {
 
 
 
-// Eigenständige Timer-Anzeige: rendert sich jede Sekunde nur selbst neu,
-// statt (wie zuvor über einen globalen setInterval-State) die komplette
-// Seite inkl. der ganzen Buchungsliste. Der globale Re-Render pro Sekunde
-// führte beim Scrollen (v. a. Richtung Footer) zu spürbarem Ruckeln.
-function CallTimerBadge({ startTs }) {
-  const [, forceTick] = useState(0);
-  useEffect(() => {
-    const iv = setInterval(() => forceTick(t => (t + 1) % 3600), 1000);
-    return () => clearInterval(iv);
-  }, []);
-  const elapsed = Math.floor((Date.now() - startTs) / 1000) % 3600;
-  const mm = Math.floor(elapsed / 60);
-  const ss = elapsed % 60;
-  const text = String(mm).padStart(1, "0") + ":" + String(ss).padStart(2, "0");
-  return (
-    <span
-      style={{
-        fontSize: 36,
-        fontWeight: 900,
-        color: elapsed >= 600 ? "red" : "#fff",
-        minWidth: 96,
-        textAlign: "right",
-        letterSpacing: 1,
-        userSelect: "none",
-        textShadow: "0 1px 3px #000a",
-        cursor: "default"
-      }}
-      title="Timer läuft"
-    >
-      {text}
-    </span>
-  );
-}
-
 function PXFooter() {
   return (
     <div
@@ -365,40 +331,31 @@ useEffect(() => {
       const el = document.getElementById(ROOT_ID);
       if (!el) return;
 
+      // Vor Messung ggf. alten Zustand entfernen
+      el.style.transform = '';
+      el.style.transformOrigin = '';
+      el.style.left = '';
+      el.style.position = '';
+      el.style.height = '';
+
       const vw = window.innerWidth;
       const s = Math.min(1, vw / DESIGN_WIDTH);
 
-      // Hinweis: "transform" verändert nicht die Layout-Größe des Elements –
-      // scrollHeight lässt sich also messen, ohne vorher Transform/Höhe
-      // zurückzusetzen. Der frühere Reset-vor-Messung erzwang bei jedem
-      // Aufruf einen synchronen Browser-Reflow und veränderte dabei selbst
-      // die von ResizeObserver beobachtete Höhe von #vx-root – das löste
-      // den Observer erneut aus (Rückkopplungsschleife) und erzeugte beim
-      // Scrollen kurz vor dem Footer sichtbares Ruckeln, v. a. nachdem
-      // "Alle Buchungen" die Liste verlängert hatte.
       if (s < 1) {
         const usedWidth = DESIGN_WIDTH * s;
         const left = Math.max(0, Math.round((vw - usedWidth) / 2));
+
+        // Skaliere visuell, zentriere und setze die Layout‑Höhe passend,
+        // damit der Body die richtige (skalierte) Scrollhöhe hat.
+        el.style.transform = `scale(${s})`;
+        el.style.transformOrigin = 'top left';
+        el.style.position = 'relative';
+        el.style.left = `${left}px`;
+
+        // Layout-Höhe anpassen (Skalierungs-Höhe), damit nur der Body scrollt.
         const contentHeight = el.scrollHeight; // unskaliert
         const scaledHeight = Math.ceil(contentHeight * s);
-
-        const transform = `scale(${s})`;
-        const leftPx = `${left}px`;
-        const heightPx = `${scaledHeight}px`;
-
-        // Nur schreiben, wenn sich etwas geändert hat, damit keine
-        // No-Op-Style-Änderungen den ResizeObserver unnötig erneut feuern.
-        if (el.style.transform !== transform) el.style.transform = transform;
-        if (el.style.transformOrigin !== 'top left') el.style.transformOrigin = 'top left';
-        if (el.style.position !== 'relative') el.style.position = 'relative';
-        if (el.style.left !== leftPx) el.style.left = leftPx;
-        if (el.style.height !== heightPx) el.style.height = heightPx;
-      } else {
-        if (el.style.transform) el.style.transform = '';
-        if (el.style.transformOrigin) el.style.transformOrigin = '';
-        if (el.style.left) el.style.left = '';
-        if (el.style.position) el.style.position = '';
-        if (el.style.height) el.style.height = '';
+        el.style.height = `${scaledHeight}px`;
       }
     };
 
@@ -533,6 +490,25 @@ const [editSaving, setEditSaving] = useState(false);
     } catch {}
   }, [callTimers]);
  // { [buchungId]: startTimestampMs }
+  const [timerTick, setTimerTick] = useState(0);
+  useEffect(() => {
+    const iv = setInterval(() => {
+      setTimerTick(t => (t + 1) % 3600); // trigger re-render each second
+    }, 1000);
+    return () => clearInterval(iv);
+  }, []);
+
+  function timerElapsedSec(id) {
+    const start = callTimers[id];
+    if (!start) return 0;
+    const diff = Math.floor((Date.now() - start) / 1000);
+    return diff % 3600; // loop every hour
+  }
+  function formatMMSS(totalSec) {
+    const mm = Math.floor(totalSec / 60);
+    const ss = totalSec % 60;
+    return String(mm).padStart(1, "0") + ":" + String(ss).padStart(2, "0");
+  }
   // ---- Universal Timer via [CT:timestamp] Tag in bemerkung ----
   function parseCallTimerFromBem(bem) {
     const m = (bem || "").match(/\[CT:(\d{10,})\]/);
@@ -1298,7 +1274,21 @@ onClick={() => {
   } catch {} })();
 }}>✔️</span>
                         {callTimers[row.id] ? (
-                          <CallTimerBadge startTs={callTimers[row.id]} />
+                          <span
+                            style={{
+                              fontSize: 36,
+                              fontWeight: 900,
+                              color: (timerElapsedSec(row.id) >= 600) ? "red" : "#fff",
+                              minWidth: 96,
+                              textAlign: "right",
+                              letterSpacing: 1,
+                              userSelect: "none",
+                              textShadow: "0 1px 3px #000a",
+                              cursor: "default" }}
+                            title="Timer läuft"
+                          >
+                            {formatMMSS(timerElapsedSec(row.id))}
+                          </span>
                         ) : (
                           <span onClick={() => { setCallTimers(prev => { const next = { ...prev }; if (next[row.id]) delete next[row.id]; else next[row.id] = Date.now(); return next; }); (async () => { try {
               const ts = Date.now();
